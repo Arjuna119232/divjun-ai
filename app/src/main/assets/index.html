@@ -104,14 +104,16 @@ nav button.on{color:var(--ac)}nav button.on::after{transform:none}
   <section id="set"><div class="pad">
     <h2>Pengaturan</h2>
     <h3>Koneksi</h3>
-    <label for="key">API key OpenCode</label>
+    <label for="route">Penyedia AI</label>
+    <select id="route" style="max-width:100%;width:100%"></select>
+    <p class="hint" id="pnote"></p>
+    <label for="key" id="klab">API key</label>
     <div class="two"><input id="key" type="password" autocomplete="off" placeholder="Tempel API key di sini"><button class="ib" id="eye" aria-label="Tampilkan key"></button></div>
     <p class="hint">Disimpan hanya di HP ini.</p>
     <button class="btn" id="getkey" style="margin-top:10px">Dapatkan API key</button>
-    <label for="route">Jalur layanan</label>
-    <select id="route" style="max-width:100%;width:100%"><option value="zen">OpenCode Zen</option><option value="go">OpenCode Go</option></select>
-    <label for="mname">Model</label>
+        <label for="mname">Model</label>
     <input id="mname" list="mlist" placeholder="Pilih dari daftar atau ketik nama model"><datalist id="mlist"></datalist>
+    <div class="chips" style="margin-top:10px"><button class="chip" id="onlyfree"></button></div>
     <button class="btn pri" id="saveBtn" style="margin-top:14px">Simpan dan uji koneksi</button>
     <div id="st"></div>
     <h3>Tampilan</h3>
@@ -139,12 +141,20 @@ nav button.on{color:var(--ac)}nav button.on::after{transform:none}
 const $=s=>document.querySelector(s),A=window.Android;
 const st={get:k=>A?A.get(k):(localStorage.getItem(k)||''),set:(k,v)=>A?A.set(k,v):localStorage.setItem(k,v)};
 const J=(k,d)=>{try{return JSON.parse(st.get(k))||d}catch(e){return d}};
-const BASE={zen:'https://opencode.ai/zen/v1',go:'https://opencode.ai/zen/go/v1'};
-let cfg={key:'',route:'zen',model:'',system:'Kamu adalah DIVJUN AI, asisten yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.',theme:'auto',fs:'1',temp:0.7,fav:[],...J('cfg',{})};
+const PROV={
+gemini:{name:'Google Gemini',base:'https://generativelanguage.googleapis.com/v1beta/openai',keyUrl:'https://aistudio.google.com/apikey',preset:'gemini-2.5-flash',ok:i=>/^(gemini|gemma)/.test(i)&&!/embedding|image|tts|live|aqa/.test(i),note:'Gratis dengan batas pemakaian harian. Buat key di Google AI Studio.'},
+groq:{name:'Groq',base:'https://api.groq.com/openai/v1',keyUrl:'https://console.groq.com/keys',preset:'llama-3.3-70b-versatile',ok:i=>!/whisper|guard|tts|playai/.test(i),note:'Gratis dengan batas permintaan, sangat cepat.'},
+cerebras:{name:'Cerebras',base:'https://api.cerebras.ai/v1',keyUrl:'https://cloud.cerebras.ai',preset:'llama3.1-8b',note:'Tingkat gratis tersedia dengan batas pemakaian.'},
+openrouter:{name:'OpenRouter',base:'https://openrouter.ai/api/v1',keyUrl:'https://openrouter.ai/keys',free:/:free$/,note:'Model gratis berakhiran :free, dengan batas pemakaian.'},
+zen:{name:'OpenCode Zen',base:'https://opencode.ai/zen/v1',keyUrl:'https://opencode.ai/auth',free:/free/,note:'Model gratis OpenCode hanya bisa dipakai dari aplikasi OpenCode. Dari sini perlu saldo.'},
+go:{name:'OpenCode Go',base:'https://opencode.ai/zen/go/v1',keyUrl:'https://opencode.ai/auth',note:'Perlu langganan OpenCode Go.'}};
+let LI=[];
+let cfg={key:'',route:'gemini',model:'',kk:{},mm:{},onlyFree:true,v:0,system:'Kamu adalah DIVJUN AI, asisten yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.',theme:'auto',fs:'1',temp:0.7,fav:[],...J('cfg',{})};
 let chats=J('chats',[]),cur=st.get('cur'),busy=null,seq=0,tab='chat',cat='Semua',modalRes=null;const pend={};
 if(!chats.length){const o=J('msgs',[]);if(o.length)chats=[{id:'c0',title:o[0].content.slice(0,40),ts:Date.now(),msgs:o}]}
 const chat=()=>chats.find(c=>c.id===cur),msgs=()=>chat()?chat().msgs:[];
 const save=()=>st.set('cfg',JSON.stringify(cfg)),persist=()=>{st.set('chats',JSON.stringify(chats.slice(0,100)));st.set('cur',cur||'')};
+if(cfg.v!==2){cfg.kk=cfg.kk||{};cfg.mm=cfg.mm||{};if(cfg.key)cfg.kk[cfg.route]=cfg.key;cfg.route='gemini';cfg.key=cfg.kk.gemini||'';cfg.model=cfg.mm.gemini||'';cfg.v=2;save()}
 const sv=p=>'<svg viewBox="0 0 24 24">'+p+'</svg>';
 const IC={edit:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),trash:sv('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),star:sv('<path d="M12 4l2.4 5 5.6.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.8z"/>'),share:sv('<path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/>'),plus:sv('<path d="M12 5v14M5 12h14"/>'),eye:sv('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),send:sv('<path d="M12 19V5M5 12l7-7 7 7"/>'),stop:'<svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>'};
 const NAV=[['chat','Chat',sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>')],['hist','Riwayat',sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')],['tools','Alat AI',sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>')],['set','Pengaturan',sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>')]];
@@ -158,15 +168,26 @@ function ask(o){return new Promise(res=>{$('#mt').textContent=o.title;$('#mb').t
 function applyTheme(){const th=cfg.theme==='auto'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):cfg.theme;document.documentElement.dataset.th=th;document.documentElement.style.setProperty('--fs',cfg.fs)}
 
 window.__net=(id,t,d)=>{const p=pend[id];if(p&&p[t])p[t](d)};
-function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;A.request(id,method,BASE[cfg.route]+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
+function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;A.request(id,method,PROV[cfg.route].base+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
 function errMsg(raw){try{const j=JSON.parse(raw);return j.error&&j.error.message||j.message||raw}catch(e){return raw.slice(0,200)||'Tidak ada detail dari server'}}
-const PRESET=['nemotron-3-ultra-free'];
-function fillModels(ids){ids=[...new Set(PRESET.concat(ids))].sort((a,b)=>(/free/.test(b)-/free/.test(a))||a.localeCompare(b));const s=$('#model');s.innerHTML=ids.length?ids.map(i=>'<option value="'+esc(i)+'">'+esc(i)+(/free/.test(i)?'':' (berbayar)')+'</option>').join(''):'<option>Pilih model di Pengaturan</option>';$('#mlist').innerHTML=ids.map(i=>'<option value="'+esc(i)+'">').join('');if(!cfg.model||!ids.includes(cfg.model)){cfg.model=PRESET[0];save()}s.value=cfg.model;$('#mname').value=cfg.model}
+const isFree=(p,i)=>p.free?p.free.test(i):true;
+function fillModels(ids){
+ const p=PROV[cfg.route];
+ ids=[...new Set((ids.length||!p.preset?[]:[p.preset]).concat(ids))];
+ if(cfg.onlyFree)ids=ids.filter(i=>isFree(p,i));
+ ids.sort((a,b)=>(isFree(p,b)-isFree(p,a))||a.localeCompare(b));
+ const s=$('#model');
+ s.innerHTML=ids.length?ids.map(i=>'<option value="'+esc(i)+'">'+esc(i)+(isFree(p,i)?'':' (berbayar)')+'</option>').join(''):'<option>Belum ada model</option>';
+ $('#mlist').innerHTML=ids.map(i=>'<option value="'+esc(i)+'">').join('');
+ if(ids.length&&(!cfg.model||!ids.includes(cfg.model))){cfg.model=ids[0];save()}
+ s.value=cfg.model;$('#mname').value=cfg.model}
+function renderProv(){const p=PROV[cfg.route];$('#route').value=cfg.route;$('#key').value=cfg.key;$('#klab').textContent='API key '+p.name;$('#pnote').textContent=p.note;const o=$('#onlyfree');o.className='chip'+(cfg.onlyFree?' on':'');o.textContent='Hanya model gratis: '+(cfg.onlyFree?'Ya':'Tidak')}
+function switchProv(id){cfg.kk[cfg.route]=cfg.key;cfg.mm[cfg.route]=cfg.model;cfg.route=id;cfg.key=cfg.kk[id]||'';cfg.model=cfg.mm[id]||'';LI=[];save();renderProv();fillModels([]);render();if(cfg.key)loadModels()}
 function loadModels(cb){
   if(!A||!cfg.key)return cb&&cb(false,'Isi API key dulu.');
   let raw='',code=0,dec=new TextDecoder();
   call('GET','/models',null,{status:c=>code=+c,chunk:d=>raw+=dec.decode(b64(d),{stream:true}),
-    done:()=>{if(code>=400)return cb&&cb(false,errMsg(raw));try{const ids=JSON.parse(raw).data.map(m=>m.id).sort();fillModels(ids);cb&&cb(true,ids.length)}catch(e){cb&&cb(false,'Respons tidak dikenali.')}},
+    done:()=>{if(code>=400)return cb&&cb(false,errMsg(raw));try{const p=PROV[cfg.route],ids=JSON.parse(raw).data.map(m=>m.id.replace(/^models\//,'')).filter(i=>!p.ok||p.ok(i)).sort();LI=ids;fillModels(ids);cb&&cb(true,ids.length)}catch(e){cb&&cb(false,'Respons tidak dikenali.')}},
     err:e=>cb&&cb(false,e)});
 }
 
@@ -174,7 +195,7 @@ function render(){
   const box=$('#msgs'),m=msgs();
   if(!m.length){
     box.innerHTML=cfg.key?'<div class="hero"><h1>Mau mengerjakan apa hari ini?</h1><p>Tanya apa saja, atau mulai dari salah satu ini.</p><div class="chips">'+['Bantu saya menulis pesan yang sopan','Jelaskan konsep ini dengan sederhana','Rangkum teks yang saya tempel'].map(s=>'<button class="chip" data-q="'+s+'">'+s+'</button>').join('')+'</div></div>'
-    :'<div class="card"><h1>Hubungkan OpenCode</h1><p>Masukkan API key OpenCode untuk mulai mengobrol dengan model AI. Kamu juga bisa langsung membuka alat AI lain.</p><button class="btn pri" data-go="set">Masukkan API key</button><button class="btn" data-go="tools">Lihat alat AI</button></div>';
+    :'<div class="card"><h1>Hubungkan penyedia AI</h1><p>Pilih penyedia AI gratis di Pengaturan, masukkan API key-nya, lalu mulai mengobrol. Kamu juga bisa langsung membuka alat AI lain.</p><button class="btn pri" data-go="set">Masukkan API key</button><button class="btn" data-go="tools">Lihat alat AI</button></div>';
     return;
   }
   box.innerHTML=m.map((x,i)=>{
@@ -191,7 +212,7 @@ function fin(){busy=null;persist();setBtn();render()}
 function send(text){
   text=(text||'').trim();if(busy||!text)return;
   if(!A){toast('Buka lewat aplikasi DIVJUN AI di HP');return}
-  if(!cfg.key){go('set');toast('Isi API key OpenCode dulu');return}
+  if(!cfg.key){go('set');toast('Isi API key dulu');return}
   if(!cfg.model){go('set');toast('Pilih model lalu uji koneksi');return}
   let c=chat();if(!c){c={id:'c'+Date.now(),title:text.slice(0,40),ts:Date.now(),msgs:[]};chats.unshift(c);cur=c.id}
   const payload=[{role:'system',content:cfg.system}].concat(c.msgs.filter(m=>!m.err).map(m=>({role:m.role,content:m.content})),[{role:'user',content:text}]);
@@ -201,10 +222,11 @@ function send(text){
     status:x=>code=+x,
     chunk:d=>{const s=dec.decode(b64(d),{stream:true});if(code>=400){eb+=s;return}buf+=s;const ls=buf.split('\n');buf=ls.pop();
       for(const l of ls){if(l.indexOf('data:')!==0)continue;const j=l.slice(5).trim();if(!j||j==='[DONE]')continue;try{const d0=JSON.parse(j).choices[0].delta||{};a.content+=d0.content||'';const r=d0.reasoning_content||d0.reasoning;if(r)a.think=((a.think||'')+r).slice(-160)}catch(e){}}paint()},
-    done:()=>{if(code>=400){a.err=true;a.content=code===402?'Saldo akun OpenCode tidak cukup untuk model ini. Pilih model gratis (berakhiran -free) di bagian atas, atau isi saldo di opencode.ai.':'Gagal ('+code+'): '+errMsg(eb)+'\n\nKalau model ini tidak mendukung format chat standar, pilih model lain.'}else if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';fin()},
+    done:()=>{if(code>=400){a.err=true;a.content=hint(code,eb)}else if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';fin()},
     err:e=>{a.err=true;a.content='Gagal terhubung: '+e;fin()}});
   setBtn();
 }
+const hint=(c,e)=>c===402?'Saldo akun penyedia tidak cukup untuk model ini. Pilih model gratis atau isi saldo.':c===429?'Batas pemakaian gratis tercapai. Tunggu beberapa menit atau pilih model lain.':(c===401||c===403)?'Akses ditolak ('+c+'): '+errMsg(e)+'\n\nPeriksa API key di Pengaturan. Model gratis OpenCode hanya bisa dipakai dari aplikasi OpenCode sendiri.':'Gagal ('+c+'): '+errMsg(e)+'\n\nKalau model ini tidak mendukung format chat standar, pilih model lain.';
 function regen(){const c=chat();if(!c||busy)return;while(c.msgs.length&&c.msgs[c.msgs.length-1].role==='assistant')c.msgs.pop();const u=c.msgs.pop();if(u)send(u.content)}
 const fmt=c=>'# '+c.title+'\n\n'+c.msgs.map(m=>(m.role==='user'?'Saya':'DIVJUN AI')+':\n'+m.content).join('\n\n');
 function doShare(t){if(A)A.share(t);else navigator.clipboard.writeText(t)}
@@ -252,22 +274,24 @@ $('#share').onclick=()=>{const c=chat();c&&c.msgs.length?doShare(fmt(c)):toast('
 $('#model').onchange=e=>{cfg.model=e.target.value;$('#mname').value=cfg.model;save();toast('Model: '+cfg.model)};
 $('#hq').oninput=renderHist;$('#tq').oninput=renderTools;
 $('#eye').onclick=()=>{const k=$('#key');k.type=k.type==='password'?'text':'password'};
-$('#getkey').onclick=()=>A?A.open('https://opencode.ai/auth'):0;
+$('#getkey').onclick=()=>A?A.open(PROV[cfg.route].keyUrl):0;
+$('#route').onchange=e=>switchProv(e.target.value);
+$('#onlyfree').onclick=()=>{cfg.onlyFree=!cfg.onlyFree;save();renderProv();fillModels(LI)};
 $('#docs').onclick=()=>A?A.open('https://opencode.ai/docs/zen'):0;
 $('#tmp').oninput=e=>$('#tv').textContent=e.target.value;
-$('#saveBtn').onclick=()=>{cfg.key=$('#key').value.trim();cfg.route=$('#route').value;cfg.model=$('#mname').value.trim();save();const s=$('#st');s.style.color='var(--mu)';s.textContent='Menguji koneksi...';
+$('#saveBtn').onclick=()=>{cfg.key=$('#key').value.trim();cfg.model=$('#mname').value.trim();cfg.kk[cfg.route]=cfg.key;cfg.mm[cfg.route]=cfg.model;save();const s=$('#st');s.style.color='var(--mu)';s.textContent='Menguji koneksi...';
   loadModels((ok,info)=>{s.style.color=ok?'var(--ok)':'var(--er)';s.textContent=ok?'Terhubung. '+info+' model tersedia.':'Gagal: '+info;if(ok){render();toast('Terhubung ke OpenCode')}})};
 $('#saveAi').onclick=()=>{cfg.system=$('#sys').value.trim()||cfg.system;cfg.temp=+$('#tmp').value;save();toast('Pengaturan AI disimpan')};
 $('#expAll').onclick=()=>chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
-$('#wipe').onclick=async()=>{if(await ask({title:'Hapus semua data?',body:'Semua percakapan, API key, dan pengaturan akan dihapus dari HP ini.',ok:'Hapus semua',danger:1})){chats=[];cur='';cfg={...cfg,key:'',model:'',fav:[]};save();persist();$('#key').value='';$('#mname').value='';fillModels([]);render();toast('Semua data dihapus')}};
+$('#wipe').onclick=async()=>{if(await ask({title:'Hapus semua data?',body:'Semua percakapan, API key, dan pengaturan akan dihapus dari HP ini.',ok:'Hapus semua',danger:1})){chats=[];cur='';cfg={...cfg,key:'',model:'',fav:[],kk:{},mm:{}};save();persist();$('#key').value='';$('#mname').value='';fillModels([]);render();toast('Semua data dihapus')}};
 window.__back=()=>{if(modalRes){modalRes(null);return true}if(tab!=='chat'){go('chat');return true}return false};
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);
 
 $('#nav').innerHTML=NAV.map(n=>'<button data-t="'+n[0]+'"'+(n[0]==='chat'?' class="on"':'')+'>'+n[2]+n[1]+'</button>').join('');
 $('#share').innerHTML=IC.share;$('#new').innerHTML=IC.plus;$('#eye').innerHTML=IC.eye;
-$('#key').value=cfg.key;$('#route').value=cfg.route;$('#mname').value=cfg.model;$('#sys').value=cfg.system;$('#tmp').value=cfg.temp;$('#tv').textContent=cfg.temp;
+$('#route').innerHTML=Object.keys(PROV).map(k=>'<option value="'+k+'">'+PROV[k].name+'</option>').join('');renderProv();$('#mname').value=cfg.model;$('#sys').value=cfg.system;$('#tmp').value=cfg.temp;$('#tv').textContent=cfg.temp;
 $('#ver').textContent=A?'v'+A.version():'';
-fillModels(cfg.model?[cfg.model]:[]);applyTheme();renderSeg();setBtn();render();loadModels();
+fillModels([]);applyTheme();renderSeg();setBtn();render();loadModels();
 </script>
 </body>
 </html>
