@@ -161,7 +161,7 @@ window.__net=(id,t,d)=>{const p=pend[id];if(p&&p[t])p[t](d)};
 function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;A.request(id,method,BASE[cfg.route]+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
 function errMsg(raw){try{const j=JSON.parse(raw);return j.error&&j.error.message||j.message||raw}catch(e){return raw.slice(0,200)||'Tidak ada detail dari server'}}
 const PRESET=['nemotron-3-ultra-free'];
-function fillModels(ids){ids=[...new Set(PRESET.concat(ids))];const s=$('#model');s.innerHTML=ids.length?ids.map(i=>'<option>'+esc(i)+'</option>').join(''):'<option>Pilih model di Pengaturan</option>';$('#mlist').innerHTML=ids.map(i=>'<option value="'+esc(i)+'">').join('');if(!cfg.model||!ids.includes(cfg.model)){cfg.model=PRESET[0];save()}s.value=cfg.model;$('#mname').value=cfg.model}
+function fillModels(ids){ids=[...new Set(PRESET.concat(ids))].sort((a,b)=>(/free/.test(b)-/free/.test(a))||a.localeCompare(b));const s=$('#model');s.innerHTML=ids.length?ids.map(i=>'<option value="'+esc(i)+'">'+esc(i)+(/free/.test(i)?'':' (berbayar)')+'</option>').join(''):'<option>Pilih model di Pengaturan</option>';$('#mlist').innerHTML=ids.map(i=>'<option value="'+esc(i)+'">').join('');if(!cfg.model||!ids.includes(cfg.model)){cfg.model=PRESET[0];save()}s.value=cfg.model;$('#mname').value=cfg.model}
 function loadModels(cb){
   if(!A||!cfg.key)return cb&&cb(false,'Isi API key dulu.');
   let raw='',code=0,dec=new TextDecoder();
@@ -201,7 +201,7 @@ function send(text){
     status:x=>code=+x,
     chunk:d=>{const s=dec.decode(b64(d),{stream:true});if(code>=400){eb+=s;return}buf+=s;const ls=buf.split('\n');buf=ls.pop();
       for(const l of ls){if(l.indexOf('data:')!==0)continue;const j=l.slice(5).trim();if(!j||j==='[DONE]')continue;try{const d0=JSON.parse(j).choices[0].delta||{};a.content+=d0.content||'';const r=d0.reasoning_content||d0.reasoning;if(r)a.think=((a.think||'')+r).slice(-160)}catch(e){}}paint()},
-    done:()=>{if(code>=400){a.err=true;a.content='Gagal ('+code+'): '+errMsg(eb)+'\n\nKalau model ini tidak mendukung format chat standar, pilih model lain.'}else if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';fin()},
+    done:()=>{if(code>=400){a.err=true;a.content=code===402?'Saldo akun OpenCode tidak cukup untuk model ini. Pilih model gratis (berakhiran -free) di bagian atas, atau isi saldo di opencode.ai.':'Gagal ('+code+'): '+errMsg(eb)+'\n\nKalau model ini tidak mendukung format chat standar, pilih model lain.'}else if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';fin()},
     err:e=>{a.err=true;a.content='Gagal terhubung: '+e;fin()}});
   setBtn();
 }
