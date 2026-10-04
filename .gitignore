@@ -1,0 +1,12 @@
+keys.properties
+local.properties
+build/
+.gradle/
+app/src/main/assets/keys.js
+*.bak
+*.bak-*
+
+*.jks
+*.keystore
+*.py
+sheet.txt

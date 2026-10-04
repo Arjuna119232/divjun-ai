@@ -2,17 +2,32 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
+def kp = new Properties()
+def kf = rootProject.file('keys.properties')
+if (kf.exists()) kf.withInputStream { kp.load(it) }
+def groqKey = System.getenv('GROQ_API_KEY') ?: kp.getProperty('GROQ_API_KEY', '')
+def geminiKey = System.getenv('GEMINI_API_KEY') ?: kp.getProperty('GEMINI_API_KEY', '')
+
 android {
+    buildFeatures { buildConfig true }
     namespace 'com.divjun.ai'
     compileSdk 34
     defaultConfig {
         applicationId 'com.divjun.ai'
         minSdk 24
         targetSdk 34
-        versionCode 5
-        versionName '1.2.0'
+        versionCode 13
+        versionName '1.8.0'
+        buildConfigField 'String', 'GROQ_KEY', "\"${groqKey}\""
+        buildConfigField 'String', 'GEMINI_KEY', "\"${geminiKey}\""
     }
     signingConfigs {
+        repo {
+            storeFile file('divjun.jks')
+            storePassword 'd77d22b4a3a84de02881'
+            keyAlias 'divjun'
+            keyPassword 'd77d22b4a3a84de02881'
+        }
         release {
             def ks = System.getenv('KEYSTORE_PATH')
             if (ks) {
@@ -24,9 +39,12 @@ android {
         }
     }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.repo
+        }
         release {
             minifyEnabled false
-            signingConfig System.getenv('KEYSTORE_PATH') ? signingConfigs.release : signingConfigs.debug
+            signingConfig System.getenv('KEYSTORE_PATH') ? signingConfigs.release : signingConfigs.repo
         }
     }
     compileOptions {
@@ -34,4 +52,8 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = '17' }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
 }

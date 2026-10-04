@@ -1,107 +1,146 @@
 <!DOCTYPE html>
-<html lang="id" data-th="dark">
+<html lang="id" data-th="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DIVJUN AI</title>
+<script src="keys.js"></script>
 <style>
-:root{--bg:#0D1228;--panel:#151B3D;--line:#263060;--tx:#E9ECFF;--mu:#8F98C9;--ac:#7C8CFF;--acx:#0D1228;--ok:#5EEAD4;--er:#FF8A8A;--fs:1}
-:root[data-th=light]{--bg:#F5F6FF;--panel:#FFF;--line:#DDE1F5;--tx:#141A3A;--mu:#5B6494;--ac:#4F5FE0;--acx:#FFF;--ok:#0F8F7E;--er:#D63A3A}
+:root{--bg:#FAF9F7;--panel:#FFF;--line:#E4E1DA;--tx:#1F1E1D;--mu:#78756D;--ac:#141413;--acx:#FFF;--ub:#F0EEE8;--lk:#5B4FD1;--ok:#1B8A6B;--er:#C9372C;--fs:1;--sf:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif}
+:root[data-th=dark]{--bg:#1F1E1D;--panel:#2B2A27;--line:#3D3B36;--tx:#F3F1EB;--mu:#A5A199;--ac:#F3F1EB;--acx:#1F1E1D;--ub:#34322E;--lk:#A99DFF;--ok:#5EEAD4;--er:#FF8A80}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 html,body{height:100%;background:var(--bg);color:var(--tx);font:calc(16px*var(--fs))/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:background .25s,color .25s}
 #app{display:flex;flex-direction:column;height:100%}
-header{display:flex;align-items:center;gap:8px;padding:10px 12px 10px 16px;border-bottom:1px solid var(--line)}
-.brand{font-weight:700;font-size:18px;margin-right:auto}.brand i{font-style:normal;color:var(--ac)}
+header{display:flex;align-items:center;gap:6px;padding:10px 12px;min-height:60px}
+.sd{min-width:92px;display:flex}.rg{justify-content:flex-end}.cact{display:flex;gap:6px}
+#app:not([data-tab=chat]) .cact{display:none}
+#ttl{flex:1;text-align:center;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 select,input,textarea,button{font:inherit;color:var(--tx)}
-select{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;max-width:36vw;min-height:40px}
-#app:not([data-tab=chat]) #model,#app:not([data-tab=chat]) #share{display:none}
-button{cursor:pointer;transition:transform .12s,background .2s,opacity .2s}
-button:active{transform:scale(.96)}
-:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-.btn{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-height:42px}
-.btn.pri{background:var(--ac);border-color:var(--ac);color:var(--acx);font-weight:650}
+button{cursor:pointer;transition:transform .12s,background .2s,opacity .2s}button:active{transform:scale(.96)}
+:focus-visible{outline:2px solid var(--lk);outline-offset:2px}
+svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ib{width:42px;height:42px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;flex:none}
+.ib.fl{background:var(--panel);border:1px solid var(--line)}.ib.on svg{fill:var(--lk);stroke:var(--lk)}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;min-height:44px}
+.btn.pri,.pill{background:var(--ac);border-color:var(--ac);color:var(--acx);font-weight:650}
 .btn.dng{background:var(--er);border-color:var(--er);color:#fff;font-weight:650}
-.ib{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;flex:none}
-.ib.on svg{fill:var(--ac);stroke:var(--ac)}
-svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pill{border:0;border-radius:999px;padding:14px 22px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.fab{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0))}
+select{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:44px}
 main{flex:1;min-height:0;position:relative}
 section{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .22s,transform .22s,visibility .22s}
 section.on{opacity:1;visibility:visible;transform:none}
-#msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.u{align-self:flex-end;max-width:85%;background:var(--ac);color:var(--acx);padding:10px 14px;border-radius:18px 18px 4px 18px;white-space:pre-wrap;word-break:break-word}
-.a{white-space:pre-wrap;word-break:break-word}.a.err{color:var(--er)}
-.a code{background:var(--panel);padding:1px 6px;border-radius:6px;font:.82em ui-monospace,Menlo,monospace}
-.a pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0;overflow-x:auto;white-space:pre}
-.a pre code{background:none;padding:0}
+#msgs{flex:1;min-height:0;overflow-y:auto;padding:0 18px;display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain}
+.u{align-self:flex-end;max-width:88%;background:var(--ub);padding:10px 16px;border-radius:20px;white-space:pre-wrap;word-break:break-word}
+.a{font-family:var(--sf);font-size:1.06em;line-height:1.65;white-space:pre-wrap;word-break:break-word}.a.err{color:var(--er)}
+.a code{background:var(--ub);padding:1px 6px;border-radius:6px;font:.82em ui-monospace,Menlo,monospace}
+.a pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;overflow-x:auto;white-space:pre}.a pre code{background:none;padding:0}
 .acts{display:flex;gap:14px;margin-top:-8px}.cp{background:none;border:0;color:var(--mu);font-size:.85em;min-height:36px;padding:0}
-.dots i{display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--mu);animation:b 1s infinite}
-.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+.dots i{display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--mu);animation:b 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
-.hero{margin:auto 0}.hero h1{font-size:1.75em;line-height:1.2;max-width:12em}.hero p{color:var(--mu);margin:8px 0 18px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:auto 0}
-.card h1{font-size:1.4em;margin-bottom:6px}.card p{color:var(--mu);margin-bottom:14px}.card .btn{margin-right:8px;margin-bottom:8px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;min-height:40px}
-.chip.on{background:var(--ac);border-color:var(--ac);color:var(--acx)}
-.bar{display:flex;gap:8px;align-items:flex-end;padding:10px 12px;border-top:1px solid var(--line)}
-textarea{flex:1;resize:none;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px;max-height:140px;outline:none}
-textarea:focus,input:focus{border-color:var(--ac)}
-#send{width:46px;height:46px;border-radius:50%;border:0;background:var(--ac);color:var(--acx);display:grid;place-items:center;flex:none}
-.pad{padding:16px;overflow-y:auto;flex:1}
-h2{font-size:1.4em;margin-bottom:2px}.sub{color:var(--mu);margin-bottom:12px}
-h3{font-size:1em;margin:24px 0 4px;color:var(--ac)}
-input,.pad textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;outline:none;min-height:46px}
-.pad textarea{min-height:96px;max-height:none}
+.hero{margin:auto 0;text-align:center;padding:0 8px 12vh}.hero .mk{width:48px;height:48px;color:var(--lk);stroke:none;margin-bottom:18px}
+.hero h1,h2{font-family:var(--sf);font-weight:600}.hero h1{font-size:1.45em;line-height:1.35;margin-bottom:22px;letter-spacing:-0.01em}
+.tips{font-size:.82em;color:var(--mu);margin-top:-14px;margin-bottom:18px;line-height:1.5;font-style:italic;opacity:.85}
+.mk2{width:40px;height:40px;border-radius:50%;background:var(--ub);display:grid;place-items:center;flex:none;color:var(--tx)}.mk2 svg{width:20px;height:20px}
+.pjt{display:flex;align-items:center;gap:14px;width:100%;background:var(--panel);border:0;border-radius:18px;padding:14px 16px;margin-top:10px;text-align:left}
+.pjt .mi{flex:1;min-width:0}
+.pjt .mi b{display:block;font-weight:500;font-size:1em}
+.pjt .mi small{display:block;color:var(--mu);font-size:.85em;margin-top:1px}
+.pjt .ar{color:var(--mu);font-size:1.4em;line-height:1;margin-left:auto}
+.pjt .sw{margin-left:auto;opacity:.5;pointer-events:none}
+.drag{width:36px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;margin:auto 0}.card h1{font-family:var(--sf);font-weight:500;font-size:1.4em;margin-bottom:6px}.card p{color:var(--mu);margin-bottom:14px}.card .btn{margin:0 8px 8px 0}
+.chips{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 16px;min-height:38px;font-size:.92em;white-space:nowrap;flex-shrink:0}.chip.on{background:var(--ac);border-color:var(--ac);color:var(--acx)}
+.cmp{margin:0 12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:28px;padding:12px 12px 10px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
+.cmp textarea{width:100%;border:0;background:transparent;resize:none;outline:none;padding:6px 8px;min-height:44px;max-height:140px;font-size:1.05em}
+.crow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+#mchip{background:var(--ub);border:0;border-radius:999px;padding:10px 16px;max-width:64%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#send{width:44px;height:44px;border-radius:50%;border:0;background:var(--ac);color:var(--acx);display:grid;place-items:center;flex:none}
+.pad{padding:8px 16px 96px;overflow-y:auto;flex:1}.pad>h2{display:none}
+.sub{color:var(--mu);margin-bottom:12px}h3{font-size:1em;margin:24px 0 4px;color:var(--lk)}
+input,.pad textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:11px 14px;outline:none;min-height:48px}.pad textarea{min-height:96px;max-height:none}
+input:focus,textarea:focus{border-color:var(--lk)}
 label{display:block;margin:14px 0 6px;font-weight:600}
-.row,.tool{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 10px 10px 14px;margin-top:10px}
-.row{cursor:pointer}.rt{flex:1;min-width:0}.rt b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rt span,.to span{color:var(--mu);font-size:.85em}
-.to{flex:1;display:flex;gap:12px;align-items:center;background:none;border:0;text-align:left;padding:0;min-width:0}
-.to b{display:block}
-.av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:700;color:#0D1228;flex:none}
-.empty{color:var(--mu);text-align:center;margin-top:40px}
-.two{display:flex;gap:8px;align-items:center}.two input{flex:1}
-.hint{color:var(--mu);font-size:.85em;margin-top:6px}
-#st{margin-top:12px;min-height:24px}
-nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
-nav button{position:relative;background:none;border:0;padding:9px 0 8px;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.75em;min-height:54px}
-nav button::after{content:"";position:absolute;top:0;width:22px;height:3px;border-radius:0 0 3px 3px;background:var(--ac);transform:scaleX(0);transition:transform .22s}
-nav button.on{color:var(--ac)}nav button.on::after{transform:none}
-#modal{position:fixed;inset:0;background:rgba(5,8,22,.6);display:flex;align-items:flex-end;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;z-index:9}
-#modal.open{opacity:1;visibility:visible}
-#mp{width:100%;background:var(--panel);border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:20px 16px calc(16px + env(safe-area-inset-bottom,0));transform:translateY(40px);transition:transform .25s}
-#modal.open #mp{transform:none}
-#mp h3{margin:0 0 6px;color:var(--tx);font-size:1.1em}#mp p{color:var(--mu);margin-bottom:12px}
-#mp .two{justify-content:flex-end;margin-top:14px}
-#toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,12px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:10;max-width:88vw;text-align:center}
+.row,.tool{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}.row{cursor:pointer}
+.row>svg{color:var(--mu)}.rt{flex:1;min-width:0}.rt b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rt span,.to span{color:var(--mu);font-size:.85em}
+.row .ib{width:36px;height:36px;color:var(--mu)}
+.to{flex:1;display:flex;gap:12px;align-items:center;background:none;border:0;text-align:left;padding:0;min-width:0}.to b{display:block;font-weight:500}
+.av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:700;color:#141413;flex:none}
+.empty{color:var(--mu);text-align:center;margin-top:40px}.two{display:flex;gap:8px;align-items:center}.two input{flex:1}
+.hint{color:var(--mu);font-size:.85em;margin-top:6px}#st{margin-top:12px;min-height:24px}
+#dov{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;visibility:hidden;transition:.2s;z-index:20}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:84%;max-width:340px;background:var(--bg);border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .25s;z-index:21;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top,0)) 16px calc(16px + env(safe-area-inset-bottom,0))}
+body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
+.dh{font-family:var(--sf);font-size:1.9em;margin:6px 8px 14px}
+.di{display:flex;align-items:center;gap:14px;width:100%;background:none;border:0;text-align:left;padding:13px 8px;border-radius:12px;font-size:1.05em}.di.on{background:var(--ub)}.di svg{color:var(--mu)}.tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dl{flex:1;overflow-y:auto;border-top:1px solid var(--line);margin-top:10px;padding-top:6px}.dl small{color:var(--mu);display:block;margin:10px 8px 2px}
+.df{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px}
+.av0{width:48px;height:48px;border-radius:50%;background:var(--lk);color:#fff;display:grid;place-items:center;font-weight:700;border:0}
+#menu{position:fixed;top:64px;right:12px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:8px;box-shadow:0 8px 30px rgba(0,0,0,.18);z-index:25;min-width:210px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:.15s}
+#menu.open{opacity:1;visibility:visible;transform:none}
+#menu button{display:flex;gap:14px;align-items:center;width:100%;background:none;border:0;padding:12px;border-radius:12px;text-align:left}#menu .dg{color:var(--er)}
+#modal,#sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;z-index:30}
+#modal.open,#sheet.open{opacity:1;visibility:visible}
+#mp,#sp{width:100%;background:var(--bg);border-radius:24px 24px 0 0;padding:20px 16px calc(16px + env(safe-area-inset-bottom,0));transform:translateY(40px);transition:transform .25s;max-height:82%;overflow-y:auto}
+#modal.open #mp,#sheet.open #sp{transform:none}
+#mp h3{margin:0 0 6px;color:var(--tx);font-size:1.1em}#mp p{color:var(--mu);margin-bottom:12px}#mp .two{justify-content:flex-end;margin-top:14px}
+.sh{display:flex;align-items:center;margin-bottom:12px}.sh b{flex:1;text-align:center;font-size:1.1em;margin-right:42px}
+.mr{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:var(--panel);border:0;border-radius:14px;padding:14px 16px;margin-top:8px;text-align:left}.mr span{overflow:hidden;text-overflow:ellipsis}
+#toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,12px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;max-width:88vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+.mr b{display:block;font-weight:500;font-size:1.15em}.mr small{display:block;color:var(--mu);margin-top:2px}.mr svg{color:var(--lk)}
+.pl{font-style:normal;background:var(--ub);color:var(--lk);border-radius:999px;font-size:.62em;padding:3px 10px;margin-left:8px;font-weight:600;vertical-align:middle}
+.bn{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ub);border-radius:20px;padding:12px 16px;margin-bottom:8px;font-size:.95em}.bn button{background:none;border:0;color:var(--lk);font-weight:650;white-space:nowrap}
+#app[data-empty="1"] .cact{display:none}
+.cmp{border-radius:32px}.cmp textarea{font-size:1.15em;min-height:52px}
+#info{display:none;border:1.5px solid var(--tx)}#app[data-tab=set] #info{display:grid}
+#app[data-tab=set] #ttl{font-family:var(--sf);font-size:1.35em;font-weight:500}
+.sg{display:flex;flex-direction:column;gap:3px;border-radius:24px;overflow:hidden;margin-top:14px}
+.sr{display:flex;align-items:center;gap:16px;width:100%;background:var(--panel);border:0;padding:18px 20px;text-align:left;font-size:1.08em}
+.sr>span{flex:1;min-width:0}.sr b{display:block;font-weight:500}.sr small{display:block;color:var(--mu);font-size:.85em;margin-top:1px}.sr svg{color:var(--tx)}.sr.dg,.sr.dg svg{color:var(--er)}
+.bdg{font-style:normal;background:var(--tx);color:var(--bg);border-radius:999px;font-size:.8em;font-weight:650;padding:7px 14px}
+.sr.top{cursor:default;font-size:1.1em}
+.sw{margin-left:auto;width:52px;height:30px;border-radius:15px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
+.sw.on{background:var(--lk)}.sw.on::after{left:25px}
+.ib.gr{width:44px;height:44px;background:var(--ub)}
+#mchip{flex:0 1 auto;max-width:44%;text-align:left}
+#atts{display:flex;gap:8px;flex-wrap:wrap;padding:0 4px 6px}#atts:empty{display:none}
+.th{position:relative;width:60px;height:60px;border-radius:12px;background:var(--ub);overflow:hidden;display:grid;place-items:center;font-size:.7em;padding:4px;text-align:center}
+.th img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.th button{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:12px;line-height:1;padding:0}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--panel);border:0;border-radius:20px;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:1.05em}
+.tile i{width:60px;height:60px;border-radius:50%;background:var(--ub);display:grid;place-items:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div id="app" data-tab="chat">
 <header>
-  <div class="brand">DIVJUN <i>AI</i></div>
-  <select id="model" aria-label="Model"></select>
-  <button class="ib" id="share" aria-label="Bagikan percakapan"></button>
-  <button class="ib" id="new" aria-label="Obrolan baru"></button>
+  <div class="sd"><button class="ib" id="burger" aria-label="Menu"></button></div>
+  <div id="ttl"></div>
+  <div class="sd rg"><span class="cact"><button class="ib fl" id="new" aria-label="Obrolan baru"></button><button class="ib" id="more" aria-label="Opsi"></button></span><button class="ib" id="info" aria-label="Tentang"></button></div>
 </header>
 <main>
   <section id="chat" class="on">
     <div id="msgs"></div>
-    <div class="bar"><textarea id="in" rows="1" placeholder="Tulis pesan"></textarea><button id="send" aria-label="Kirim"></button></div>
+    <div class="cmp"><div id="atts"></div><textarea id="in" rows="1" placeholder="Mengobrol dengan AI..."></textarea><div class="crow"><button class="ib gr" id="plus" aria-label="Tambah"></button><button id="mchip"></button><span style="flex:1"></span><button class="ib gr" id="mic" aria-label="Suara"></button><button id="send" aria-label="Kirim"></button></div></div>
+    
   </section>
   <section id="hist"><div class="pad">
     <h2>Riwayat</h2><p class="sub">Percakapan tersimpan di HP ini.</p>
     <input id="hq" type="search" placeholder="Cari percakapan">
     <div id="hl"></div>
-  </div></section>
+  </div><button class="pill fab" id="fab">+ Chat baru</button></section>
   <section id="tools"><div class="pad">
     <h2>Alat AI</h2><p class="sub">Semua alat AI favorit dalam satu tempat. Ketuk bintang untuk menyimpan favorit.</p>
     <input id="tq" type="search" placeholder="Cari alat AI" style="margin-bottom:12px">
     <div class="chips" id="cats"></div><div id="grid"></div>
   </div></section>
-  <section id="set"><div class="pad">
+  <section id="set"><div class="pad" id="setp"></div><div id="legacy" hidden><div>
     <h2>Pengaturan</h2>
     <h3>Koneksi</h3>
     <label for="route">Penyedia AI</label>
@@ -113,7 +152,6 @@ nav button.on{color:var(--ac)}nav button.on::after{transform:none}
     <button class="btn" id="getkey" style="margin-top:10px">Dapatkan API key</button>
         <label for="mname">Model</label>
     <input id="mname" list="mlist" placeholder="Pilih dari daftar atau ketik nama model"><datalist id="mlist"></datalist>
-    <div class="chips" style="margin-top:10px"><button class="chip" id="onlyfree"></button></div>
     <button class="btn pri" id="saveBtn" style="margin-top:14px">Simpan dan uji koneksi</button>
     <div id="st"></div>
     <h3>Tampilan</h3>
@@ -129,12 +167,18 @@ nav button.on{color:var(--ac)}nav button.on::after{transform:none}
     <h3>Data</h3>
     <div class="chips"><button class="btn" id="expAll">Ekspor semua obrolan</button><button class="btn dng" id="wipe">Hapus semua data</button></div>
     <h3>Tentang</h3>
-    <p class="sub">DIVJUN AI <span id="ver"></span><br>Chat AI lewat OpenCode dan kumpulan alat AI dalam satu aplikasi.</p>
-    <button class="btn" id="docs">Dokumentasi OpenCode</button>
-  </div></section>
+    <p class="sub">DIVJUN AI <span id="ver"></span><br>Chat AI lewat Gemini dan Groq, plus kumpulan alat AI dalam satu aplikasi.</p>
+    <button class="btn" id="docs">Dokumentasi penyedia</button>
+  </div></div></section>
 </main>
-<nav id="nav"></nav>
+
 </div>
+<select id="model" hidden></select>
+<div id="dov" data-dc="1"></div>
+<aside id="drawer"><div class="dh">DIVJUN AI</div><div id="dtabs"></div><div class="dl" id="drec"></div>
+<div class="df"><button class="av0" id="dav" aria-label="Pengaturan">D</button><button class="pill" id="dnew">+ Chat baru</button></div></aside>
+<div id="menu"><button data-m="share">Bagikan</button><button data-m="rename">Ganti nama</button><button data-m="pin">Sematkan</button><button data-m="del" class="dg">Hapus</button></div>
+<div id="sheet"><div id="sp"></div></div>
 <div id="modal"><div id="mp"><h3 id="mt"></h3><p id="mb"></p><input id="mi"><div class="two"><button class="btn" id="mno">Batal</button><button class="btn pri" id="mok">Oke</button></div></div></div>
 <div id="toast"></div>
 <script>
@@ -142,21 +186,21 @@ const $=s=>document.querySelector(s),A=window.Android;
 const st={get:k=>A?A.get(k):(localStorage.getItem(k)||''),set:(k,v)=>A?A.set(k,v):localStorage.setItem(k,v)};
 const J=(k,d)=>{try{return JSON.parse(st.get(k))||d}catch(e){return d}};
 const PROV={
-gemini:{name:'Google Gemini',base:'https://generativelanguage.googleapis.com/v1beta/openai',keyUrl:'https://aistudio.google.com/apikey',preset:'gemini-2.5-flash',ok:i=>/^(gemini|gemma)/.test(i)&&!/embedding|image|tts|live|aqa/.test(i),note:'Gratis dengan batas pemakaian harian. Buat key di Google AI Studio.'},
-groq:{name:'Groq',base:'https://api.groq.com/openai/v1',keyUrl:'https://console.groq.com/keys',preset:'llama-3.3-70b-versatile',ok:i=>!/whisper|guard|tts|playai/.test(i),note:'Gratis dengan batas permintaan, sangat cepat.'},
-cerebras:{name:'Cerebras',base:'https://api.cerebras.ai/v1',keyUrl:'https://cloud.cerebras.ai',preset:'llama3.1-8b',note:'Tingkat gratis tersedia dengan batas pemakaian.'},
-openrouter:{name:'OpenRouter',base:'https://openrouter.ai/api/v1',keyUrl:'https://openrouter.ai/keys',free:/:free$/,note:'Model gratis berakhiran :free, dengan batas pemakaian.'},
-zen:{name:'OpenCode Zen',base:'https://opencode.ai/zen/v1',keyUrl:'https://opencode.ai/auth',free:/free/,note:'Model gratis OpenCode hanya bisa dipakai dari aplikasi OpenCode. Dari sini perlu saldo.'},
-go:{name:'OpenCode Go',base:'https://opencode.ai/zen/go/v1',keyUrl:'https://opencode.ai/auth',note:'Perlu langganan OpenCode Go.'}};
+gemini:{name:'Google Gemini',base:'https://generativelanguage.googleapis.com/v1beta/openai',keyUrl:'https://aistudio.google.com/apikey',docs:'https://ai.google.dev/gemini-api/docs',preset:'gemini-3.5-flash-lite',ok:i=>/^(gemini|gemma)/.test(i)&&!/embedding|image|tts|live|aqa/.test(i),note:'Gratis dengan batas pemakaian. Google dapat memakai data tingkat gratis, jadi jangan kirim data rahasia.'},
+groq:{name:'Groq',base:'https://api.groq.com/openai/v1',keyUrl:'https://console.groq.com/keys',docs:'https://console.groq.com/docs',preset:'llama-3.3-70b-versatile',ok:i=>!/whisper|guard|tts|playai/.test(i),note:'Gratis dengan batas permintaan, sangat cepat.'}};
 let LI=[];
-let cfg={key:'',route:'gemini',model:'',kk:{},mm:{},onlyFree:true,v:0,system:'Kamu adalah DIVJUN AI, asisten yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.',theme:'auto',fs:'1',temp:0.7,fav:[],...J('cfg',{})};
+let cfg={key:'',route:'gemini',model:'',kk:{},mm:{},cn:2,cs:[],ml:{},onlyFree:true,v:0,system:'',theme:'auto',fs:'1',temp:0.7,fav:[],...J('cfg',{})};
 let chats=J('chats',[]),cur=st.get('cur'),busy=null,seq=0,tab='chat',cat='Semua',modalRes=null;const pend={};
 if(!chats.length){const o=J('msgs',[]);if(o.length)chats=[{id:'c0',title:o[0].content.slice(0,40),ts:Date.now(),msgs:o}]}
 const chat=()=>chats.find(c=>c.id===cur),msgs=()=>chat()?chat().msgs:[];
-const save=()=>st.set('cfg',JSON.stringify(cfg)),persist=()=>{st.set('chats',JSON.stringify(chats.slice(0,100)));st.set('cur',cur||'')};
+const save=()=>st.set('cfg',JSON.stringify(cfg)),persist=()=>{st.set('chats',cfg.hist===false?'[]':JSON.stringify(chats.slice(0,100)));st.set('cur',cur||'')};
 if(cfg.v!==2){cfg.kk=cfg.kk||{};cfg.mm=cfg.mm||{};if(cfg.key)cfg.kk[cfg.route]=cfg.key;cfg.route='gemini';cfg.key=cfg.kk.gemini||'';cfg.model=cfg.mm.gemini||'';cfg.v=2;save()}
+if(cfg.v!==3){cfg.kk=cfg.kk||{};cfg.mm=cfg.mm||{};if(!PROV[cfg.route]){cfg.route='gemini';cfg.key=cfg.kk.gemini||'';cfg.model=''}cfg.mm.gemini=PROV.gemini.preset;if(cfg.route==='gemini')cfg.model=PROV.gemini.preset;cfg.v=3;save()}
+function useBuilt(){if(cfg.key)return;let b='';try{b=(A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){}if(b){cfg.key=b;cfg.kk[cfg.route]=b}}
+if(/^Kamu adalah DIVJUN AI/.test(cfg.system||'')){cfg.system='';save()}
+useBuilt();
 const sv=p=>'<svg viewBox="0 0 24 24">'+p+'</svg>';
-const IC={edit:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),trash:sv('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),star:sv('<path d="M12 4l2.4 5 5.6.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.8z"/>'),share:sv('<path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/>'),plus:sv('<path d="M12 5v14M5 12h14"/>'),eye:sv('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),send:sv('<path d="M12 19V5M5 12l7-7 7 7"/>'),stop:'<svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>'};
+const IC={edit:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),trash:sv('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),star:sv('<path d="M12 4l2.4 5 5.6.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.8z"/>'),share:sv('<path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/>'),more:sv('<circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/>'),menu:sv('<path d="M4 8h16M4 16h10"/>'),chev:sv('<path d="M9 6l6 6-6 6"/>'),check:sv('<path d="M5 12l5 5 9-10"/>'),chat:sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>'),plus:sv('<path d="M12 5v14M5 12h14"/>'),eye:sv('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),send:sv('<path d="M12 19V5M5 12l7-7 7 7"/>'),stop:'<svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>'};
 const NAV=[['chat','Chat',sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>')],['hist','Riwayat',sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')],['tools','Alat AI',sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>')],['set','Pengaturan',sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>')]];
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const md=t=>t.split('```').map((p,i)=>i%2?'<pre><code>'+esc(p.replace(/^[\w+-]*\n/,''))+'</code></pre>':esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>')).join('');
@@ -167,8 +211,20 @@ let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('sh
 function ask(o){return new Promise(res=>{$('#mt').textContent=o.title;$('#mb').textContent=o.body||'';const i=$('#mi'),has=o.input!=null;i.style.display=has?'block':'none';i.value=o.input||'';const ok=$('#mok');ok.textContent=o.ok||'Oke';ok.className='btn '+(o.danger?'dng':'pri');$('#modal').classList.add('open');if(has)setTimeout(()=>i.focus(),250);modalRes=v=>{$('#modal').classList.remove('open');modalRes=null;res(v)};ok.onclick=()=>modalRes(has?i.value.trim():true);$('#mno').onclick=()=>modalRes(null)})}
 function applyTheme(){const th=cfg.theme==='auto'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):cfg.theme;document.documentElement.dataset.th=th;document.documentElement.style.setProperty('--fs',cfg.fs)}
 
+const ctl={};
+const rq=(...a)=>A?A.request(...a):fetchReq(...a);
+const cancelReq=id=>A?A.cancel(id):(ctl[id]&&ctl[id].abort());
+function fetchReq(id,method,url,headers,body){
+  const h=pend[id],ac=new AbortController();ctl[id]=ac;
+  fetch(url,{method:method,headers:JSON.parse(headers),body:body||undefined,signal:ac.signal}).then(async r=>{
+    h.status&&h.status(String(r.status));const rd=r.body.getReader();
+    for(;;){const x=await rd.read();if(x.done)break;let bin='';x.value.forEach(b=>bin+=String.fromCharCode(b));if(pend[id]&&h.chunk)h.chunk(btoa(bin))}
+    if(pend[id]&&h.done)h.done('');
+  }).catch(e=>{if(pend[id]&&h.err)h.err(e.name==='AbortError'?'Dibatalkan':'Gagal terhubung. Periksa internet. Kalau memakai pembungkus web, coba build native lewat GitHub.')});
+}
 window.__net=(id,t,d)=>{const p=pend[id];if(p&&p[t])p[t](d)};
-function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;A.request(id,method,PROV[cfg.route].base+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
+window.__onPerm=(tipe,ok)=>{if(ok&&window.__pendingPick){A&&A.pick?A.pick(window.__pendingPick):pickWeb(window.__pendingPick);window.__pendingPick=null}else{toast('Izin ditolak. Buka Pengaturan untuk mengaktifkan')}};
+function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;rq(id,method,PROV[cfg.route].base+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
 function errMsg(raw){try{const j=JSON.parse(raw);return j.error&&j.error.message||j.message||raw}catch(e){return raw.slice(0,200)||'Tidak ada detail dari server'}}
 const isFree=(p,i)=>p.free?p.free.test(i):true;
 function fillModels(ids){
@@ -179,27 +235,26 @@ function fillModels(ids){
  const s=$('#model');
  s.innerHTML=ids.length?ids.map(i=>'<option value="'+esc(i)+'">'+esc(i)+(isFree(p,i)?'':' (berbayar)')+'</option>').join(''):'<option>Belum ada model</option>';
  $('#mlist').innerHTML=ids.map(i=>'<option value="'+esc(i)+'">').join('');
- if(ids.length&&(!cfg.model||!ids.includes(cfg.model))){cfg.model=ids[0];save()}
- s.value=cfg.model;$('#mname').value=cfg.model}
-function renderProv(){const p=PROV[cfg.route];$('#route').value=cfg.route;$('#key').value=cfg.key;$('#klab').textContent='API key '+p.name;$('#pnote').textContent=p.note;const o=$('#onlyfree');o.className='chip'+(cfg.onlyFree?' on':'');o.textContent='Hanya model gratis: '+(cfg.onlyFree?'Ya':'Tidak')}
-function switchProv(id){cfg.kk[cfg.route]=cfg.key;cfg.mm[cfg.route]=cfg.model;cfg.route=id;cfg.key=cfg.kk[id]||'';cfg.model=cfg.mm[id]||'';LI=[];save();renderProv();fillModels([]);render();if(cfg.key)loadModels()}
+ if(ids.length&&(!cfg.model||!ids.includes(cfg.model))){cfg.model=ids.includes(p.preset)?p.preset:ids[0];save()}
+ s.value=cfg.model;$('#mname').value=cfg.model;updChip();if(sheetMode==='model'&&$('#sheet').classList.contains('open'))renderSheet();if(tab==='set')renderSet()}
+function renderProv(){const p=PROV[cfg.route];$('#route').value=cfg.route;$('#key').value=cfg.key;$('#klab').textContent='API key '+p.name;$('#pnote').textContent=p.note;}
+function switchProv(id){cfg.kk[cfg.route]=cfg.key;cfg.mm[cfg.route]=cfg.model;cfg.route=id;cfg.key=cfg.kk[id]||'';cfg.model=cfg.mm[id]||'';LI=[];useBuilt();save();renderProv();fillModels([]);render();if(cfg.key)loadModels()}
 function loadModels(cb){
-  if(!A||!cfg.key)return cb&&cb(false,'Isi API key dulu.');
+  if(!cfg.key)return cb&&cb(false,'Isi API key dulu.');
   let raw='',code=0,dec=new TextDecoder();
   call('GET','/models',null,{status:c=>code=+c,chunk:d=>raw+=dec.decode(b64(d),{stream:true}),
-    done:()=>{if(code>=400)return cb&&cb(false,errMsg(raw));try{const p=PROV[cfg.route],ids=JSON.parse(raw).data.map(m=>m.id.replace(/^models\//,'')).filter(i=>!p.ok||p.ok(i)).sort();LI=ids;fillModels(ids);cb&&cb(true,ids.length)}catch(e){cb&&cb(false,'Respons tidak dikenali.')}},
+    done:()=>{if(code>=400)return cb&&cb(false,errMsg(raw));try{const p=PROV[cfg.route],ids=JSON.parse(raw).data.map(m=>m.id.replace(/^models\//,'')).filter(i=>!p.ok||p.ok(i)).sort();LI=ids;cfg.ml=cfg.ml||{};cfg.ml[cfg.route]=ids;save();fillModels(ids);cb&&cb(true,ids.length)}catch(e){cb&&cb(false,'Respons tidak dikenali.')}},
     err:e=>cb&&cb(false,e)});
 }
 
 function render(){
-  const box=$('#msgs'),m=msgs();
+  titleChat();$('#app').dataset.empty=msgs().length?'':'1';const box=$('#msgs'),m=msgs();
   if(!m.length){
-    box.innerHTML=cfg.key?'<div class="hero"><h1>Mau mengerjakan apa hari ini?</h1><p>Tanya apa saja, atau mulai dari salah satu ini.</p><div class="chips">'+['Bantu saya menulis pesan yang sopan','Jelaskan konsep ini dengan sederhana','Rangkum teks yang saya tempel'].map(s=>'<button class="chip" data-q="'+s+'">'+s+'</button>').join('')+'</div></div>'
-    :'<div class="card"><h1>Hubungkan penyedia AI</h1><p>Pilih penyedia AI gratis di Pengaturan, masukkan API key-nya, lalu mulai mengobrol. Kamu juga bisa langsung membuka alat AI lain.</p><button class="btn pri" data-go="set">Masukkan API key</button><button class="btn" data-go="tools">Lihat alat AI</button></div>';
+    box.innerHTML='<div class="hero">'+MARK+'<h1>'+greet()+'</h1><p class="tips">'+tips()+'</p></div>';
     return;
   }
   box.innerHTML=m.map((x,i)=>{
-    if(x.role==='user')return '<div class="u">'+esc(x.content)+'</div>';
+    if(x.role==='user')return '<div class="u">'+esc(x.content)+(x.img?'\n['+x.img+' lampiran]':'')+'</div>';
     const last=i===m.length-1;
     return '<div class="a'+(x.err?' err':'')+'" data-i="'+i+'">'+(md(x.content)||thk(x))+'</div>'+(busy===null&&x.content?'<div class="acts">'+(x.err?'':'<button class="cp" data-c="'+i+'">Salin</button>')+(last?'<button class="cp" data-r="1">'+(x.err?'Coba lagi':'Ulangi')+'</button>':'')+'</div>':'');
   }).join('');
@@ -210,32 +265,32 @@ const setBtn=()=>$('#send').innerHTML=busy?IC.stop:IC.send;
 function fin(){busy=null;persist();setBtn();render()}
 
 function send(text){
-  text=(text||'').trim();if(busy||!text)return;
-  if(!A){toast('Buka lewat aplikasi DIVJUN AI di HP');return}
+  text=(text||'').trim();if(busy||(!text&&!att.length))return;if(!text)text='Jelaskan lampiran ini.';
   if(!cfg.key){go('set');toast('Isi API key dulu');return}
   if(!cfg.model){go('set');toast('Pilih model lalu uji koneksi');return}
   let c=chat();if(!c){c={id:'c'+Date.now(),title:text.slice(0,40),ts:Date.now(),msgs:[]};chats.unshift(c);cur=c.id}
-  const payload=[{role:'system',content:cfg.system}].concat(c.msgs.filter(m=>!m.err).map(m=>({role:m.role,content:m.content})),[{role:'user',content:text}]);
-  c.msgs.push({role:'user',content:text});const a={role:'assistant',content:''};c.msgs.push(a);c.ts=Date.now();render();
+  const uc=buildUser(text),hadImg=att.some(x=>x.mime.indexOf('image/')===0);
+  const payload=[{role:'system',content:sysPrompt()}].concat(c.msgs.filter(m=>!m.err).map(m=>({role:m.role,content:m.content})),[{role:'user',content:uc}]);
+  c.msgs.push({role:'user',content:text,img:att.length||undefined});att=[];renderAtt();const a={role:'assistant',content:''};c.msgs.push(a);c.ts=Date.now();render();
   let buf='',code=0,eb='',dec=new TextDecoder();
   busy=call('POST','/chat/completions',{model:cfg.model,messages:payload,stream:true,temperature:+cfg.temp},{
     status:x=>code=+x,
     chunk:d=>{const s=dec.decode(b64(d),{stream:true});if(code>=400){eb+=s;return}buf+=s;const ls=buf.split('\n');buf=ls.pop();
       for(const l of ls){if(l.indexOf('data:')!==0)continue;const j=l.slice(5).trim();if(!j||j==='[DONE]')continue;try{const d0=JSON.parse(j).choices[0].delta||{};a.content+=d0.content||'';const r=d0.reasoning_content||d0.reasoning;if(r)a.think=((a.think||'')+r).slice(-160)}catch(e){}}paint()},
-    done:()=>{if(code>=400){a.err=true;a.content=hint(code,eb)}else if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';fin()},
+    done:()=>{if(code>=400){a.err=true;a.content=hadImg&&code<500?'Gagal mengirim lampiran ('+code+'): '+errMsg(eb)+'\n\nPastikan model yang dipilih mendukung gambar.':hint(code,eb)}else if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';fin()},
     err:e=>{a.err=true;a.content='Gagal terhubung: '+e;fin()}});
   setBtn();
 }
-const hint=(c,e)=>c===402?'Saldo akun penyedia tidak cukup untuk model ini. Pilih model gratis atau isi saldo.':c===429?'Batas pemakaian gratis tercapai. Tunggu beberapa menit atau pilih model lain.':(c===401||c===403)?'Akses ditolak ('+c+'): '+errMsg(e)+'\n\nPeriksa API key di Pengaturan. Model gratis OpenCode hanya bisa dipakai dari aplikasi OpenCode sendiri.':'Gagal ('+c+'): '+errMsg(e)+'\n\nKalau model ini tidak mendukung format chat standar, pilih model lain.';
+const hint=(c,e)=>c===402?'Saldo akun penyedia tidak cukup untuk model ini. Pilih model gratis atau isi saldo.':c===429?'Batas pemakaian gratis tercapai. Tunggu beberapa menit atau pilih model lain.':(c===401||c===403)?'Akses ditolak ('+c+'): '+errMsg(e)+'\n\nPeriksa API key di Pengaturan. Pastikan key milik penyedia yang dipilih.':'Gagal ('+c+'): '+errMsg(e)+'\n\nKalau model ini tidak mendukung format chat standar, pilih model lain.';
 function regen(){const c=chat();if(!c||busy)return;while(c.msgs.length&&c.msgs[c.msgs.length-1].role==='assistant')c.msgs.pop();const u=c.msgs.pop();if(u)send(u.content)}
 const fmt=c=>'# '+c.title+'\n\n'+c.msgs.map(m=>(m.role==='user'?'Saya':'DIVJUN AI')+':\n'+m.content).join('\n\n');
 function doShare(t){if(A)A.share(t);else navigator.clipboard.writeText(t)}
 
-function go(t){tab=t;$('#app').dataset.tab=t;document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===t));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='hist')renderHist();if(t==='tools')renderTools()}
+function go(t){tab=t;closeAll();$('#app').dataset.tab=t;document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===t));$('#ttl').textContent={chat:'',hist:'Obrolan',tools:'Alat AI',set:'Pengaturan'}[t];if(t==='chat')titleChat();if(t==='hist')renderHist();if(t==='tools')renderTools();if(t==='set')renderSet()}
 function newChat(){if(busy)return toast('Tunggu jawaban selesai');cur='';persist();go('chat');render();$('#in').focus()}
 function renderHist(){
-  const q=$('#hq').value.toLowerCase(),l=chats.filter(c=>!q||c.title.toLowerCase().includes(q)||c.msgs.some(m=>(m.content||'').toLowerCase().includes(q))).sort((a,b)=>b.ts-a.ts);
-  $('#hl').innerHTML=l.length?l.map(c=>'<div class="row" data-o="'+c.id+'"><div class="rt"><b>'+esc(c.title)+'</b><span>'+fmtT(c.ts)+' \u00b7 '+c.msgs.length+' pesan</span></div><button class="ib" data-rn="'+c.id+'" aria-label="Ubah nama">'+IC.edit+'</button><button class="ib" data-dl="'+c.id+'" aria-label="Hapus">'+IC.trash+'</button></div>').join(''):'<p class="empty">'+(q?'Tidak ada percakapan yang cocok.':'Belum ada percakapan. Mulai obrolan di tab Chat.')+'</p>';
+  const q=$('#hq').value.toLowerCase(),l=chats.filter(c=>!q||c.title.toLowerCase().includes(q)||c.msgs.some(m=>(m.content||'').toLowerCase().includes(q))).sort((a,b)=>(b.pin|0)-(a.pin|0)||b.ts-a.ts);
+  $('#hl').innerHTML=l.length?l.map(c=>'<div class="row" data-o="'+c.id+'">'+IC.chat+'<div class="rt"><b>'+esc(c.title)+'</b><span>'+rel(c.ts)+'</span></div><button class="ib" data-rn="'+c.id+'" aria-label="Ubah nama">'+IC.edit+'</button><button class="ib" data-dl="'+c.id+'" aria-label="Hapus">'+IC.trash+'</button></div>').join(''):'<p class="empty">'+(q?'Tidak ada percakapan yang cocok.':'Belum ada percakapan. Mulai obrolan di tab Chat.')+'</p>';
 }
 const TOOLS=[['ChatGPT','https://chatgpt.com','Chat','Asisten serbaguna dari OpenAI'],['Gemini','https://gemini.google.com','Chat','Asisten AI dari Google'],['Claude','https://claude.ai','Chat','Asisten AI dari Anthropic'],['Grok','https://grok.com','Chat','Asisten AI dari xAI'],['DeepSeek','https://chat.deepseek.com','Chat','Model chat dan penalaran'],['Le Chat','https://chat.mistral.ai','Chat','Asisten AI dari Mistral'],['Meta AI','https://www.meta.ai','Chat','Asisten AI dari Meta'],['Copilot','https://copilot.microsoft.com','Chat','Asisten AI dari Microsoft'],['Perplexity','https://www.perplexity.ai','Riset','Pencarian dengan jawaban bersumber'],['NotebookLM','https://notebooklm.google.com','Riset','Belajar dari dokumen sendiri'],['Poe','https://poe.com','Riset','Satu tempat untuk banyak model'],['Midjourney','https://www.midjourney.com','Gambar','Pembuat gambar artistik'],['Leonardo','https://leonardo.ai','Gambar','Gambar dan aset kreatif'],['Ideogram','https://ideogram.ai','Gambar','Gambar dengan teks yang rapi'],['Canva','https://www.canva.com','Gambar','Desain dengan fitur AI'],['Runway','https://runwayml.com','Video','Membuat dan mengedit video'],['Kling','https://klingai.com','Video','Video dari teks atau gambar'],['Pika','https://pika.art','Video','Video pendek dari prompt'],['Suno','https://suno.com','Audio','Membuat lagu dari teks'],['ElevenLabs','https://elevenlabs.io','Audio','Suara dan pengisi suara AI'],['Cursor','https://cursor.com','Kode','Editor kode dengan AI'],['Replit','https://replit.com','Kode','Bangun aplikasi dari browser'],['Hugging Face','https://huggingface.co','Kode','Ribuan model dan demo terbuka'],['OpenCode','https://opencode.ai','Kode','Agen kode dan gerbang model AI']];
 const COL=['#7C8CFF','#5EEAD4','#FFB86B','#FF8FB1','#A5E36B','#8FD3FF'];
@@ -250,8 +305,111 @@ function renderSeg(){
   $('#fsz').innerHTML=[['0.9','Kecil'],['1','Normal'],['1.12','Besar']].map(x=>'<button class="chip'+(cfg.fs===x[0]?' on':'')+'" data-fs="'+x[0]+'">'+x[1]+'</button>').join('');
 }
 
+const MARK='<svg class="mk" viewBox="0 0 96 96"><path fill="currentColor" fill-rule="evenodd" d="M24,16h24a32,32 0 0 1 0,64h-24z M38,30v36h10a18,18 0 0 0 0,-36z"/></svg>';
+const greet=()=>{const h=new Date().getHours();const q=h<4?[0,1,2]:h<11?[3,4,5]:h<15?[6,7,8]:h<18?[9,10,11]:[0,1,12];const s=["Anda begadang, apa yang bisa saya bantu?","Mau memikirkan apa malam ini?","Malam ini mau bahas apa?","Mau mulai hari dengan apa?","Ada rencana apa pagi ini?","Pagi ini mau bahas apa?","Mau bahas apa siang ini?","Ada yang bisa dibantu?","Siang ini mau ngapain?","Sore ini mau ngapain?","Ada yang bisa dibantu?","Mau bahas apa sore ini?","Ada yang bisa dibantu malam ini?"];return s[q[Math.floor(Math.random()*q.length)]]};
+function rel(t){const d=(Date.now()-t)/1000;if(d<60)return 'Baru saja';if(d<3600)return Math.floor(d/60)+' menit yang lalu';if(d<86400)return Math.floor(d/3600)+' jam yang lalu';const n=Math.floor(d/86400);if(n===1)return 'Kemarin';if(n<7)return n+' hari yang lalu';return new Date(t).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
+const tips=()=>{const t=["Minum air dulu, biar fokus tetap terjaga.","Istirahat 5 menit tiap 25 menit kerja.","Jangan lupa makan tepat waktu.","Mata butuh istirahat dari layar tiap 20 menit.","Tidur cukup 7-8 jam sehari.","Tarik napas dalam, tenangkan pikiran.","Jalan kaki 10 menit bisa segarkan otak.","Kurangi begadang, tubuh butuh istirahat.","Pikiran tenang, jawaban lebih jernih.","Hari ini boleh santai, besok tetap semangat."];return t[Math.floor(Math.random()*t.length)]};
+function titleChat(){if(tab==='chat'){const c=chat();$('#ttl').textContent=c?c.title:''}}
+function updChip(){$('#mchip').textContent=cfg.model?fn(cfg.model):'Pilih model'}
+function openDrawer(){renderDrawer();document.body.classList.add('dr')}
+function closeDrawer(){document.body.classList.remove('dr')}
+function closeAll(){closeDrawer();$('#menu').classList.remove('open')}
+const closeSheet=()=>$('#sheet').classList.remove('open');
+function openSheet(){sheetMode='model';renderSheet();$('#sheet').classList.add('open');if(cfg.key&&!LI.length)loadModels()}
+const PICK={gemini:[['gemini-3.5-flash-lite','Gemini 3.5 Flash Lite','Bawaan','Tercepat dan hemat untuk tugas sehari-hari'],['gemini-3.5-flash','Gemini 3.5 Flash','','Seimbang untuk tugas yang lebih kompleks']],groq:[['llama-3.3-70b-versatile','Llama 3.3 70B','Bawaan','Serbaguna dan sangat cepat'],['llama-3.1-8b-instant','Llama 3.1 8B','','Paling ringan untuk jawaban kilat']]};
+let sheetMore=false;
+let sheetMode='model';
+const fn=id=>{for(const k in PICK){const x=PICK[k].find(y=>y[0]===id);if(x)return x[1]}return id};
+function renderDrawer(){
+  $('#dtabs').innerHTML=[['hist','Obrolan',IC.chat],['tools','Alat AI',sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>')],['set','Pengaturan',sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>')]].map(x=>'<button class="di'+(tab===x[0]?' on':'')+'" data-t="'+x[0]+'">'+x[2]+x[1]+'</button>').join('');
+  const l=chats.slice().sort((a,b)=>(b.pin|0)-(a.pin|0)||b.ts-a.ts).slice(0,8);
+  $('#drec').innerHTML=l.length?'<small>Terbaru</small>'+l.map(c=>'<button class="di" data-o="'+c.id+'">'+IC.chat+'<span class="tt">'+esc(c.title)+'</span></button>').join(''):'';
+}
+function renderSheet(){
+  const p=PROV[cfg.route],ids=[...$('#model').options].map(o=>o.value).filter(v=>v&&v!=='Belum ada model'),pk=PICK[cfg.route]||[];
+  const row=(id,t,badge,sub)=>'<button class="mr" data-mo="'+esc(id)+'"><span><b>'+esc(t)+(badge?'<i class="pl">'+badge+'</i>':'')+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</span>'+(id===cfg.model?IC.check:'')+'</button>';
+  const shown=pk.filter(x=>!LI.length||ids.includes(x[0])),rest=ids.filter(i=>!pk.some(x=>x[0]===i));
+  $('#sp').innerHTML='<div class="sh"><button class="ib" data-sx="1" aria-label="Tutup">'+sv('<path d="M6 6l12 12M18 6L6 18"/>')+'</button><b>Pilih model</b></div><div class="chips">'+Object.keys(PROV).map(k=>'<button class="chip'+(k===cfg.route?' on':'')+'" data-sp="'+k+'">'+PROV[k].name+'</button>').join('')+'</div>'+shown.map(x=>row(x[0],x[1],x[2],x[3])).join('')+'<p class="hint" style="margin:12px 4px">'+p.note+'</p>'+(rest.length?'<button class="mr" data-more="1"><span><b>Model lainnya</b></span>'+IC.chev+'</button>'+(sheetMore?rest.map(i=>row(i,i,'','')).join(''):''):'')+(!cfg.key?'<p class="hint" style="margin:12px 4px">Isi API key di Pengaturan untuk memakai model ini.</p>':'');
+}
+function menuAct(a){
+  $('#menu').classList.remove('open');const c=chat();if(!c||!c.msgs.length)return toast('Belum ada percakapan');
+  if(a==='share')doShare(fmt(c));
+  else if(a==='pin'){c.pin=!c.pin;persist();toast(c.pin?'Percakapan disematkan':'Sematan dilepas')}
+  else if(a==='rename')ask({title:'Ganti nama',input:c.title,ok:'Simpan'}).then(v=>{if(v){c.title=v.slice(0,60);persist();titleChat();toast('Nama diperbarui')}});
+  else if(a==='del')ask({title:'Hapus percakapan?',body:'"'+c.title+'" akan dihapus permanen.',ok:'Hapus',danger:1}).then(v=>{if(v){chats=chats.filter(x=>x!==c);cur='';persist();render();toast('Percakapan dihapus')}});
+}
+document.addEventListener('click',e=>{if(!e.target.closest('#menu,#more'))$('#menu').classList.remove('open')});
+const ver=()=>A&&A.version?A.version():'web';
+const bkey=()=>{try{return (A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){return ''}};
+const SI={prov:sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><path d="M16.5 13v7M13 16.5h7"/>'),key:sv('<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3"/>'),model:sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'),moon:sv('<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>'),font:sv('<path d="M4 19l5-14 5 14M6 14h6M17 19v-6M17 15c0-2.5 4-2.5 4 0v4"/>'),sys:sv('<path d="M5 6h14M5 12h14M5 18h9"/>'),temp:sv('<path d="M12 4v10"/><circle cx="12" cy="17" r="3"/>'),hist:sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),info:sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),book:sv('<path d="M5 5h10a3 3 0 0 1 3 3v11H8a3 3 0 0 1-3-3z"/>')};
+const TH={auto:'Sistem',dark:'Gelap',light:'Terang'},FS={'0.9':'Kecil','1':'Normal','1.12':'Besar'};
+function renderSet(){
+  const p=PROV[cfg.route],ks=!cfg.key?'Belum diisi':(cfg.key===bkey()?'Tertanam di aplikasi':'Diisi manual');
+  const r=(k,ic,t,sub,cls)=>'<button class="sr'+(cls||'')+'" data-se="'+k+'">'+ic+'<span><b>'+t+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</span></button>';
+  const sw=(k,ic,t,on)=>'<button class="sr" data-se="'+k+'">'+ic+'<span><b>'+t+'</b></span><i class="sw'+(on?' on':'')+'"></i></button>';
+  $('#setp').innerHTML='<div class="sg"><div class="sr top"><span><b>'+p.name+'</b></span><i class="bdg">'+(cfg.key?'Terhubung':'Belum terhubung')+'</i></div></div>'+
+   '<div class="sg">'+r('prov',SI.prov,'Penyedia AI',p.name)+r('key',SI.key,'API key',ks)+r('model',SI.model,'Model',cfg.model?fn(cfg.model):'Belum dipilih')+'</div>'+
+   '<div class="sg">'+r('theme',SI.moon,'Mode warna',TH[cfg.theme])+r('fs',SI.font,'Ukuran teks',FS[cfg.fs]||'Normal')+'</div>'+
+   '<div class="sg">'+r('sys',SI.sys,'Instruksi tambahan',cfg.system?cfg.system.slice(0,40)+(cfg.system.length>40?'...':''):'Tidak ada (identitas DIVJUN AI sudah bawaan)')+r('temp',SI.temp,'Kreativitas jawaban',String(cfg.temp))+'</div>'+
+   '<div class="sg">'+sw('hist',SI.hist,'Simpan riwayat obrolan',cfg.hist!==false)+r('exp',IC.share,'Ekspor semua obrolan')+r('clr',IC.trash,'Bersihkan riwayat')+'</div>'+
+   '<div class="sg">'+r('docs',SI.book,'Dokumentasi penyedia')+r('about',SI.info,'Tentang DIVJUN AI','Versi '+ver())+'</div>'+
+   '<div class="sg">'+r('wipe',IC.trash,'Hapus semua data','', ' dg')+'</div>';
+}
+function refreshSheet(){sheetMode==='model'?renderSheet():renderEdit()}
+function openEdit(k){sheetMode=k;renderEdit();$('#sheet').classList.add('open')}
+function renderEdit(){
+  const k=sheetMode,T={prov:'Penyedia AI',key:'API key',theme:'Mode warna',fs:'Ukuran teks',sys:'Instruksi tambahan',attach:'Tambahkan ke chat',temp:'Kreativitas jawaban'}[k];let b='';
+  const chips=(a,l,cur)=>'<div class="chips">'+l.map(x=>'<button class="chip'+(cur===x[0]?' on':'')+'" data-'+a+'="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>';
+  if(k==='prov')b=Object.keys(PROV).map(i=>'<button class="mr" data-sp="'+i+'"><span><b>'+PROV[i].name+'</b><small>'+PROV[i].note+'</small></span>'+(i===cfg.route?IC.check:'')+'</button>').join('');
+  else if(k==='key')b='<div class="two"><input id="ek" type="password" autocomplete="off" placeholder="Tempel API key di sini" value="'+esc(cfg.key)+'"><button class="ib" data-ea="eye" aria-label="Tampilkan">'+IC.eye+'</button></div><p class="hint">Disimpan hanya di HP ini. Key untuk '+PROV[cfg.route].name+'.</p><div class="chips" style="margin-top:12px"><button class="btn" data-ea="get">Dapatkan API key</button><button class="btn pri" data-ea="key">Simpan dan uji koneksi</button></div><div id="es" class="hint" style="margin-top:12px"></div>';
+  else if(k==='theme')b=chips('th',[['auto','Sistem'],['dark','Gelap'],['light','Terang']],cfg.theme);
+  else if(k==='fs')b=chips('fs',[['0.9','Kecil'],['1','Normal'],['1.12','Besar']],cfg.fs);
+      else if(k==='attach')b='<div class="drag"></div><div class="tiles">'+[['camera','Kamera','<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'],['photo','Foto','<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 17l5-5 4 4 2-2 3 3"/>'],['file','File','<path d="M7 3h7l4 4v14H7z"/><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5"/>']].map(x=>'<button class="tile" data-pk="'+x[0]+'"><i>'+sv(x[2])+'</i><span>'+x[1]+'</span></button>').join('')+'</div><p class="hint" style="margin-top:14px;padding:0 4px">Gambar dibaca oleh model, jadi pilih model yang mendukung gambar. File teks dibaca sebagai bagian pesan. Maksimal 4 lampiran.</p>';
+  else if(k==='sys')b='<textarea id="esy" placeholder="Contoh: jawab selalu singkat" style="width:100%;min-height:140px;border:1px solid var(--line);border-radius:16px;padding:12px;background:var(--panel)">'+esc(cfg.system)+'</textarea><button class="btn pri" data-ea="sys" style="margin-top:12px">Simpan</button>';
+  else if(k==='temp')b='<p class="sub">Makin tinggi, makin variatif jawabannya: <b id="etv">'+cfg.temp+'</b></p><input id="etm" type="range" min="0" max="1.5" step="0.1" value="'+cfg.temp+'" style="padding:0"><button class="btn pri" data-ea="temp" style="margin-top:12px">Simpan</button>';
+  $('#sp').innerHTML='<div class="sh"><button class="ib" data-sx="1" aria-label="Tutup">'+sv('<path d="M6 6l12 12M18 6L6 18"/>')+'</button><b>'+T+'</b></div>'+b;
+}
+function seAct(k){
+  if(k==='model')openSheet();
+  else if(['prov','key','theme','fs','sys','temp'].includes(k))openEdit(k);
+  else if(k==='hist'){cfg.hist=cfg.hist===false;save();persist();renderSet();toast(cfg.hist===false?'Riwayat tidak disimpan':'Riwayat disimpan')}
+  else if(k==='exp')chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
+  else if(k==='clr')ask({title:'Bersihkan riwayat?',body:'Semua percakapan akan dihapus. API key dan pengaturan tetap aman.',ok:'Bersihkan',danger:1}).then(v=>{if(v){chats=[];cur='';persist();render();toast('Riwayat dibersihkan')}});
+  else if(k==='docs'){const u=PROV[cfg.route].docs;A?A.open(u):window.open(u)}
+  else if(k==='about')ask({title:'DIVJUN AI',body:'Versi '+ver()+'. Chat AI lewat Gemini dan Groq, plus kumpulan alat AI dalam satu aplikasi.',ok:'Tutup'});
+  else if(k==='wipe')$('#wipe').click();
+}
+function eaAct(a){
+  if(a==='eye'){const k=$('#ek');k.type=k.type==='password'?'text':'password'}
+  else if(a==='get'){const u=PROV[cfg.route].keyUrl;A?A.open(u):window.open(u)}
+  else if(a==='key'){const v=$('#ek').value.trim();cfg.key=v;cfg.kk[cfg.route]=v;save();const s=$('#es');s.style.color='var(--mu)';s.textContent='Menguji koneksi...';loadModels((ok,info)=>{s.style.color=ok?'var(--ok)':'var(--er)';s.textContent=ok?'Terhubung. '+info+' model tersedia.':'Gagal: '+info;if(ok){render();renderSet();toast('Terhubung')}})}
+  else if(a==='sys'){cfg.system=$('#esy').value.trim();save();closeSheet();renderSet();toast('Instruksi disimpan')}
+  else if(a==='temp'){cfg.temp=+$('#etm').value;save();closeSheet();renderSet();toast('Kreativitas disimpan')}
+}
+document.addEventListener('input',e=>{if(e.target.id==='etm')$('#etv').textContent=e.target.value});
+const SYS_BASE='Kamu adalah DIVJUN AI, asisten AI yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.\nNama aplikasi ini adalah DIVJUN AI. Aplikasi ini dibuat oleh 0xmahen di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan siapa pembuat atau pengembang aplikasi, jawab bahwa DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan model apa yang dipakai, sebutkan nama model dan penyedia pada baris "Model yang sedang dipakai" di bawah. Jangan mengaku sebagai model lain dan jangan mengarang nama model.';
+function sysPrompt(){return SYS_BASE+'\nModel yang sedang dipakai: '+fn(cfg.model)+' ('+cfg.model+') dari '+PROV[cfg.route].name+'.'+(cfg.system?'\n'+cfg.system:'')}
+let att=[];
+function buildUser(text){
+  const im=att.filter(x=>x.mime.indexOf('image/')===0),tx=att.filter(x=>x.mime.indexOf('image/')!==0);let t=text;
+  tx.forEach(f=>{t+='\n\n[File: '+f.name+']\n'+new TextDecoder().decode(b64(f.b64))});
+  if(!im.length)return t;
+  return [{type:'text',text:t}].concat(im.map(f=>({type:'image_url',image_url:{url:'data:'+f.mime+';base64,'+f.b64}})));
+}
+function renderAtt(){$('#atts').innerHTML=att.map((f,i)=>'<div class="th">'+(f.mime.indexOf('image/')===0?'<img alt="" src="data:'+f.mime+';base64,'+f.b64+'">':'<span>'+esc(f.name.slice(0,12))+'</span>')+'<button data-rm="'+i+'" aria-label="Hapus">\u00d7</button></div>').join('')}
+window.__picked=(n,m,d)=>{if(att.length>=4)return toast('Maksimal 4 lampiran');att.push({name:n,mime:m,b64:d});renderAtt();closeSheet()};
+window.__pickErr=m=>toast(m);
+window.__voice=t=>{const i=$('#in');i.value=(i.value?i.value+' ':'')+t;i.dispatchEvent(new Event('input'));i.focus()};
+function voice(){if(A&&A.voice)return A.voice();const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return toast('Suara hanya tersedia di aplikasi');const r=new R();r.lang='id-ID';r.onresult=e=>window.__voice(e.results[0][0].transcript);r.onerror=()=>toast('Suara tidak bisa dipakai');r.start()}
+function pickWeb(kind){
+  const i=document.createElement('input');i.type='file';i.accept=kind==='file'?'image/*,text/*,.md,.json,.csv':'image/*';if(kind==='camera')i.capture='environment';
+  i.onchange=()=>{const f=i.files[0];if(!f)return;
+    if(f.type.indexOf('image/')===0){const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);window.__picked(f.name,'image/jpeg',c.toDataURL('image/jpeg',0.85).split(',')[1])};im.src=URL.createObjectURL(f)}
+    else f.text().then(t=>window.__picked(f.name,f.type||'text/plain',btoa(unescape(encodeURIComponent(t.slice(0,200000))))))};
+  i.click();
+}
 document.addEventListener('click',async e=>{
-  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-u],[data-f],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-t]');
+  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-u],[data-f],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-pk],[data-rm],[data-se],[data-ea],[data-more],[data-m],[data-sp],[data-mo],[data-sx],[data-dc],[data-t]');
   if(!t)return;const d=t.dataset;
   if(d.q)send(d.q);
   else if(d.go)go(d.go);
@@ -263,32 +421,47 @@ document.addEventListener('click',async e=>{
   else if(d.rn){const c=chats.find(x=>x.id===d.rn),v=await ask({title:'Ubah nama percakapan',input:c.title,ok:'Simpan'});if(v){c.title=v.slice(0,60);persist();renderHist();toast('Nama diperbarui')}}
   else if(d.dl){const c=chats.find(x=>x.id===d.dl);if(await ask({title:'Hapus percakapan?',body:'"'+c.title+'" akan dihapus permanen.',ok:'Hapus',danger:1})){chats=chats.filter(x=>x.id!==c.id);if(cur===c.id)cur='';persist();renderHist();render();toast('Percakapan dihapus')}}
   else if(d.o){if(busy)return toast('Tunggu jawaban selesai');cur=d.o;persist();render();go('chat')}
-  else if(d.th){cfg.theme=d.th;save();applyTheme();renderSeg()}
-  else if(d.fs){cfg.fs=d.fs;save();applyTheme();renderSeg()}
+  else if(d.th){cfg.theme=d.th;save();applyTheme();renderSeg();refreshSheet();renderSet()}
+  else if(d.fs){cfg.fs=d.fs;save();applyTheme();renderSeg();refreshSheet();renderSet()}
+  else if(d.dc)closeAll();
+  else if(d.sx)closeSheet();
+  else if(d.pk){if(A&&A.minta){window.__pendingPick=d.pk;A.minta(d.pk)}else{pickWeb(d.pk)}}
+  else if(d.rm){att.splice(+d.rm,1);renderAtt()}
+  else if(d.se)seAct(d.se);
+  else if(d.ea)eaAct(d.ea);
+  else if(d.more){sheetMore=!sheetMore;renderSheet()}
+  else if(d.sp){switchProv(d.sp);refreshSheet();renderSet()}
+  else if(d.mo){cfg.model=d.mo;cfg.mm[cfg.route]=d.mo;save();$('#model').value=d.mo;updChip();closeSheet();renderSet();toast('Model: '+fn(d.mo))}
+  else if(d.m)menuAct(d.m);
   else if(d.t)go(d.t);
 });
-$('#send').onclick=()=>{if(busy){const id=busy;delete pend[id];A.cancel(id);const m=msgs(),a=m[m.length-1];if(!a.content)a.content='(Dihentikan)';fin()}else{const i=$('#in'),v=i.value;i.value='';i.style.height='auto';send(v)}};
+$('#send').onclick=()=>{if(busy){const id=busy;delete pend[id];cancelReq(id);const m=msgs(),a=m[m.length-1];if(!a.content)a.content='(Dihentikan)';fin()}else{const i=$('#in'),v=i.value;i.value='';i.style.height='auto';send(v)}};
 $('#in').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,140)+'px'};
-$('#new').onclick=newChat;
-$('#share').onclick=()=>{const c=chat();c&&c.msgs.length?doShare(fmt(c)):toast('Belum ada percakapan untuk dibagikan')};
+$('#new').onclick=newChat;$('#plus').innerHTML=IC.plus;$('#plus').onclick=()=>openEdit('attach');$('#mic').innerHTML=sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>');$('#mic').onclick=voice;$('#info').innerHTML=SI.info;$('#info').onclick=()=>seAct('about');$('#fab').onclick=newChat;
+$('#burger').onclick=openDrawer;$('#mchip').onclick=openSheet;$('#dav').onclick=()=>go('set');$('#dnew').onclick=()=>{closeDrawer();newChat()};
+$('#more').onclick=()=>$('#menu').classList.toggle('open');$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet()};
+(function(){
+  var sp=document.getElementById('sp'),sy=0,dy=0,on=false;
+  sp.addEventListener('touchstart',function(e){if(sp.scrollTop>0)return;sy=e.touches[0].clientY;dy=0;on=true;sp.style.transition='none'},{passive:true});
+  sp.addEventListener('touchmove',function(e){if(!on)return;dy=e.touches[0].clientY-sy;if(dy>0){sp.style.transform='translateY('+dy+'px)';e.preventDefault()}},{passive:false});
+  sp.addEventListener('touchend',function(){if(!on)return;on=false;sp.style.transition='';if(dy>100){closeSheet();sp.style.transform=''}else{sp.style.transform=''}});
+})();
 $('#model').onchange=e=>{cfg.model=e.target.value;$('#mname').value=cfg.model;save();toast('Model: '+cfg.model)};
 $('#hq').oninput=renderHist;$('#tq').oninput=renderTools;
 $('#eye').onclick=()=>{const k=$('#key');k.type=k.type==='password'?'text':'password'};
-$('#getkey').onclick=()=>A?A.open(PROV[cfg.route].keyUrl):0;
+$('#getkey').onclick=()=>A?A.open(PROV[cfg.route].keyUrl):window.open(PROV[cfg.route].keyUrl);
 $('#route').onchange=e=>switchProv(e.target.value);
-$('#onlyfree').onclick=()=>{cfg.onlyFree=!cfg.onlyFree;save();renderProv();fillModels(LI)};
-$('#docs').onclick=()=>A?A.open('https://opencode.ai/docs/zen'):0;
+$('#docs').onclick=()=>A?A.open(PROV[cfg.route].docs):window.open(PROV[cfg.route].docs);
 $('#tmp').oninput=e=>$('#tv').textContent=e.target.value;
 $('#saveBtn').onclick=()=>{cfg.key=$('#key').value.trim();cfg.model=$('#mname').value.trim();cfg.kk[cfg.route]=cfg.key;cfg.mm[cfg.route]=cfg.model;save();const s=$('#st');s.style.color='var(--mu)';s.textContent='Menguji koneksi...';
   loadModels((ok,info)=>{s.style.color=ok?'var(--ok)':'var(--er)';s.textContent=ok?'Terhubung. '+info+' model tersedia.':'Gagal: '+info;if(ok){render();toast('Terhubung ke OpenCode')}})};
 $('#saveAi').onclick=()=>{cfg.system=$('#sys').value.trim()||cfg.system;cfg.temp=+$('#tmp').value;save();toast('Pengaturan AI disimpan')};
 $('#expAll').onclick=()=>chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
-$('#wipe').onclick=async()=>{if(await ask({title:'Hapus semua data?',body:'Semua percakapan, API key, dan pengaturan akan dihapus dari HP ini.',ok:'Hapus semua',danger:1})){chats=[];cur='';cfg={...cfg,key:'',model:'',fav:[],kk:{},mm:{}};save();persist();$('#key').value='';$('#mname').value='';fillModels([]);render();toast('Semua data dihapus')}};
-window.__back=()=>{if(modalRes){modalRes(null);return true}if(tab!=='chat'){go('chat');return true}return false};
+$('#wipe').onclick=async()=>{if(await ask({title:'Hapus semua data?',body:'Semua percakapan, API key, dan pengaturan akan dihapus dari HP ini.',ok:'Hapus semua',danger:1})){chats=[];cur='';cfg={...cfg,key:'',model:'',fav:[],kk:{},mm:{},ml:{},cs:[]};save();persist();$('#key').value='';$('#mname').value='';fillModels([]);render();toast('Semua data dihapus')}};
+window.__back=()=>{if(modalRes){modalRes(null);return true}if($('#sheet').classList.contains('open')){closeSheet();return true}if(document.body.classList.contains('dr')||$('#menu').classList.contains('open')){closeAll();return true}if(tab!=='chat'){go('chat');return true}return false};
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);
 
-$('#nav').innerHTML=NAV.map(n=>'<button data-t="'+n[0]+'"'+(n[0]==='chat'?' class="on"':'')+'>'+n[2]+n[1]+'</button>').join('');
-$('#share').innerHTML=IC.share;$('#new').innerHTML=IC.plus;$('#eye').innerHTML=IC.eye;
+$('#new').innerHTML=IC.plus;$('#more').innerHTML=IC.more;$('#burger').innerHTML=IC.menu;$('#eye').innerHTML=IC.eye;
 $('#route').innerHTML=Object.keys(PROV).map(k=>'<option value="'+k+'">'+PROV[k].name+'</option>').join('');renderProv();$('#mname').value=cfg.model;$('#sys').value=cfg.system;$('#tmp').value=cfg.temp;$('#tv').textContent=cfg.temp;
 $('#ver').textContent=A?'v'+A.version():'';
 fillModels([]);applyTheme();renderSeg();setBtn();render();loadModels();

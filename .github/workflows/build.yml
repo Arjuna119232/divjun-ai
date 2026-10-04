@@ -15,7 +15,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.7
-      - run: gradle assembleDebug --no-daemon
+      - name: Build debug
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: gradle assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: DIVJUN-AI-apk
