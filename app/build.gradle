@@ -22,12 +22,6 @@ android {
         buildConfigField 'String', 'GEMINI_KEY', "\"${geminiKey}\""
     }
     signingConfigs {
-        repo {
-            storeFile file('divjun.jks')
-            storePassword 'd77d22b4a3a84de02881'
-            keyAlias 'divjun'
-            keyPassword 'd77d22b4a3a84de02881'
-        }
         release {
             def ks = System.getenv('KEYSTORE_PATH')
             if (ks) {
@@ -40,11 +34,11 @@ android {
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.repo
+            signingConfig signingConfigs.debug
         }
         release {
             minifyEnabled false
-            signingConfig System.getenv('KEYSTORE_PATH') ? signingConfigs.release : signingConfigs.repo
+            signingConfig System.getenv('KEYSTORE_PATH') ? signingConfigs.release : signingConfigs.debug
         }
     }
     compileOptions {
