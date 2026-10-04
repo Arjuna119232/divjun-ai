@@ -37,6 +37,7 @@ section.on{opacity:1;visibility:visible;transform:none}
 .a code{background:var(--ub);padding:1px 6px;border-radius:6px;font:.82em ui-monospace,Menlo,monospace}
 .a pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;overflow-x:auto;white-space:pre}.a pre code{background:none;padding:0}
 .acts{display:flex;gap:14px;margin-top:-8px}.cp{background:none;border:0;color:var(--mu);font-size:.85em;min-height:36px;padding:0}
+.tkb{background:none;border:0;color:var(--mu);font:inherit;font-size:1em;cursor:pointer;padding:0;display:flex;align-items:center;gap:6px}.tkb:active{opacity:.6}
 .dots i{display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--mu);animation:b 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 .hero{margin:auto 0;text-align:center;padding:0 8px 12vh}.hero .mk{width:48px;height:48px;color:var(--lk);stroke:none;margin-bottom:18px}
@@ -126,6 +127,20 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 #mp h3{margin:0 0 6px;color:var(--tx);font-size:1.1em}#mp p{color:var(--mu);margin-bottom:12px}#mp .two{justify-content:flex-end;margin-top:14px}
 .sh{display:flex;align-items:center;margin-bottom:12px}.sh b{flex:1;text-align:center;font-size:1.1em;margin-right:42px}
 .mr{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:var(--panel);border:0;border-radius:14px;padding:14px 16px;margin-top:8px;text-align:left}.mr span{overflow:hidden;text-overflow:ellipsis}
+#think{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;z-index:35}
+#think.on{opacity:1;visibility:visible}
+#think .tk{width:100%;background:var(--bg);border-radius:28px 28px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0));transform:translateY(40px);transition:transform .25s;max-height:88%;overflow-y:auto}
+#think.on .tk{transform:none}
+#think .tkh{display:flex;align-items:center;margin-bottom:14px}
+#think .tkh b{flex:1;text-align:center;font-size:1.1em;margin-right:42px}
+#think .tkl{display:flex;flex-direction:column;gap:2px;padding:0 4px}
+#think .tki{position:relative;padding:14px 4px 14px 36px;color:var(--tx);font-size:1.02em;line-height:1.5}
+#think .tki::before{content:"";position:absolute;left:8px;top:22px;width:10px;height:10px;border-radius:50%;background:var(--lk);z-index:2}
+#think .tki::after{content:"";position:absolute;left:12px;top:22px;bottom:-14px;width:2px;background:var(--line);z-index:1}
+#think .tki:last-child::after{display:none}
+#think .tki.on{color:var(--mu)}
+#think .tki.on::before{background:var(--er)}
+#think .tki small{display:block;color:var(--mu);font-size:.85em;margin-top:2px}
 #toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,12px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;max-width:88vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 .mr b{display:block;font-weight:500;font-size:1.15em}.mr small{display:block;color:var(--mu);margin-top:2px}.mr svg{color:var(--lk)}
@@ -225,6 +240,15 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 <div id="menu"><button data-m="share">Bagikan</button><button data-m="rename">Ganti nama</button><button data-m="pin">Sematkan</button><button data-m="del" class="dg">Hapus</button></div>
 <div id="sheet"><div id="sp"></div></div>
 <div id="modal"><div id="mp"><h3 id="mt"></h3><p id="mb"></p><input id="mi"><div class="two"><button class="btn" id="mno">Batal</button><button class="btn pri" id="mok">Oke</button></div></div></div>
+<div id="think">
+  <div class="tk">
+    <div class="tkh">
+      <button class="ib" id="tkx" aria-label="Tutup">✕</button>
+      <b>Ringkasan</b>
+    </div>
+    <div class="tkl" id="tkl"></div>
+  </div>
+</div>
 <div id="toast"></div>
 <div id="voice">
   <div class="vbar">
@@ -261,7 +285,7 @@ const IC={edit:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),trash:sv('<path d="M5 7
 const NAV=[['chat','Chat',sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>')],['hist','Riwayat',sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')],['tools','Alat AI',sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>')],['set','Pengaturan',sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>')]];
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const md=t=>t.split('```').map((p,i)=>i%2?'<pre><code>'+esc(p.replace(/^[\w+-]*\n/,''))+'</code></pre>':esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>')).join('');
-const thk=x=>x.think?'<span style="color:var(--mu)">Berpikir... '+esc(x.think)+'</span>':DOTS;
+const thk=x=>x.think?'<span style="color:var(--mu)">Berpikir... '+esc(x.think)+'</span>':'<button class="tkb" onclick="thinkOpen()">Berpikir'+DOTS+'</button>';
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),DOTS='<span class="dots"><i></i><i></i><i></i></span>';
 const fmtT=t=>new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2000)}
@@ -444,8 +468,8 @@ function eaAct(a){
   else if(a==='temp'){cfg.temp=+$('#etm').value;save();closeSheet();renderSet();toast('Kreativitas disimpan')}
 }
 document.addEventListener('input',e=>{if(e.target.id==='etm')$('#etv').textContent=e.target.value});
-const SYS_BASE='Kamu adalah DIVJUN AI, asisten AI yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.\nNama aplikasi ini adalah DIVJUN AI. Aplikasi ini dibuat oleh 0xmahen di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan siapa pembuat atau pengembang aplikasi, jawab bahwa DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan model apa yang dipakai, sebutkan nama model dan penyedia pada baris "Model yang sedang dipakai" di bawah. Jangan mengaku sebagai model lain dan jangan mengarang nama model.';
-function sysPrompt(){return SYS_BASE+'\nModel yang sedang dipakai: '+fn(cfg.model)+' ('+cfg.model+') dari '+PROV[cfg.route].name+'.'+(cfg.system?'\n'+cfg.system:'')}
+const SYS_BASE='Kamu adalah DIVJUN AI, asisten AI yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.\nNama aplikasi ini adalah DIVJUN AI. Aplikasi ini dibuat oleh 0xmahen di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan siapa pembuat atau pengembang aplikasi, jawab bahwa DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan model atau teknologi apa yang dipakai, JANGAN sebutkan nama model atau penyedia. Cukup jelaskan kemampuan dan fitur yang bisa kamu lakukan, misalnya: menjawab pertanyaan, membantu menulis, meringkas teks, menjelaskan konsep, membantu coding, menerjemahkan bahasa, memberi ide kreatif, dan membantu belajar. Fokus pada manfaat untuk pengguna, bukan nama teknis.';
+function sysPrompt(){return SYS_BASE+(cfg.system?'\n'+cfg.system:'')}
 let att=[];
 function buildUser(text){
   const im=att.filter(x=>x.mime.indexOf('image/')===0),tx=att.filter(x=>x.mime.indexOf('image/')!==0);let t=text;
@@ -509,7 +533,21 @@ document.addEventListener('click',async e=>{
 });
 $('#send').onclick=()=>{if(busy){const id=busy;delete pend[id];cancelReq(id);const m=msgs(),a=m[m.length-1];if(!a.content)a.content='(Dihentikan)';fin()}else{const i=$('#in'),v=i.value;i.value='';i.style.height='auto';send(v)}};
 $('#in').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,140)+'px'};
-$('#new').onclick=newChat;$('#plus').innerHTML=IC.plus;$('#plus').onclick=()=>openEdit('attach');$('#mic').innerHTML=sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>');$('#mic').onclick=voice;$('#vcancel').onclick=voiceClose;$('#vstop').onclick=voiceClose;$('#vsend').onclick=voiceSend;$('#info').innerHTML=SI.info;$('#info').onclick=()=>seAct('about');$('#fab').onclick=newChat;
+$('#new').onclick=newChat;$('#plus').innerHTML=IC.plus;$('#plus').onclick=()=>openEdit('attach');$('#mic').innerHTML=sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>');$('#mic').onclick=voice;function thinkOpen(){
+  const t=$('#think'),l=$('#tkl');
+  const items=[
+    ['Memahami permintaan Anda','Menganalisis pertanyaan'],
+    ['Menyusun jawaban','Memilih kata yang tepat'],
+    ['Memeriksa konteks','Memastikan jawaban relevan'],
+    ['Menyiapkan balasan','Menyelesaikan jawaban']
+  ];
+  l.innerHTML=items.map((x,i)=>'<div class="tki'+(i===items.length-1?' on':'')+'" data-i="'+i+'"><b>'+x[0]+'</b><small>'+x[1]+'</small></div>').join('');
+  t.classList.add('on');
+}
+function thinkClose(){$('#think').classList.remove('on')}
+$('#tkx').onclick=thinkClose;
+$('#think').onclick=e=>{if(e.target.id==='think')thinkClose()};
+$('#vcancel').onclick=voiceClose;$('#vstop').onclick=voiceClose;$('#vsend').onclick=voiceSend;$('#info').innerHTML=SI.info;$('#info').onclick=()=>seAct('about');$('#fab').onclick=newChat;
 $('#burger').onclick=openDrawer;$('#mchip').onclick=openSheet;$('#dav').onclick=()=>go('set');$('#dnew').onclick=()=>{closeDrawer();newChat()};
 $('#more').onclick=()=>$('#menu').classList.toggle('open');$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet()};
 (function(){
