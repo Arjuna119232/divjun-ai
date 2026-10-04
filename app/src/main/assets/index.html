@@ -36,6 +36,10 @@ section.on{opacity:1;visibility:visible;transform:none}
 .a{font-family:var(--sf);font-size:1.06em;line-height:1.65;white-space:pre-wrap;word-break:break-word}.a.err{color:var(--er)}
 .a code{background:var(--ub);padding:1px 6px;border-radius:6px;font:.82em ui-monospace,Menlo,monospace}
 .a pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;overflow-x:auto;white-space:pre}.a pre code{background:none;padding:0}
+.pre-wrap{position:relative;margin:8px 0}
+.pre-wrap pre{margin:0}
+.pre-btn{position:absolute;top:8px;right:8px;background:var(--ub);border:0;border-radius:8px;padding:5px 10px;font-size:.78em;color:var(--mu);cursor:pointer;font-weight:600;z-index:2}
+.pre-btn:active{opacity:.6}
 .acts{display:flex;gap:14px;margin-top:-8px}.cp{background:none;border:0;color:var(--mu);font-size:.85em;min-height:36px;padding:0}
 .tkb{background:none;border:0;color:var(--mu);font:inherit;font-size:1em;cursor:pointer;padding:0;display:flex;align-items:center;gap:6px}.tkb:active{opacity:.6}
 .dots i{display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--mu);animation:b 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
@@ -284,7 +288,7 @@ const sv=p=>'<svg viewBox="0 0 24 24">'+p+'</svg>';
 const IC={edit:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),trash:sv('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),star:sv('<path d="M12 4l2.4 5 5.6.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.8z"/>'),share:sv('<path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/>'),more:sv('<circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/>'),menu:sv('<path d="M4 8h16M4 16h10"/>'),chev:sv('<path d="M9 6l6 6-6 6"/>'),check:sv('<path d="M5 12l5 5 9-10"/>'),chat:sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>'),plus:sv('<path d="M12 5v14M5 12h14"/>'),eye:sv('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),send:sv('<path d="M12 19V5M5 12l7-7 7 7"/>'),stop:'<svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>'};
 const NAV=[['chat','Chat',sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>')],['hist','Riwayat',sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')],['tools','Alat AI',sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>')],['set','Pengaturan',sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>')]];
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const md=t=>t.split('```').map((p,i)=>i%2?'<pre><code>'+esc(p.replace(/^[\w+-]*\n/,''))+'</code></pre>':esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>')).join('');
+const md=t=>t.split('```').map((p,i)=>i%2?'<div class="pre-wrap"><button class="pre-btn" onclick="copyPre(this)">Salin</button><pre><code>'+esc(p.replace(/^[\w+-]*\n/,''))+'</code></pre></div>':esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>')).join('');
 const thk=x=>x.think?'<span style="color:var(--mu)">Berpikir... '+esc(x.think)+'</span>':'<button class="tkb" onclick="thinkOpen()">Berpikir'+DOTS+'</button>';
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),DOTS='<span class="dots"><i></i><i></i><i></i></span>';
 const fmtT=t=>new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
@@ -533,7 +537,16 @@ document.addEventListener('click',async e=>{
 });
 $('#send').onclick=()=>{if(busy){const id=busy;delete pend[id];cancelReq(id);const m=msgs(),a=m[m.length-1];if(!a.content)a.content='(Dihentikan)';fin()}else{const i=$('#in'),v=i.value;i.value='';i.style.height='auto';send(v)}};
 $('#in').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,140)+'px'};
-$('#new').onclick=newChat;$('#plus').innerHTML=IC.plus;$('#plus').onclick=()=>openEdit('attach');$('#mic').innerHTML=sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>');$('#mic').onclick=voice;function thinkOpen(){
+$('#new').onclick=newChat;$('#plus').innerHTML=IC.plus;$('#plus').onclick=()=>openEdit('attach');$('#mic').innerHTML=sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>');$('#mic').onclick=voice;function copyPre(btn){
+  const wrap=btn.parentElement;
+  const code=wrap.querySelector('code');
+  if(!code)return;
+  const text=code.innerText;
+  if(A&&A.copy){A.copy(text)}else{navigator.clipboard.writeText(text)}
+  btn.textContent='Tersalin!';
+  setTimeout(()=>{btn.textContent='Salin'},1500);
+}
+function thinkOpen(){
   const t=$('#think'),l=$('#tkl');
   const items=[
     ['Memahami permintaan Anda','Menganalisis pertanyaan'],
