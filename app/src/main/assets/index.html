@@ -271,16 +271,14 @@ const $=s=>document.querySelector(s),A=window.Android;
 const st={get:k=>A?A.get(k):(localStorage.getItem(k)||''),set:(k,v)=>A?A.set(k,v):localStorage.setItem(k,v)};
 const J=(k,d)=>{try{return JSON.parse(st.get(k))||d}catch(e){return d}};
 const PROV={
-gemini:{name:'Google Gemini',base:'https://generativelanguage.googleapis.com/v1beta/openai',keyUrl:'https://aistudio.google.com/apikey',docs:'https://ai.google.dev/gemini-api/docs',preset:'gemini-3.5-flash-lite',ok:i=>/^(gemini|gemma)/.test(i)&&!/embedding|image|tts|live|aqa/.test(i),note:'Gratis dengan batas pemakaian. Google dapat memakai data tingkat gratis, jadi jangan kirim data rahasia.'},
 groq:{name:'Groq',base:'https://api.groq.com/openai/v1',keyUrl:'https://console.groq.com/keys',docs:'https://console.groq.com/docs',preset:'llama-3.3-70b-versatile',ok:i=>!/whisper|guard|tts|playai/.test(i),note:'Gratis dengan batas permintaan, sangat cepat.'}};
 let LI=[];
-let cfg={key:'',route:'gemini',model:'',kk:{},mm:{},cn:2,cs:[],ml:{},onlyFree:true,v:0,system:'',theme:'auto',fs:'1',temp:0.7,fav:[],...J('cfg',{})};
+let cfg={key:'',route:'groq',model:'',kk:{},mm:{},cn:2,cs:[],ml:{},onlyFree:true,v:0,system:'',theme:'auto',fs:'1',temp:0.7,fav:[],...J('cfg',{})};
 let chats=J('chats',[]),cur=st.get('cur'),busy=null,seq=0,tab='chat',cat='Semua',modalRes=null;const pend={};
 if(!chats.length){const o=J('msgs',[]);if(o.length)chats=[{id:'c0',title:o[0].content.slice(0,40),ts:Date.now(),msgs:o}]}
 const chat=()=>chats.find(c=>c.id===cur),msgs=()=>chat()?chat().msgs:[];
 const save=()=>st.set('cfg',JSON.stringify(cfg)),persist=()=>{st.set('chats',cfg.hist===false?'[]':JSON.stringify(chats.slice(0,100)));st.set('cur',cur||'')};
-if(cfg.v!==2){cfg.kk=cfg.kk||{};cfg.mm=cfg.mm||{};if(cfg.key)cfg.kk[cfg.route]=cfg.key;cfg.route='gemini';cfg.key=cfg.kk.gemini||'';cfg.model=cfg.mm.gemini||'';cfg.v=2;save()}
-if(cfg.v!==3){cfg.kk=cfg.kk||{};cfg.mm=cfg.mm||{};if(!PROV[cfg.route]){cfg.route='gemini';cfg.key=cfg.kk.gemini||'';cfg.model=''}cfg.mm.gemini=PROV.gemini.preset;if(cfg.route==='gemini')cfg.model=PROV.gemini.preset;cfg.v=3;save()}
+
 function useBuilt(){if(cfg.key)return;let b='';try{b=(A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){}if(b){cfg.key=b;cfg.kk[cfg.route]=b}}
 if(/^Kamu adalah DIVJUN AI/.test(cfg.system||'')){cfg.system='';save()}
 useBuilt();
@@ -401,7 +399,7 @@ function closeDrawer(){document.body.classList.remove('dr')}
 function closeAll(){closeDrawer();$('#menu').classList.remove('open')}
 const closeSheet=()=>$('#sheet').classList.remove('open');
 function openSheet(){sheetMode='model';renderSheet();$('#sheet').classList.add('open');if(cfg.key&&!LI.length)loadModels()}
-const PICK={gemini:[['gemini-3.5-flash-lite','Gemini 3.5 Flash Lite','Bawaan','Tercepat dan hemat untuk tugas sehari-hari'],['gemini-3.5-flash','Gemini 3.5 Flash','','Seimbang untuk tugas yang lebih kompleks']],groq:[['llama-3.3-70b-versatile','Llama 3.3 70B','Bawaan','Serbaguna dan sangat cepat'],['llama-3.1-8b-instant','Llama 3.1 8B','','Paling ringan untuk jawaban kilat']]};
+const PICK={groq:[['llama-3.3-70b-versatile','Llama 3.3 70B','Bawaan','Serbaguna dan sangat cepat'],['llama-3.1-8b-instant','Llama 3.1 8B','','Paling ringan untuk jawaban kilat']]};
 let sheetMore=false;
 let sheetMode='model';
 const fn=id=>{for(const k in PICK){const x=PICK[k].find(y=>y[0]===id);if(x)return x[1]}return id};
