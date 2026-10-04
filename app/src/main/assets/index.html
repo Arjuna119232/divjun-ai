@@ -271,7 +271,7 @@ const $=s=>document.querySelector(s),A=window.Android;
 const st={get:k=>A?A.get(k):(localStorage.getItem(k)||''),set:(k,v)=>A?A.set(k,v):localStorage.setItem(k,v)};
 const J=(k,d)=>{try{return JSON.parse(st.get(k))||d}catch(e){return d}};
 const PROV={
-groq:{name:'Groq',base:'https://api.groq.com/openai/v1',keyUrl:'https://console.groq.com/keys',docs:'https://console.groq.com/docs',preset:'llama-3.1-8b-instant',ok:i=>!/whisper|guard|tts|playai/.test(i),note:'Gratis dengan batas permintaan, sangat cepat.'}};
+groq:{name:'Groq',base:'https://api.groq.com/openai/v1',keyUrl:'https://console.groq.com/keys',docs:'https://console.groq.com/docs',preset:'openai/gpt-oss-120b',ok:i=>!/whisper|guard|tts|playai/.test(i),note:'Gratis dengan batas permintaan, sangat cepat.'}};
 let LI=[];
 let cfg={key:'',route:'groq',model:'',kk:{},mm:{},cn:2,cs:[],ml:{},onlyFree:true,v:0,system:'',theme:'auto',fs:'1',temp:0.7,fav:[],...J('cfg',{})};
 let chats=J('chats',[]),cur=st.get('cur'),busy=null,seq=0,tab='chat',cat='Semua',modalRes=null;const pend={};
@@ -399,7 +399,7 @@ function closeDrawer(){document.body.classList.remove('dr')}
 function closeAll(){closeDrawer();$('#menu').classList.remove('open')}
 const closeSheet=()=>$('#sheet').classList.remove('open');
 function openSheet(){sheetMode='model';renderSheet();$('#sheet').classList.add('open');if(cfg.key&&!LI.length)loadModels()}
-const PICK={groq:[['llama-3.3-70b-versatile','Llama 3.3 70B','Bawaan','Serbaguna dan sangat cepat'],['llama-3.1-8b-instant','Llama 3.1 8B','','Paling ringan untuk jawaban kilat']]};
+const PICK={groq:[['openai/gpt-oss-120b','GPT OSS 120B','Bawaan','Pintar dan cepat untuk tugas berat'],['openai/gpt-oss-20b','GPT OSS 20B','','Ringan untuk jawaban kilat'],['qwen/qwen3.8-27b','Qwen 3.8 27B','','Seimbang untuk tugas umum'],['allam-2-7b','Allam 2 7B','','Ringan dan cepat']]};
 let sheetMore=false;
 let sheetMode='model';
 const fn=id=>{for(const k in PICK){const x=PICK[k].find(y=>y[0]===id);if(x)return x[1]}return id};
