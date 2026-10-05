@@ -30,8 +30,7 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : Activity() {
     lateinit var web: WebView
-        private set
-    internal var pendingPermId: String = ""
+    var pendingPermId: String = ""
     private val conns = ConcurrentHashMap<String, HttpURLConnection>()
     private val REQ_CAMERA = 101
     private val REQ_GALLERY = 102
