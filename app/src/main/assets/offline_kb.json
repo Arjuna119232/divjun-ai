@@ -1,0 +1,509 @@
+{
+  "version": "1.9.0",
+  "generated": "2026-10-05",
+  "categories": [],
+  "prompt_templates": [
+    {
+      "category": "Menulis",
+      "items": [
+        {
+          "name": "Menulis",
+          "template": "Tulis {tone} tentang {topic} sepanjang {len}"
+        }
+      ]
+    },
+    {
+      "category": "Merangkum",
+      "items": [
+        {
+          "name": "Merangkum",
+          "template": "Rangkum teks berikut jadi {len} poin kunci:\n\n{teks}"
+        }
+      ]
+    },
+    {
+      "category": "Menerjemahkan",
+      "items": [
+        {
+          "name": "Menerjemahkan",
+          "template": "Terjemahkan teks ini ke bahasa {target}:\n\n{teks}"
+        }
+      ]
+    },
+    {
+      "category": "Mengeksplainsi",
+      "items": [
+        {
+          "name": "Mengeksplainsi",
+          "template": "Jelaskan {topic} seperti untuk {level} ({level_detail})"
+        }
+      ]
+    },
+    {
+      "category": "Membuat",
+      "items": [
+        {
+          "name": "Membuat kode",
+          "template": "Buat program {bahasa} yang {tugas}. Sertakan penjelasan singkat."
+        }
+      ]
+    },
+    {
+      "category": "Debugging",
+      "items": [
+        {
+          "name": "Debugging",
+          "template": "Kode ini error: {error}. Tolong perbaiki:\n\n```\n{kode}\n```"
+        }
+      ]
+    },
+    {
+      "category": "Optimasi",
+      "items": [
+        {
+          "name": "Optimasi kode",
+          "template": "Optimalkan kode ini agar lebih cepat dan bersih:\n\n```\n{kode}\n```"
+        }
+      ]
+    },
+    {
+      "category": "Riset",
+      "items": [
+        {
+          "name": "Riset",
+          "template": "Bandingkan {opsi1} dan {opsi2} untuk {kebutuhan}. Buatkan tabel."
+        }
+      ]
+    },
+    {
+      "category": "Brainstorm",
+      "items": [
+        {
+          "name": "Brainstorm",
+          "template": "Beri 10 ide kreatif untuk {topik}. Pilih 3 terbaik dan jelaskan alasannya."
+        }
+      ]
+    },
+    {
+      "category": "Perencanaan",
+      "items": [
+        {
+          "name": "Perencanaan",
+          "template": "Buat rencana {durasi} untuk {target}. Sertakan milestone dan risiko."
+        }
+      ]
+    },
+    {
+      "category": "Interview",
+      "items": [
+        {
+          "name": "Interview",
+          "template": "Buat 10 pertanyaan interview untuk posisi {posisi}."
+        }
+      ]
+    },
+    {
+      "category": "Copywriting",
+      "items": [
+        {
+          "name": "Copywriting",
+          "template": "Tulis 3 variasi headline untuk {produk} yang {tujuan}."
+        }
+      ]
+    },
+    {
+      "category": "SEO",
+      "items": [
+        {
+          "name": "SEO",
+          "template": "Buat 5 keyword untuk {topik} beserta difficulty dan search intent."
+        }
+      ]
+    },
+    {
+      "category": "Email",
+      "items": [
+        {
+          "name": "Email",
+          "template": "Tulis email profesional {nada} tentang {topik} kepada {penerima}."
+        }
+      ]
+    },
+    {
+      "category": "Analisis",
+      "items": [
+        {
+          "name": "Analisis SWOT",
+          "template": "Lakukan analisis SWOT untuk {perusahaan}."
+        }
+      ]
+    },
+    {
+      "category": "Statistik",
+      "items": [
+        {
+          "name": "Statistik",
+          "template": "Buat statistik ringkas tentang {topik} dengan sumber."
+        }
+      ]
+    },
+    {
+      "category": "Diktat",
+      "items": [
+        {
+          "name": "Diktat",
+          "template": "Ubah catatan kasar ini jadi rapi:\n\n{catatan}"
+        }
+      ]
+    },
+    {
+      "category": "Penerjemah",
+      "items": [
+        {
+          "name": "Penerjemah kode",
+          "template": "Jelaskan kode ini line by line:\n\n```\n{kode}\n```"
+        }
+      ]
+    },
+    {
+      "category": "Regex",
+      "items": [
+        {
+          "name": "Regex",
+          "template": "Buat regex untuk {kebutuhan} di {bahasa}."
+        }
+      ]
+    },
+    {
+      "category": "SQL",
+      "items": [
+        {
+          "name": "SQL",
+          "template": "Buat query SQL untuk {tujuan} dari tabel {tabel}."
+        }
+      ]
+    }
+  ],
+  "cheatsheets": [
+    {
+      "id": "git",
+      "title": "Git Cheatsheet",
+      "icon": "code",
+      "sections": [
+        {
+          "t": "Dasar",
+          "c": [
+            "git init",
+            "git clone <url>",
+            "git status",
+            "git add .",
+            "git commit -m \"msg\"",
+            "git push",
+            "git pull"
+          ]
+        },
+        {
+          "t": "Cabang",
+          "c": [
+            "git branch",
+            "git switch -c <nama>",
+            "git switch <nama>",
+            "git merge <nama>",
+            "git branch -d <nama>"
+          ]
+        },
+        {
+          "t": "Undo",
+          "c": [
+            "git restore <file>",
+            "git reset --soft HEAD~1",
+            "git reset --hard HEAD~1",
+            "git revert <commit>",
+            "git reflog"
+          ]
+        },
+        {
+          "t": "Remote",
+          "c": [
+            "git remote -v",
+            "git remote add origin <url>",
+            "git fetch origin",
+            "git push -u origin main",
+            "git push --force"
+          ]
+        },
+        {
+          "t": "Stash",
+          "c": [
+            "git stash",
+            "git stash list",
+            "git stash pop",
+            "git stash drop"
+          ]
+        },
+        {
+          "t": "Tag",
+          "c": [
+            "git tag",
+            "git tag -a v1.0 -m \"msg\"",
+            "git push origin v1.0",
+            "git tag -d v1.0"
+          ]
+        },
+        {
+          "t": "Log",
+          "c": [
+            "git log --oneline -10",
+            "git log --graph --oneline",
+            "git show <commit>",
+            "git diff",
+            "git blame <file>"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "regex",
+      "title": "Regex Cheatsheet",
+      "icon": "code",
+      "sections": [
+        {
+          "t": "Karakter",
+          "c": [
+            "\\d digit",
+            "\\w word char",
+            "\\s whitespace",
+            ". semua char",
+            "^ awal string",
+            "$ akhir string"
+          ]
+        },
+        {
+          "t": "Kelas",
+          "c": [
+            "[abc] salah satu",
+            "[a-z] rentang",
+            "[^abc] bukan",
+            "[0-9]{2,4} jumlah 2-4"
+          ]
+        },
+        {
+          "t": "Quantifier",
+          "c": [
+            "* 0 atau lebih",
+            "+ 1 atau lebih",
+            "? 0 atau 1",
+            "{n} tepat n",
+            "{n,} min n",
+            "{n,m} n sampai m"
+          ]
+        },
+        {
+          "t": "Group",
+          "c": [
+            "(x) tangkap",
+            "(?:x) non-tangkap",
+            "(?<nama>x) named",
+            "x|y alternasi",
+            "(?=x) lookahead",
+            "(?!x) negative"
+          ]
+        },
+        {
+          "t": "Pola umum",
+          "c": [
+            "email: ^[\\w.+-]+@[\\w-]+\\.[\\w.]+$",
+            "URL: https?://\\S+",
+            "tanggal: \\d{4}-\\d{2}-\\d{2}",
+            "IP: \\d{1,3}(\\.\\d{1,3}){3}"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shortcut",
+      "title": "Shortcut Keyboard",
+      "icon": "code",
+      "sections": [
+        {
+          "t": "Umum",
+          "c": [
+            "Ctrl+C salin",
+            "Ctrl+V tempel",
+            "Ctrl+Z undo",
+            "Ctrl+Y redo",
+            "Ctrl+F cari",
+            "Ctrl+S simpan"
+          ]
+        },
+        {
+          "t": "Navigasi",
+          "c": [
+            "Ctrl+A pilih semua",
+            "Ctrl+Home ke atas",
+            "Ctrl+End ke bawah",
+            "Ctrl+Left/Right kata"
+          ]
+        },
+        {
+          "t": "Terminal",
+          "c": [
+            "Ctrl+C batal",
+            "Ctrl+L bersihkan",
+            "Ctrl+A awal baris",
+            "Ctrl+E akhir baris",
+            "Ctrl+R cari riwayat"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prompt",
+      "title": "Menulis Prompt Efektif",
+      "icon": "chat",
+      "sections": [
+        {
+          "t": "Aturan",
+          "c": [
+            "Sebut peran: 'Kamu adalah...' ",
+            "Beri konteks lengkap",
+            "Tentukan format output",
+            "Sebut batasan (panjang, gaya)",
+            "Contohkan bila perlu"
+          ]
+        },
+        {
+          "t": "Struktur",
+          "c": [
+            "Tugas: apa yang diminta",
+            "Konteks: situasi latar",
+            "Format: bentuk output",
+            "Contoh: contoh hasil",
+            "Batasan: pantangan"
+          ]
+        },
+        {
+          "t": "Kesalahan umum",
+          "c": [
+            "Permintaan terlalu vague",
+            "Tanpa format output",
+            "Terlalu banyak instruksi sekaligus",
+            "Tidak menyebut bahasa"
+          ]
+        },
+        {
+          "t": "Iterasi",
+          "c": [
+            "Minta draft pertama",
+            "Kasih feedback spesifik",
+            "Minta revisi bagian tertentu",
+            "Minta versi ringkas"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wifi",
+      "title": "Per troubleshoot WiFi",
+      "icon": "code",
+      "sections": [
+        {
+          "t": "Cek dasar",
+          "c": [
+            "Restart router",
+            "Cek HPzy bisa connect",
+            "Lupa password lalu connect ulang",
+            "Matikan airplane mode sebentar"
+          ]
+        },
+        {
+          "t": "Android",
+          "c": [
+            "Settings > WiFi > forget network",
+            "Pastikan airplane mode OFF",
+            "Restart WiFi adapter",
+            "Reset network settings"
+          ]
+        },
+        {
+          "t": "Perintah",
+          "c": [
+            "ping 8.8.8.8 -t",
+            "ipconfig /flushdns",
+            "netsh wlan show profiles",
+            "ping google.com"
+          ]
+        }
+      ]
+    }
+  ],
+  "models": [
+    {
+      "id": "openai/gpt-oss-120b",
+      "provider": "Groq",
+      "params": "120B",
+      "type": "reasoning",
+      "free": true,
+      "ctx": "128K",
+      "speed": "sedang",
+      "best_for": [
+        "reasoning",
+        "coding",
+        "analysis"
+      ]
+    },
+    {
+      "id": "openai/gpt-oss-20b",
+      "provider": "Groq",
+      "params": "20B",
+      "type": "reasoning",
+      "free": true,
+      "ctx": "128K",
+      "speed": "cepat",
+      "best_for": [
+        "general",
+        "coding",
+        "chat"
+      ]
+    },
+    {
+      "id": "qwen/qwen3-32b",
+      "provider": "Groq",
+      "params": "32B",
+      "type": "general",
+      "free": true,
+      "ctx": "128K",
+      "speed": "cepat",
+      "best_for": [
+        "multilingual",
+        "general"
+      ]
+    },
+    {
+      "id": "llama-3.3-70b-versatile",
+      "provider": "Groq",
+      "params": "70B",
+      "type": "general",
+      "free": true,
+      "ctx": "128K",
+      "speed": "sedang",
+      "best_for": [
+        "general",
+        "coding"
+      ]
+    },
+    {
+      "id": "allam-2-7b",
+      "provider": "Groq",
+      "params": "7B",
+      "type": "general",
+      "free": true,
+      "ctx": "8K",
+      "speed": "sangat cepat",
+      "best_for": [
+        "chat cepat",
+        "bahasa Indonesia"
+      ]
+    }
+  ]
+}
