@@ -240,8 +240,10 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
 /* ===== AUTOPILOT STATUS ===== */
 .mstat{display:inline-flex;align-items:center;gap:8px;background:var(--ub);border-radius:999px;padding:7px 13px;font-size:.83em;color:var(--mu);margin-bottom:9px}
 .mstat .dots i{width:6px;height:6px;margin:0;background:var(--lk)}
-#usedwrap{position:absolute;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0));transform:translateX(-50%);pointer-events:none}
-#usedm{background:var(--ub);border-radius:999px;padding:4px 11px;font-size:.7em;color:var(--mu);white-space:nowrap;max-width:70vw;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
+#usedm{flex:0 1 auto;min-width:0;max-width:38%;display:flex;align-items:center;gap:5px;background:var(--ub);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:.72em;color:var(--mu);white-space:nowrap;overflow:hidden;pointer-events:none}
+#usedm::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ok);flex:none}
+#usedm span{overflow:hidden;text-overflow:ellipsis}
+.crow{gap:6px}
 
 /* ===== ONBOARDING ===== */
 #onb{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;padding:calc(28px + env(safe-area-inset-top,0)) 24px calc(28px + env(safe-area-inset-bottom,0));opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
@@ -317,7 +319,7 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
 <main>
   <section id="chat" class="on">
     <div id="msgs"></div>
-    <div class="cmp"><div id="usedwrap"><span id="usedm" hidden></span></div><div id="atts"></div><textarea id="in" rows="1" placeholder="Mengobrol dengan AI..."></textarea><div class="crow"><button class="ib gr" id="plus" aria-label="Tambah"></button><button id="mchip"></button><span style="flex:1"></span><button class="ib gr" id="mic" aria-label="Suara"></button><button id="send" aria-label="Kirim"></button></div></div>
+    <div class="cmp"><div id="atts"></div><textarea id="in" rows="1" placeholder="Mengobrol dengan AI..."></textarea><div class="crow"><button class="ib gr" id="plus" aria-label="Tambah"></button><span id="usedm" hidden></span><button id="mchip"></button><span style="flex:1"></span><button class="ib gr" id="mic" aria-label="Suara"></button><button id="send" aria-label="Kirim"></button></div></div>
     
   </section>
   <section id="hist"><div class="pad">
@@ -739,7 +741,7 @@ function noteHealth(id,ok){
 }
 function markUsed(id){
   const el=$('#usedm');
-  if(el)el.textContent=id?fn(id):'';
+  if(el)el.innerHTML=id?'<span>'+esc(fn(id))+'</span>':'';
   if(usedM!==id){usedM=id;paintUsed()}
 }
 function paintUsed(){
