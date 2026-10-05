@@ -102,4 +102,12 @@
     "tip_8": "Less late nights, body needs rest.",
     "tip_9": "Calm mind, clearer answers.",
     "tip_10": "Relax today, stay motivated tomorrow."
+
+    <string name="shortcut_voice_chat">Voice Chat</string>
+    <string name="shortcut_voice_chat_long">Start voice conversation</string>
+    <string name="shortcut_voice_chat_disabled">Voice not available</string>
+    <string name="shortcut_camera_scan">Scan Image</string>
+    <string name="shortcut_camera_scan_long">Analyze image with AI</string>
+    <string name="shortcut_camera_scan_disabled">Camera not available</string>
+
 </resources>

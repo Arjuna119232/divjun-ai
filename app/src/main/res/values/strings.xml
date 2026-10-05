@@ -102,4 +102,12 @@
     <string name="tip_8">Kurangi begadang, tubuh butuh istirahat.</string>
     <string name="tip_9">Pikiran tenang, jawaban lebih jernih.</string>
     <string name="tip_10">Hari ini boleh santai, besok tetap semangat.</string>
+
+    <string name="shortcut_voice_chat">Voice Chat</string>
+    <string name="shortcut_voice_chat_long">Start voice conversation</string>
+    <string name="shortcut_voice_chat_disabled">Voice not available</string>
+    <string name="shortcut_camera_scan">Scan Image</string>
+    <string name="shortcut_camera_scan_long">Analyze image with AI</string>
+    <string name="shortcut_camera_scan_disabled">Camera not available</string>
+
 </resources>

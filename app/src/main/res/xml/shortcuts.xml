@@ -17,9 +17,9 @@
         android:shortcutId="voice_chat"
         android:enabled="true"
         android:icon="@drawable/ic_launcher"
-        android:shortcutShortLabel="Voice Chat"
-        android:shortcutLongLabel="Start voice conversation"
-        android:shortcutDisabledMessage="Voice not available">
+        android:shortcutShortLabel="@string/shortcut_voice_chat"
+        android:shortcutLongLabel="@string/shortcut_voice_chat_long"
+        android:shortcutDisabledMessage="@string/shortcut_voice_chat_disabled">
         <intent
             android:action="com.divjun.ai.VOICE_CHAT"
             android:targetClass="com.divjun.ai.MainActivity"
@@ -30,9 +30,9 @@
         android:shortcutId="camera_scan"
         android:enabled="true"
         android:icon="@drawable/ic_launcher"
-        android:shortcutShortLabel="Scan Image"
-        android:shortcutLongLabel="Analyze image with AI"
-        android:shortcutDisabledMessage="Camera not available">
+        android:shortcutShortLabel="@string/shortcut_camera_scan"
+        android:shortcutLongLabel="@string/shortcut_camera_scan_long"
+        android:shortcutDisabledMessage="@string/shortcut_camera_scan_disabled">
         <intent
             android:action="com.divjun.ai.CAMERA_SCAN"
             android:targetClass="com.divjun.ai.MainActivity"
