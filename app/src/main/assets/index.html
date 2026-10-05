@@ -332,6 +332,7 @@ pre.mp-pre .n{color:#0550AE}
 .mstat{display:inline-flex;align-items:center;gap:8px;background:var(--ub);border-radius:999px;padding:7px 13px;font-size:.83em;color:var(--mu);margin-bottom:9px}
 .mstat .dots i{width:6px;height:6px;margin:0;background:var(--lk)}
 .mstat.warn{color:var(--er)}
+#usedt{background:var(--lk);color:#fff;border-radius:999px;padding:5px 9px;font-size:.72em;font-weight:650;white-space:nowrap}
 #usedm{flex:0 1 auto;min-width:0;max-width:38%;display:flex;align-items:center;gap:5px;background:var(--ub);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:.72em;color:var(--mu);white-space:nowrap;overflow:hidden;pointer-events:none}
 #usedm::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ok);flex:none}
 #usedm span{overflow:hidden;text-overflow:ellipsis}
@@ -355,6 +356,7 @@ pre.mp-pre .n{color:#0550AE}
 #onb .pr2{background:var(--ac);border-color:var(--ac);color:var(--acx)}
 /* ===== HELP ===== */
 #help .hcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:10px}
+.hart{width:100%;border-radius:14px;margin-bottom:12px;display:block;border:1px solid var(--line)}
 #help .hcard h3{font-size:1.02em;margin:0 0 10px;color:var(--tx);display:flex;align-items:center;gap:9px}
 #help .hcard h3 svg{width:19px;height:19px;color:var(--lk)}
 #help .hcard p{color:var(--tx);font-size:.94em;line-height:1.65;margin-bottom:9px}
@@ -411,7 +413,7 @@ pre.mp-pre .n{color:#0550AE}
 <main>
   <section id="chat" class="on">
     <div id="msgs"></div>
-    <div class="cmp"><div id="editbar" hidden><span id="editq"></span><button id="editx" aria-label="Batal edit"></button><button id="edity" class="pri">Kirim ulang</button></div><div id="atts"></div><textarea id="in" rows="1" placeholder="Mengobrol dengan AI..."></textarea><div class="crow"><button class="ib gr" id="plus" aria-label="Tambah"></button><span id="usedm" hidden></span><button id="mchip"></button><span style="flex:1"></span><button class="ib gr" id="mic" aria-label="Suara"></button><button id="send" aria-label="Kirim"></button></div></div>
+    <div class="cmp"><div id="editbar" hidden><span id="editq"></span><button id="editx" aria-label="Batal edit"></button><button id="edity" class="pri">Kirim ulang</button></div><div id="atts"></div><textarea id="in" rows="1" placeholder="Mengobrol dengan AI..."></textarea><div class="crow"><button class="ib gr" id="plus" aria-label="Tambah"></button><span id="usedm" hidden></span><span id="usedt" hidden></span><button id="mchip"></button><span style="flex:1"></span><button class="ib gr" id="mic" aria-label="Suara"></button><button id="send" aria-label="Kirim"></button></div></div>
     
   </section>
   <section id="hist"><div class="pad">
@@ -852,9 +854,10 @@ function send(text){
   setBtn();
   // PRE-FETCH: ambil data web dulu (kalau perlu) lalu ONE-shot ke model.
   // Ini menghapus 2-3 round trip tool-calling -> jauh lebih cepat.
+  const task=taskOf(text);
   gatherContext(text).then(ctx=>{
     if(ctx)injectCtx(messages,ctx,a);
-    runPlan(messages,a,hadImg);
+    runPlan(messages,a,hadImg,false,task);
   });
 }
 
@@ -863,9 +866,40 @@ const VISION=/gemma-?3|vision|llava|compound-beta|pixtral|llama-4|qwen.*vl|kimi.
 const FAST=/(^|[^0-9])(7b|8b|9b)([^0-9]|$)|small|tiny|mini|allam|gemma2-9b/i;
 const BIG=/(^|[^0-9])(120b|236b|405b|671b|70b)|deepseek-r1/i;
 const BALANCED=/(^|[^0-9])(20b|27b|32b|14b)|gemma-3|qwen3/i;
+// Klasifikasi perintah: supaya model yang dipilih benar-benar cocok dengan
+// apa yang user minta, bukan cuma urutan statis.
+// CATATAN: pola TIDAK memakai \b di akhir karena bahasa Indonesia memakai
+// awalan/akhiran (terjemah|kan, tulis|tulah, hitung|in). Dengan \b kata
+// seperti "Terjemahkan" TIDAK akan dikenali.
+const TASK={
+  code:/```|\b(kode|coding|program|fungsi|function|method|class|debug|traceback|script|sql|query|regex|endpoint|html|css|javascript|typescript|python|java|kotlin|react|flutter|django|git|compile|kompilasi|program)\b|buatkan (kode|program|fungsi)|tulis (kode|program|fungsi)/i,
+  math:/\b(hitung|berapa|jumlah|total|statistik|rasio|persentase|persen|derivat|integral|fisika|matematika|persamaan|aljabar|kalkulasi|calculate|how many|how much)\b|\d+\s*[%x×+\-\/]\s*\d+/i,
+  write:/\b(tulis|bikin|buat|draft|surat|artikel|essay|cerita|puisi|story|caption|deskripsi|ringkas|rangkum|summary|parafrase|email|naskah|resensi)\b/i,
+  translate:/terjemah|translate|translation|ke bahasa|dari bahasa|artinya/i
+};
+function taskOf(t){
+  t=String(t||'');
+  if(t.length>700)return 'long';
+  if(/```/.test(t))return 'code';
+  // kode dicek sebelum matematika: "tulis kode untuk menghitung luas" = kode
+  if(TASK.code.test(t))return 'code';
+  if(TASK.math.test(t))return 'math';
+  if(TASK.translate.test(t))return 'translate';
+  if(TASK.write.test(t))return 'write';
+  return 'chat';
+}
+// model yang cocok per jenis tugas
+const TASKFIT={
+  code:{reasoning:26,umum:16,cepat:2,vision:0},
+  math:{reasoning:28,umum:12,cepat:0},
+  write:{umum:22,cepat:16,reasoning:6},
+  translate:{cepat:22,umum:14,reasoning:2},
+  chat:{cepat:14,umum:14,reasoning:8},
+  long:{umum:24,reasoning:18,cepat:0}
+};
 const SKIP=/whisper|guard|tts|playai|embedding|moderation|safety/i;
 // skor model: makin tinggi makin dipilih duluan (cepat + pintar = tinggi)
-function mScore(id,withImg){
+function mScore(id,withImg,task){
   if(SKIP.test(id))return -1;                          // bukan model chat
   if(withImg&&!VISION.test(id))return -1;             // butuh gambar -> harus vision
   let s=50;
@@ -874,11 +908,19 @@ function mScore(id,withImg){
   else if(FAST.test(id))s+=2;                          // paling cepat, kualitas secukupnya
   else s-=6;
   if(withImg&&VISION.test(id))s+=30;                  // satu-satunya yg bisa -> prioritas
+  // cocok dengan jenis perintah
+  const f=TASKFIT[task||'chat'];
+  if(f){
+    if(BIG.test(id))s+=f.reasoning;
+    else if(BALANCED.test(id))s+=f.umum;
+    else if(FAST.test(id))s+=f.cepat;
+    if(VISION.test(id))s+=f.vision;
+  }
   const h=cfg.mh&&cfg.mh[id];
   if(typeof h==='number')s+=h;                         // hasil belajar dari pemakaian nyata
   return s;
 }
-function buildPlan(withImg){
+function buildPlan(withImg,task){
   const src=(LI&&LI.length)?LI:(cfg.model?[cfg.model]:[]);
   const seen={},ids=[];
   for(const id of src){
@@ -886,8 +928,9 @@ function buildPlan(withImg){
     seen[id]=1;ids.push(id);
   }
   if(!ids.length&&cfg.model)ids.push(cfg.model);
-  return ids.filter(i=>mScore(i,withImg)>-1)
-            .sort((a,b)=>mScore(b,withImg)-mScore(a,withImg))
+  const tk=task||'chat';
+  return ids.filter(i=>mScore(i,withImg,tk)>-1)
+            .sort((a,b)=>mScore(b,withImg,tk)-mScore(a,withImg,tk))
             .slice(0,6);
 }
 function noteHealth(id,ok){
@@ -906,14 +949,17 @@ function paintUsed(){
   const el=$('#usedm');
   if(el&&cfg.autopilot!==false)el.hidden=!usedM;
 }
-let usedM='';
+let usedM='',usedT='';
+const TASKN={code:'Kode',math:'Hitung',write:'Menulis',translate:'Terjemah',chat:'Obrolan',long:'Teks panjang'};
+function paintTask(){const e=$('#usedt');if(e){e.textContent=TASKN[usedT]||'';e.hidden=!usedT}}
 
-function runPlan(messages,a,hadImg,noImgRetry){
-  let plan=buildPlan(!!hadImg);
+function runPlan(messages,a,hadImg,noImgRetry,task){
+  let plan=buildPlan(!!hadImg,task);
+  if(usedT!==task){usedT=task;paintTask()}
   // Tidak ada model yang bisa baca gambar -> kirim ulang TANPA gambar,
   // dengan catatan ke model supaya dia minta user mendeskripsikan.
   if(!plan.length&&hadImg&&!noImgRetry){
-    const fallback=buildPlan(false);
+    const fallback=buildPlan(false,'chat');
     if(fallback.length){
       stripImages(messages);
       a.imgNote=true;
@@ -927,7 +973,7 @@ function runPlan(messages,a,hadImg,noImgRetry){
     loadModels(ok=>{if(ok){a.status='';runPlan(messages,a,false,true)}else{planFallback(messages,a)}});
     return;
   }
-  let idx=0,retried=0;
+  let idx=0,retried=0;   // plan sudah diurutkan sesuai jenis tugas
   const MAXSW=2;
   function attempt(noTools){
     return new Promise(res=>{
@@ -1407,22 +1453,6 @@ function voiceStart(){
   voiceOpen();
   try{A.voice()}catch(e){voiceClose();toast('Suara tidak bisa dipakai')}
 }
-// hasil native (tanpa popup Google)
-window.__voiceText=(txt,final)=>{
-  if(txt)$('#vtext').textContent=txt;
-  $('#in').value=txt;
-  $('#in').dispatchEvent(new Event('input'));
-  if(final){voiceClose();$('#in').focus()}
-};
-window.__voiceRms=v=>{vRms=v};
-window.__voiceEv=ev=>{
-  if(ev==='ready'){$('#vtext').textContent='Mendengarkan\u2026 Silakan bicara'}
-  else if(ev==='quiet'){$('#vtext').textContent='Tidak ada suara terdengar';setTimeout(voiceClose,900)}
-  else if(ev==='denied'){voiceClose();openPerm()}
-  else if(ev==='nostop'){voiceClose();toast('Fitur suara tidak tersedia di HP ini')}
-  else if(ev==='neterror'){voiceClose();toast('Suara butuh koneksi internet')}
-  else if(ev==='end'){voiceClose()}
-};
 function voiceSend(){
   const t=$('#vtext').textContent;
   voiceClose();
@@ -1445,7 +1475,6 @@ function voiceTap(){
   $('#vsend').textContent='Batal';
   voiceStart();
 }
-function voiceSend(){const t=$('#vtext').textContent;voiceClose();if(t&&t!=='Silakan bicara...'&&t!=='Suara tidak bisa dipakai'){$('#in').value=t;$('#in').focus()}}
 function voice(){voiceStart()}
 // Tombol telepon: dengar satu giliran lalu LANGSUNG kirim (tanpa tekan kirim lagi)
 
@@ -1462,7 +1491,6 @@ function voiceTap(){
   $('#vsend').textContent='Batal';
   voiceStart();
 }
-window.__voice=t=>{const i=$('#in');i.value=(i.value?i.value+' ':'')+t;i.dispatchEvent(new Event('input'));i.focus()}
 function doPick(kind){
   window.__pendingPick=kind;
   closeSheet();
@@ -1564,6 +1592,7 @@ $('#tkx').onclick=thinkClose;
 $('#think').onclick=e=>{if(e.target.id==='think')thinkClose()};
 $('#vcancel').onclick=()=>{vAuto=false;$('#vsend').textContent='Kirim';voiceClose()};
 $('#vstop').onclick=()=>{vAuto=false;$('#vsend').textContent='Kirim';voiceClose()};$('#vsend').onclick=voiceSend;$('#info').innerHTML=SI.info;$('#info').onclick=()=>seAct('about');$('#fab').onclick=newChat;
+$('#callb').innerHTML=IC.phone;
 $('#burger').onclick=openDrawer;$('#mchip').onclick=()=>toast('Model dipilih otomatis. App pindah ke model lain bila perlu.');$('#dav').onclick=()=>go('set');$('#dperm').onclick=()=>{closeDrawer();openPerm()};$('#dnew').onclick=()=>{closeDrawer();newChat()};
 $('#more').onclick=()=>$('#menu').classList.toggle('open');$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet()};
 (function(){
@@ -1627,7 +1656,11 @@ async function renderHelp(q){
   const term=(q||'').toLowerCase();
   const secs=d.sections.filter(s=>!term||(s.title+' '+JSON.stringify(s.blocks)).toLowerCase().includes(term));
   box.innerHTML=secs.length?secs.map(sec=>{
-    const body=sec.blocks.map(b=>{
+    const art={mulai:'help_chat',model:'help_model',gambar:'help_image',suara:'help_voice',
+             web:'help_web',cuaca:'help_call',riwayat:'help_project','api-key':'help_permission',
+             edit:'help_chat',tampilan:'help_model',privacy:'help_permission',tips:'help_chat',trouble:'help_permission'};
+  const pic=art[sec.id]?'<img class="hart" src="'+art[sec.id]+'.png" alt="" loading="lazy">':'';
+  const body=sec.blocks.map(b=>{
       if(b.type==='h')return '<div class="hh">'+esc(b.t)+'</div>';
       if(b.type==='p')return '<p>'+esc(b.t)+'</p>';
       if(b.type==='note')return '<div class="hnote">'+esc(b.t)+'</div>';
@@ -1635,7 +1668,7 @@ async function renderHelp(q){
       if(b.type==='list')return '<ul class="hlist">'+b.items.map(i=>'<li>'+esc(i)+'</li>').join('')+'</ul>';
       return '';
     }).join('');
-    return '<div class="hcard"><h3>'+helpIcon(sec.icon)+esc(sec.title)+'</h3>'+body+'</div>';
+    return '<div class="hcard">'+pic+'<h3>'+helpIcon(sec.icon)+esc(sec.title)+'</h3>'+body+'</div>';
   }).join(''):'<p class="empty">Tidak ada panduan yang cocok.</p>';
 }
 
@@ -1787,7 +1820,7 @@ function callStart(){
   setTimeout(()=>cListen(),420);
 }
 function callEnd(){
-  CAL.on=false;CAL.phase='idle';
+  CAL.on=false;CAL.phase='idle';cLastStart=0;
   clearInterval(CAL.timer);CAL.timer=null;
   if(cRAF){cancelAnimationFrame(cRAF);cRAF=null}
   if(A){try{A.voiceStop()}catch(e){}try{A.ttsStop()}catch(e){}}
@@ -1799,7 +1832,7 @@ function cListen(){
   if(!CAL.on||CAL.muted||busy)return;
   const now=Date.now();
   // cegah restart bertubi-tubi (ERROR_RECOGNIZER_BUSY)
-  if(now-cLastStart<700)return;
+  if(now-cLastStart<220)return;   // jeda min. anti restart bertubi-tubi
   if(CAL.fails>=4){
     cPhase('idle','Mikrofon bermasalah');
     cSay('Ketuk mikrofon lagi untuk mencoba ulang.');
@@ -1852,12 +1885,13 @@ function callSend(text){
   if(!c){newChat()}
   const t=setTimeout(()=>send(text),60);
 }
+window.__voiceRms=v=>{CAL.rms=CAL.phase==='speak'?.30:v;if(!CAL.on)vRms=v};
 window.__ttsReady=ok=>{CAL.ttsOk=!!ok};
 window.__ttsStart=()=>{if(CAL.on){cPhase('speak','DIVJUN AI bicara\u2026')}};
 window.__ttsDone=()=>{
   if(!CAL.on)return;
   callSetIdle();
-  setTimeout(()=>{if(CAL.on&&!busy){cPhase('listen','Siap listening\u2026');cListen()}},260);
+  setTimeout(()=>{if(CAL.on&&!busy){cPhase('listen','Siap listening\u2026');cListen()}},380);
 };
 window.__callRms=v=>{CAL.rms=CAL.phase==='speak'?.30:v};
 // voice callbacks diarahkan ke mode panggilan
@@ -1889,7 +1923,7 @@ window.__voiceEv=ev=>{
       // diam sebentar = giliran AI; jangan langsung restart kalau AI masih jalan
       if(!busy&&!CAL.said)setTimeout(()=>{if(CAL.on&&CAL.phase!=='speak')cListen()},420);
     }
-    else if(ev==='end'){ if(!busy&&!CAL.said)setTimeout(()=>{if(CAL.on)cListen()},320) }
+    else if(ev==='end'){ if(!busy&&!CAL.said)setTimeout(()=>{if(CAL.on)cListen()},420) }
     else if(ev==='neterror'){cPhase('listen','Suara butuh internet\u2026')}
     return;
   }
