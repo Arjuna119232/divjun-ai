@@ -1,7 +1,6 @@
 package com.divjun.ai
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -88,7 +87,7 @@ object Perms {
     }
 
     /** Minta izin. Kirim status akhir balik ke WebView sebagai __onPerm(type, ok). */
-    fun request(activity: Activity, id: String) {
+    fun request(activity: MainActivity, id: String) {
         val info = list(id) ?: return
         if (info.perms.isEmpty() || granted(activity, info.perms)) {
             activity.web.evaluateJavascript(
@@ -112,7 +111,7 @@ object Perms {
     }
 
     /**true kalau izin sudahGranted dan tidak perlu dialog lagi (pernah ditolak permanen). */
-    fun shouldExplain(activity: Activity, id: String): Boolean {
+    fun shouldExplain(activity: MainActivity, id: String): Boolean {
         val info = list(id) ?: return false
         if (info.perms.isEmpty()) return false
         return info.perms.any {
@@ -120,7 +119,7 @@ object Perms {
         }
     }
 
-    fun isBlocked(activity: Activity, id: String): Boolean {
+    fun isBlocked(activity: MainActivity, id: String): Boolean {
         val info = list(id) ?: return false
         if (info.perms.isEmpty()) return false
         return info.perms.any {

@@ -292,7 +292,7 @@ class MainActivity : Activity() {
 
         /** Voice native on-device: tanpa dialog Google. */
         @JavascriptInterface fun voice() {
-            if (!voice.isAvailable) {
+            if (!voice.isAvailable()) {
                 runOnUiThread {
                     web.evaluateJavascript("window.__voiceEv&&window.__voiceEv('nostop')", null)
                 }
@@ -305,7 +305,7 @@ class MainActivity : Activity() {
             runOnUiThread { voice.stop() }
         }
 
-        @JavascriptInterface fun voiceAvailable(): Boolean = voice.isAvailable
+        @JavascriptInterface fun voiceAvailable(): Boolean = voice.isAvailable()
 
         @JavascriptInterface fun cancel(id: String) { conns.remove(id)?.disconnect() }
 
