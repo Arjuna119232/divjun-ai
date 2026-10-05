@@ -18,6 +18,9 @@ import androidx.core.content.FileProvider
 import java.io.ByteArrayOutputStream
 import java.io.File
 import android.webkit.JavascriptInterface
+import android.webkit.WebViewClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceError
 import android.webkit.WebView
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -90,6 +93,105 @@ class MainActivity : Activity() {
         }
     }
 
+    private var pendingShare: Intent? = null
+    private var pageReady = false
+
+    /**
+     * Terima kiriman dari app lain (WhatsApp, Chrome, Gallery, dll) dan shortcut.
+     *
+     * Kalau halaman belum siap, intent ditunda dulu lalu dikirim setelah
+     * onPageFinished - kalau tidak, funsi JS-nya belum ada dan share jadi diam saja.
+     */
+    private fun handleIncoming(i: Intent?) {
+        if (i == null || i.action == null) return
+        when (i.action) {
+            Intent.ACTION_SEND -> {
+                val type = i.type ?: return
+                if (type.startsWith("image/")) {
+                    val uri = i.getParcelableExtra<android.net.Uri>(Intent.EXTRA_STREAM)
+                    if (uri != null) shareUri(uri)
+                } else {
+                    val txt = i.getStringExtra(Intent.EXTRA_TEXT) ?: return
+                    deliver("window.__sharedText&&window.__sharedText(" + JSONObject.quote(txt) + ")")
+                }
+            }
+            Intent.ACTION_PROCESS_TEXT -> {
+                val txt = i.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString() ?: return
+                deliver("window.__sharedText&&window.__sharedText(" + JSONObject.quote(txt) + ")")
+            }
+            "com.divjun.ai.VOICE_CHAT" -> deliver("window.__shortcut&&window.__shortcut('voice')")
+            "com.divjun.ai.CAMERA_SCAN" -> deliver("window.__shortcut&&window.__shortcut('camera')")
+            Intent.ACTION_VIEW -> {
+                val uri = i.data ?: return
+                if (i.type?.startsWith("image/") == true) shareUri(uri) else {
+                    deliver("window.__sharedText&&window.__sharedText(" + JSONObject.quote(uri.toString()) + ")")
+                }
+            }
+        }
+    }
+
+    private fun shareUri(uri: android.net.Uri) {
+        Thread {
+            try {
+                val mime = contentResolver.getType(uri) ?: "image/jpeg"
+                val name = (uri.lastPathSegment ?: "gambar").substringAfterLast('/')
+                val b = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                contentResolver.openInputStream(uri)?.use {
+                    android.graphics.BitmapFactory.decodeStream(it, null, b)
+                }
+                var s = 1
+                while (maxOf(b.outWidth, b.outHeight) / s > 3200) s *= 2
+                val o = android.graphics.BitmapFactory.Options().apply { inSampleSize = s }
+                val src = contentResolver.openInputStream(uri)?.use {
+                    android.graphics.BitmapFactory.decodeStream(it, null, o)
+                } ?: throw Exception("Gambar tidak bisa dibaca")
+                val m = android.graphics.Matrix()
+                val deg = contentResolver.openInputStream(uri)?.use {
+                    when (android.media.ExifInterface(it).getAttributeInt(
+                        android.media.ExifInterface.TAG_ORIENTATION, 1
+                    )) {
+                        6 -> 90f; 3 -> 180f; 8 -> 270f; else -> 0f
+                    }
+                } ?: 0f
+                if (deg != 0f) m.postRotate(deg)
+                val sc = 1600f / maxOf(src.width, src.height)
+                if (sc < 1f) m.postScale(sc, sc)
+                val bmp = android.graphics.Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
+                val out = java.io.ByteArrayOutputStream()
+                bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, out)
+                val b64 = android.util.Base64.encodeToString(out.toByteArray(), android.util.Base64.NO_WRAP)
+                deliver("window.__sharedImage&&window.__sharedImage(" +
+                    JSONObject.quote(name) + "," + JSONObject.quote("image/jpeg") + ",\"" + b64 + "\")")
+            } catch (e: Exception) {
+                deliver("window.__pickErr&&window.__pickErr(" +
+                    JSONObject.quote(e.message ?: "Gagal membaca gambar") + ")")
+            }
+        }.start()
+    }
+
+    private fun deliver(js: String) {
+        runOnUiThread {
+            if (pageReady && ::web.isInitialized) {
+                web.postDelayed({ web.evaluateJavascript(js, null) }, 60)
+            } else {
+                pendingShare = Intent().apply { putExtra("js", js) }
+            }
+        }
+    }
+
+    private fun flushPendingIntent() {
+        val p = pendingShare ?: return
+        val js = p.getStringExtra("js") ?: return
+        pendingShare = null
+        web.postDelayed({ web.evaluateJavascript(js, null) }, 260)
+    }
+
+    override fun onNewIntent(i: Intent) {
+        super.onNewIntent(i)
+        setIntent(i)
+        handleIncoming(i)
+    }
+
     override fun onDestroy() {
         if (::voice.isInitialized) voice.stop()
         if (::speaker.isInitialized) speaker.release()
@@ -107,12 +209,35 @@ class MainActivity : Activity() {
         )
         web = WebView(this)
         web.setBackgroundColor(resources.getColor(R.color.bg, theme))
+        // WebViewClient dipakai untuk: (a) mengirim intent share setelah halaman
+        // benar-benar siap, (b) melacak error jaringan untuk pesan yang jelas.
+        web.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String) {
+                pageReady = true
+                flushPendingIntent()
+            }
+
+            override fun onReceivedError(
+                view: WebView,
+                req: WebResourceRequest,
+                err: WebResourceError
+            ) {
+                if (req.isForMainFrame) {
+                    view.evaluateJavascript(
+                        "window.__netErr&&window.__netErr(" +
+                            org.json.JSONObject.quote(err.description?.toString() ?: "error") + ")",
+                        null
+                    )
+                }
+            }
+        }
         web.settings.javaScriptEnabled = true
         web.settings.domStorageEnabled = true
         web.addJavascriptInterface(Bridge(), "Android")
         setContentView(web)
         initVoice()
         initSpeaker()
+        handleIncoming(intent)
         web.loadUrl("file:///android_asset/index.html")
     }
 

@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#FAF9F7">
 <script>(function(){try{var d=window.matchMedia('(prefers-color-scheme: dark)').matches;var c=localStorage.getItem('cfg');var t=c?((JSON.parse(c).theme)||'auto'):'auto';document.documentElement.dataset.th=(t==='dark'||(t==='auto'&&d))?'dark':'light'}catch(e){}})();</script>
 <script src="keys.js"></script>
+<script src="md.js"></script>
 <style>
 @font-face{font-family:'InterVar';src:url('fonts/InterVariable.ttf') format('truetype-variations');font-weight:100 900;font-style:normal;font-display:swap}
 @font-face{font-family:'InterVar';src:url('fonts/InterVariable-Italic.ttf') format('truetype-variations');font-weight:100 900;font-style:italic;font-display:swap}
@@ -42,12 +43,18 @@ section.on{opacity:1;visibility:visible;transform:none}
 .u{align-self:flex-end;max-width:88%;background:var(--ub);padding:10px 16px;border-radius:20px;white-space:pre-wrap;word-break:break-word}
 .a{font-family:var(--sf);font-size:1.06em;line-height:1.65;white-space:pre-wrap;word-break:break-word}.a.err{color:var(--er)}
 .a code{background:var(--ub);padding:1px 6px;border-radius:6px;font:.84em "JBMono",ui-monospace,Menlo,monospace}
-.a pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;overflow-x:auto;white-space:pre}.a pre code{background:none;padding:0}
+.a pre{margin:0}
 .pre-wrap{position:relative;margin:8px 0}
 .pre-wrap pre{margin:0}
 .pre-btn{position:absolute;top:8px;right:8px;background:var(--ub);border:0;border-radius:8px;padding:5px 10px;font-size:.78em;color:var(--mu);cursor:pointer;font-weight:600;z-index:2}
 .pre-btn:active{opacity:.6}
-.acts{display:flex;gap:14px;margin-top:-8px}.cp{background:none;border:0;color:var(--mu);font-size:.85em;min-height:36px;padding:0}
+#editbar{display:flex;align-items:center;gap:8px;background:var(--ub);border:1px solid var(--lk);border-radius:12px;padding:6px 8px 6px 11px;margin-bottom:8px}
+#editbar span{flex:1;min-width:0;font-size:.8em;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#editbar button{border:0;background:none;color:var(--mu);font-size:.82em;font-weight:600;padding:7px 10px;min-height:36px;border-radius:9px}
+#editbar button.pri{background:var(--ac);color:var(--acx)}
+#editbar svg{width:16px;height:16px}
+.acts{display:flex;gap:14px;margin-top:-8px}
+.acts.left{justify-content:flex-end;margin-top:2px;margin-bottom:2px}.cp{background:none;border:0;color:var(--mu);font-size:.85em;min-height:36px;padding:0}
 .tkb{background:none;border:0;color:var(--mu);font:inherit;font-size:1em;cursor:pointer;padding:0;display:flex;align-items:center;gap:6px}.tkb:active{opacity:.6}
 .think-wrap{display:inline-flex;flex-direction:column;gap:6px;margin-top:8px}
 .think-btn{display:flex;align-items:center;gap:6px;background:var(--ub);border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--mu);font-size:.85em;cursor:pointer;transition:background .2s,border-color .2s}.think-btn:hover{background:var(--line)}.think-btn svg{flex:none;transition:transform .2s}.think-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
@@ -267,6 +274,38 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
 .cend{width:72px;height:72px;border-radius:50%;background:#D9342B;border:0;display:grid;place-items:center;box-shadow:0 8px 26px rgba(217,52,43,.32)}
 .cend svg{width:28px;height:28px;fill:#fff;stroke:#fff}
 
+
+/* ===== MARKDOWN JAWABAN AI ===== */
+.a p.mp{margin:0 0 10px}.a p.mp:last-child{margin-bottom:0}
+.a h3.mh,.a h4.mh,.a h5.mh,.a h6.mh{font-family:var(--sf);font-weight:650;line-height:1.3;margin:16px 0 8px;font-size:1em;color:var(--tx);display:block}
+.a h3.mh{font-size:1.14em}.a h4.mh{font-size:1.06em}
+.a h3.mh:first-child,.a h4.mh:first-child{margin-top:0}
+.a ul.ml,.a ol.ml{margin:6px 0 10px;padding-left:22px}
+.a ul.ml{list-style:disc}.a ol.ml{list-style:decimal}
+.a ul.ml li,.a ol.ml li{margin:3px 0;line-height:1.6}
+.a ul.ml li::marker{color:var(--lk)}
+.blockquote.mq{border-left:3px solid var(--lk);background:var(--ub);border-radius:0 12px 12px 0;padding:9px 13px;margin:8px 0;color:var(--mu)}
+.blockquote.mq p.mp:last-child{margin-bottom:0}
+.mtw{overflow-x:auto;margin:10px 0;-webkit-overflow-scrolling:touch}
+table.mt{border-collapse:collapse;width:100%;font-size:.92em;min-width:min(100%,320px)}
+table.mt th,table.mt td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+table.mt th{background:var(--ub);font-weight:650;white-space:nowrap}
+table.mt tr:nth-child(even) td{background:color-mix(in srgb,var(--ub) 45%,transparent)}
+hr.mhr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.a a[data-ext]{color:var(--lk);text-decoration:underline;text-underline-offset:2px}
+.a s{opacity:.7}
+.pre-head{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--ub);border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;padding:5px 8px 5px 11px}
+.pre-lang{font-size:.7em;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);font-weight:650}
+pre.mp-pre{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:0 0 12px 12px;padding:12px;overflow-x:auto;white-space:pre;-webkit-overflow-scrolling:touch}
+pre.mp-pre code{background:none;padding:0;font-size:.86em;line-height:1.6;font-family:"JBMono",ui-monospace,Menlo,monospace}
+pre.mp-pre .k{color:#8250DF;font-weight:600}
+pre.mp-pre .s{color:#0A7D33}
+pre.mp-pre .c{color:var(--mu);font-style:italic}
+pre.mp-pre .n{color:#0550AE}
+[data-th=dark] pre.mp-pre .k{color:#D2A8FF}
+[data-th=dark] pre.mp-pre .s{color:#7EE787}
+[data-th=dark] pre.mp-pre .n{color:#79C0FF}
+
 /* ===== AUTOPILOT STATUS ===== */
 .mstat{display:inline-flex;align-items:center;gap:8px;background:var(--ub);border-radius:999px;padding:7px 13px;font-size:.83em;color:var(--mu);margin-bottom:9px}
 .mstat .dots i{width:6px;height:6px;margin:0;background:var(--lk)}
@@ -350,7 +389,7 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
 <main>
   <section id="chat" class="on">
     <div id="msgs"></div>
-    <div class="cmp"><div id="atts"></div><textarea id="in" rows="1" placeholder="Mengobrol dengan AI..."></textarea><div class="crow"><button class="ib gr" id="plus" aria-label="Tambah"></button><span id="usedm" hidden></span><button id="mchip"></button><span style="flex:1"></span><button class="ib gr" id="mic" aria-label="Suara"></button><button id="send" aria-label="Kirim"></button></div></div>
+    <div class="cmp"><div id="editbar" hidden><span id="editq"></span><button id="editx" aria-label="Batal edit"></button><button id="edity" class="pri">Kirim ulang</button></div><div id="atts"></div><textarea id="in" rows="1" placeholder="Mengobrol dengan AI..."></textarea><div class="crow"><button class="ib gr" id="plus" aria-label="Tambah"></button><span id="usedm" hidden></span><button id="mchip"></button><span style="flex:1"></span><button class="ib gr" id="mic" aria-label="Suara"></button><button id="send" aria-label="Kirim"></button></div></div>
     
   </section>
   <section id="hist"><div class="pad">
@@ -496,7 +535,7 @@ const sv=p=>'<svg viewBox="0 0 24 24">'+p+'</svg>';
 const IC={edit:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),trash:sv('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),star:sv('<path d="M12 4l2.4 5 5.6.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.8z"/>'),share:sv('<path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/>'),more:sv('<circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/>'),menu:sv('<path d="M4 8h16M4 16h10"/>'),chev:sv('<path d="M9 6l6 6-6 6"/>'),check:sv('<path d="M5 12l5 5 9-10"/>'),chat:sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>'),plus:sv('<path d="M12 5v14M5 12h14"/>'),eye:sv('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),send:sv('<path d="M12 19V5M5 12l7-7 7 7"/>'),stop:'<svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>',phone:sv('<path d="M6.6 10.8a1.4 1.4 0 0 0-1.4 1.4v3.6a1.4 1.4 0 0 0 1.4 1.4l1.8-.4 5.6 3 1.4-.6V6.2l-1.4-.6-5.6 3-1.8-.4z"/><path d="M21 16.4v3.1a1.5 1.5 0 0 1-1.6 1.5A16.6 16.6 0 0 1 4 5.5 1.5 1.5 0 0 1 5.5 4h3.1a1.5 1.5 0 0 1 1.5 1.3c.1 1 .4 1.9.8 2.8a1.5 1.5 0 0 1-.3 1.6l-1.2 1.2a13 13 0 0 0 5.7 5.7l1.2-1.2a1.5 1.5 0 0 1 1.6-.3c.9.4 1.8.7 2.8.8a1.5 1.5 0 0 1 1.3 1.5z"/>')};
 const NAV=[['chat','Chat',sv('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>')],['hist','Riwayat',sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')],['tools','Alat AI',sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>')],['set','Pengaturan',sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>')]];
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const md=t=>t.split('```').map((p,i)=>i%2?'<div class="pre-wrap"><button class="pre-btn" onclick="copyPre(this)">Salin</button><pre><code>'+esc(p.replace(/^[\w+-]*\n/,''))+'</code></pre></div>':esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>')).join('');
+const md=t=>(window.divjunMd||((x)=>esc(x)))(t);
 const thk=x=>x.think?'<div class="think-wrap"><button class="think-btn" onclick="toggleThink(this)" aria-label="Tampilkan reasoning"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><span>Berpikir...</span></button><div class="think-content" hidden>'+esc(x.think)+'</div></div>':'<button class="tkb" onclick="thinkOpen()">Berpikir'+DOTS+'</button>';
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),DOTS='<span class="dots"><i></i><i></i><i></i></span>';
 const fmtT=t=>new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
@@ -688,7 +727,11 @@ function render(){
     return;
   }
   box.innerHTML=m.map((x,i)=>{
-    if(x.role==='user')return '<div class="u">'+esc(x.content)+(x.img?'\n['+x.img+' lampiran]':'')+'</div>';
+    if(x.role==='user'){
+      const lastU=i===m.length-1||(m[i+1]&&m[i+1].role!=='user');
+      return '<div class="u" data-uid="'+i+'">'+esc(x.content)+(x.img?'\n['+x.img+' lampiran]':'')+'</div>'+
+        (busy===null&&lastU?'<div class="acts left"><button class="cp" data-ed="'+i+'">Edit</button></div>':'');
+    }
     const last=i===m.length-1;
     const st=x.status?'<div class="mstat">'+DOTS+x.status+'</div>':'';
     const ig=x.imgNote?'<div class="mstat warn">&#9888; Gambar tidak bisa dibaca model ini \u2014 dikirim tanpa gambar</div>':'';
@@ -699,7 +742,7 @@ function render(){
 function paint(){const m=msgs(),el=document.querySelector('.a[data-i="'+(m.length-1)+'"]'),box=$('#msgs');if(!el)return render();const x=m[m.length-1],near=box.scrollHeight-box.scrollTop-box.clientHeight<120,st=x.status?'<div class="mstat">'+DOTS+x.status+'</div>':'',ig=x.imgNote?'<div class="mstat warn">&#9888; Gambar tidak bisa dibaca model ini \u2014 dikirim tanpa gambar</div>':'';el.innerHTML=ig+st+(md(x.content)||thk(x));if(near)box.scrollTop=box.scrollHeight}
 const setBtn=()=>{
   const b=$('#send');if(!b)return;
-  const hasText=$('#in')&&($('#in').value.trim()||att.length>0);
+  const hasText=editIdx>=0||($('#in')&&($('#in').value.trim()||att.length>0));
   b.innerHTML=busy?IC.stop:(hasText?IC.send:IC.phone);
   b.classList.toggle('voice',!busy&&!hasText);
   b.setAttribute('aria-label',busy?'Hentikan':(hasText?'Kirim':'Ngobrol dengan suara'));
@@ -952,7 +995,8 @@ const fmt=c=>'# '+c.title+'\n\n'+c.msgs.map(m=>(m.role==='user'?'Saya':'DIVJUN A
 function doShare(t){if(A)A.share(t);else navigator.clipboard.writeText(t)}
 
 function go(t){tab=t;closeAll();$('#app').dataset.tab=t;document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===t));$('#ttl').textContent={chat:'',hist:'Obrolan',tools:'Alat AI',pts:'Template Prompt',cts:'Cheatsheet',help:'Bantuan',set:'Pengaturan'}[t];if(t==='chat')titleChat();if(t==='hist')renderHist();if(t==='tools')renderTools();if(t==='set')renderSet();if(t==='help')renderHelp($('#hhq').value);if(t==='cts')renderCts($('#csq').value);if(t==='pts')renderPts()}
-function newChat(){if(busy)return toast('Tunggu jawaban selesai');cur='';persist();go('chat');render();$('#in').focus()}
+function resetEdit(){if(editIdx>=0){editIdx=-1;const e=$('#editbar');if(e)e.hidden=true}}
+function newChat(){resetEdit();if(busy)return toast('Tunggu jawaban selesai');cur='';persist();go('chat');render();$('#in').focus()}
 function renderHist(){
   const q=$('#hq').value.toLowerCase();
   // chip filter proyek
@@ -1113,6 +1157,14 @@ function menuAct(a){
   else if(a==='del')ask({title:'Hapus percakapan?',body:'"'+c.title+'" akan dihapus permanen.',ok:'Hapus',danger:1}).then(v=>{if(v){chats=chats.filter(x=>x!==c);cur='';persist();render();toast('Percakapan dihapus')}});
 }
 document.addEventListener('click',e=>{if(!e.target.closest('#menu,#more'))$('#menu').classList.remove('open')});
+// link di dalam jawaban AI -> buka di browser app
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[data-ext]');
+  if(!a)return;
+  e.preventDefault();
+  const u=a.getAttribute('href')||'';
+  if(/^https?:/i.test(u))A?A.open(u):window.open(u);
+});
 const ver=()=>A&&A.version?A.version():'web';
 const permSummary=()=>{const l=loadPerms();if(!l.length)return 'Tidak ada';const g=l.filter(p=>p.granted).length;return g+' dari '+l.length+' diizinkan'};
 const bkey=()=>{try{return (A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){return ''}};
@@ -1386,7 +1438,7 @@ function pickWeb(kind){
 }
 document.addEventListener('click',async e=>{
   if(lpFired){lpFired=false;return}
-  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-pk],[data-rm],[data-se],[data-ea],[data-more],[data-m],[data-sp],[data-mo],[data-sx],[data-dc],[data-t],[data-usem],[data-lp],[data-lpp],[data-cm],[data-pm],[data-pa],[data-hf]');
+  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-pk],[data-rm],[data-se],[data-ea],[data-more],[data-m],[data-sp],[data-mo],[data-sx],[data-dc],[data-t],[data-usem],[data-lp],[data-lpp],[data-cm],[data-pm],[data-pa],[data-hf],[data-ed]');
   if(!t)return;const d=t.dataset;
   if(d.q)send(d.q);
   else if(d.go)go(d.go);
@@ -1397,6 +1449,7 @@ document.addEventListener('click',async e=>{
   else if(d.pm){pmAct(d.pm)}
   else if(d.pa!==undefined){paAct(d.pa)}
   else if(d.hf){hFilter=d.hf;renderHist()}
+  else if(d.ed!==undefined){startEdit(+d.ed)}
   else if(d.usem){setModel(d.usem)}
   else if(d.u){A?A.open(d.u):window.open(d.u)}
   else if(d.rn){const c=chats.find(x=>x.id===d.rn),v=await ask({title:'Ubah nama percakapan',input:c.title,ok:'Simpan'});if(v){c.title=v.slice(0,60);persist();renderHist();toast('Nama diperbarui')}}
@@ -1422,11 +1475,15 @@ $('#send').onclick=()=>{
     const m=msgs(),a=m[m.length-1];if(!a.content)a.content='(Dihentikan)';
     fin();setBtn();return;
   }
+  if(editIdx>=0){submitEdit();setBtn();return}
   const i=$('#in'),v=i.value;
   if(v.trim()||att.length){i.value='';i.style.height='auto';send(v);setBtn();return}
   voiceTap();
 };
 $('#in').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,140)+'px';setBtn()};
+$('#editx').innerHTML=sv('<path d="M6 6l12 12M18 6L6 18"/>');
+$('#editx').onclick=cancelEdit;
+$('#edity').onclick=submitEdit;
 $('#new').onclick=newChat;
 $('#callb').onclick=()=>{
   if(!A||!A.ttsSay){toast('Panggilan suara hanya tersedia di aplikasi');return}
@@ -1797,6 +1854,71 @@ $('#cmute').onclick=()=>{
   else{CAL.fails=0;cLastStart=0;cPhase('listen','Mendengarkan\u2026');cListen()}
 };
 $('#cend').onclick=()=>{callEnd();toast('Panggilan selesai')};
+
+// ===== TERIMA KIRIMAN DARI APP LAIN =====
+window.__sharedText=txt=>{
+  if(!txt)return;
+  go('chat');
+  const i=$('#in');
+  const cur=i.value.trim();
+  i.value=cur?(cur+'\n'+txt):txt;
+  i.dispatchEvent(new Event('input'));
+  i.focus();
+  toast('Teks dari app lain dimasukkan');
+};
+window.__sharedImage=(name,mime,b64)=>{
+  go('chat');
+  if(att.length>=4){toast('Maksimal 4 lampiran');return}
+  att.push({name:name,mime:mime,b64:b64});
+  renderAtt();
+  toast('Gambar dari app lain ditambahkan \u2014 ketuk kirim');
+};
+// ===== SHORTCUT APLIKASI =====
+window.__shortcut=what=>{
+  if(what==='voice'){
+    if(!A||!A.voice){toast('Suara hanya tersedia di aplikasi');return}
+    if(!A.voiceAvailable||!A.voiceAvailable()){toast('Mikrofon tidak tersedia');return}
+    go('chat');voiceTap();
+  }else if(what==='camera'){
+    go('chat');
+    window.__pendingPick='camera';
+    if(A&&A.minta)A.minta('camera');else pickWeb('camera');
+  }
+};
+window.__netErr=msg=>{toast('Koneksi bermasalah: '+String(msg).slice(0,60))};
+// ===== EDIT PESAN & KIRIM ULANG =====
+let editIdx=-1;
+function startEdit(i){
+  const m=msgs()[i];
+  if(!m||m.role!=='user')return;
+  editIdx=i;
+  const box=$('#in');
+  box.value=String(m.content||'').replace(/\n\[[^\]]*\]$/,'');
+  box.dispatchEvent(new Event('input'));
+  box.focus();
+  const banner=$('#editbar');
+  banner.hidden=false;
+  $('#editq').textContent='Mengedit pesan ke-'+(i+1);
+  box.scrollIntoView&&box.scrollIntoView({block:'center'});
+}
+function cancelEdit(){
+  editIdx=-1;
+  $('#editbar').hidden=true;
+}
+function submitEdit(){
+  const i=editIdx;
+  if(i<0)return;
+  const box=$('#in');
+  const val=box.value.trim();
+  if(!val){toast('Pesan tidak boleh kosong');return}
+  const c=chat();
+  if(!c)return;
+  // buang pesan setelah yang diedit (termasuk jawaban lama)
+  c.msgs=c.msgs.slice(0,i);
+  cancelEdit();
+  box.value='';box.style.height='auto';
+  send(val);
+}
 
 $('#new').innerHTML=IC.plus;$('#more').innerHTML=IC.more;$('#burger').innerHTML=IC.menu;$('#eye').innerHTML=IC.eye;
 $('#route').innerHTML=Object.keys(PROV).map(k=>'<option value="'+k+'">'+PROV[k].name+'</option>').join('');renderProv();$('#mname').value=cfg.model;$('#sys').value=cfg.system;$('#tmp').value=cfg.temp;$('#tv').textContent=cfg.temp;
