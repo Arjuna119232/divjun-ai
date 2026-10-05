@@ -328,6 +328,43 @@ async function browseTool(url){
     return 'Gagal browse: '+e.message;
   }
 }
+// ===== WEATHER TOOL (dedicated, fast JSON) =====
+async function weatherTool(city){
+  try{
+    const url='https://wttr.in/'+encodeURIComponent(city)+'?format=j1';
+    const id='weather'+Date.now();
+    let json='',code=0,dec=new TextDecoder();
+    await new Promise((res,rej)=>{
+      call('GET',url,null,JSON.stringify({'Accept':'application/json'}),'',{
+        status:x=>code=+x,
+        chunk:d=>{json+=dec.decode(b64(d),{stream:true})},
+        done:()=>{if(code>=400)rej(new Error('HTTP '+code));else res()},
+        err:e=>rej(e)
+      });
+    });
+    const data=JSON.parse(json);
+    const cur=data.current_condition[0];
+    const area=data.nearest_area[0];
+    const today=data.weather[0];
+    return JSON.stringify({
+      location:area.areaName[0].value+', '+area.region[0].value+', '+area.country[0].value,
+      now:{
+        tempC:cur.temp_C,feelsLikeC:cur.FeelsLikeC,
+        desc:cur.weatherDesc[0].value,
+        humidity:cur.humidity,windKmph:cur.windspeedKmph,windDir:cur.winddir16Point,
+        uv:cur.uvIndex,visibility:cur.visibility
+      },
+      today:{
+        minC:today.mintempC,maxC:today.maxtempC,
+        sunrise:today.astronomy[0].sunrise,sunset:today.astronomy[0].sunset,
+        uvMax:today.uvIndex
+      },
+      tomorrow:data.weather[1]?{minC:data.weather[1].mintempC,maxC:data.weather[1].maxtempC,desc:data.weather[1].hourly[4]?.weatherDesc[0]?.value||''}:null
+    });
+  }catch(e){
+    return 'Gagal cuaca: '+e.message;
+  }
+}
 function extractReadable(html,baseUrl){
   const doc=new DOMParser().parseFromString(html,'text/html');
   // hapus script, style, nav, footer, aside, header, noscript, iframe, form
@@ -344,10 +381,12 @@ function extractReadable(html,baseUrl){
 }
 // ===== TOOL DEFINITIONS =====
 const TOOLS_DEF=[
-  {type:'function',function:{name:'browse',description:'Buka dan baca isi halaman web. Gunakan saat butuh info terbaru, fakta, artikel, dokumentasi, harga, cuaca, berita, dll. Parameter: url (string, wajib).',parameters:{type:'object',properties:{url:{type:'string',description:'URL lengkap halaman yang mau dibaca (harus http/https)'}},required:['url']}}}
+  {type:'function',function:{name:'browse',description:'Buka dan baca isi halaman web. Gunakan saat butuh info terbaru, fakta, artikel, dokumentasi, harga, berita, dll. Parameter: url (string, wajib).',parameters:{type:'object',properties:{url:{type:'string',description:'URL lengkap halaman yang mau dibaca (harus http/https)'}},required:['url']}}},
+  {type:'function',function:{name:'weather',description:'Cek cuaca real-time untuk kota. Gunakan untuk pertanyaan cuaca, suhu, hujan, dll. Parameter: city (string, wajib, nama kota bahasa Indonesia/Inggris).',parameters:{type:'object',properties:{city:{type:'string',description:'Nama kota, mis: Jakarta, Bandung, Surabaya, Tokyo, London'}},required:['city']}}}
 ];
 async function executeTool(name,args){
   if(name==='browse')return browseTool(args.url);
+  if(name==='weather')return weatherTool(args.city);
   return 'Tool tidak dikenal: '+name;
 }
 window.__onPerm=(tipe,ok)=>{if(ok&&window.__pendingPick){A&&A.pick?A.pick(window.__pendingPick):pickWeb(window.__pendingPick);window.__pendingPick=null}else{toast('Izin ditolak. Buka Pengaturan untuk mengaktifkan')}};
@@ -575,7 +614,7 @@ function eaAct(a){
   else if(a==='temp'){cfg.temp=+$('#etm').value;save();closeSheet();renderSet();toast('Kreativitas disimpan')}
 }
 document.addEventListener('input',e=>{if(e.target.id==='etm')$('#etv').textContent=e.target.value});
-const SYS_BASE='Kamu adalah DIVJUN AI, asisten AI yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.\nNama aplikasi ini adalah DIVJUN AI. Aplikasi ini dibuat oleh 0xmahen di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan siapa pembuat atau pengembang aplikasi, jawab bahwa DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan model atau teknologi apa yang dipakai, JANGAN sebutkan nama model atau penyedia. Cukup jelaskan kemampuan dan fitur yang bisa kamu lakukan, misalnya: menjawab pertanyaan, membantu menulis, meringkas teks, menjelaskan konsep, membantu coding, menerjemahkan bahasa, memberi ide kreatif, membantu belajar, dan **membaca halaman web untuk info terbaru**. Fokus pada manfaat untuk pengguna, bukan nama teknis.\n\nKamu memiliki akses ke tool **browse(url)** — gunakan saat butuh info terbaru, fakta aktual, harga, cuaca, berita, dokumentasi, dll. Contoh: browse("https://example.com"). Hasil browsing akan dikembalikan sebagai teks bersih yang bisa kamu gunakan untuk menjawab.';
+const SYS_BASE='Kamu adalah DIVJUN AI, asisten AI yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.\nNama aplikasi ini adalah DIVJUN AI. Aplikasi ini dibuat oleh 0xmahen di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan siapa pembuat atau pengembang aplikasi, jawab bahwa DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan model atau teknologi apa yang dipakai, JANGAN sebutkan nama model atau penyedia. Cukup jelaskan kemampuan dan fitur yang bisa kamu lakukan, misalnya: menjawab pertanyaan, membantu menulis, meringkas teks, menjelaskan konsep, membantu coding, menerjemahkan bahasa, memberi ide kreatif, membantu belajar, dan **membaca halaman web serta cek cuaca untuk info terbaru**. Fokus pada manfaat untuk pengguna, bukan nama teknis.\n\nKamu memiliki akses ke tool:\n- **browse(url)** — baca halaman web (artikel, docs, harga, berita, dll). Contoh: browse("https://example.com")\n- **weather(city)** — cek cuaca real-time (suhu, hujan, angin, dll). Contoh: weather("Jakarta")\nGunakan weather() untuk pertanyaan cuaca — lebih cepat dan akurat. Hasil tool dikembalikan sebagai data terstruktur yang bisa kamu gunakan untuk menjawab.';
 function sysPrompt(){return SYS_BASE+(cfg.system?'\n'+cfg.system:'')}
 let att=[];
 function buildUser(text){
