@@ -306,6 +306,47 @@ function fetchReq(id,method,url,headers,body){
   }).catch(e=>{if(pend[id]&&h.err)h.err(e.name==='AbortError'?'Dibatalkan':'Gagal terhubung. Periksa internet. Kalau memakai pembungkus web, coba build native lewat GitHub.')});
 }
 window.__net=(id,t,d)=>{const p=pend[id];if(p&&p[t])p[t](d)};
+
+// ===== BROWSE TOOL =====
+async function browseTool(url){
+  try{
+    const id='browse'+Date.now();
+    let html='',code=0,dec=new TextDecoder();
+    await new Promise((res,rej)=>{
+      call('GET',url,null,JSON.stringify({'Accept':'text/html,application/xhtml+xml'}),'',{
+        status:x=>code=+x,
+        chunk:d=>{html+=dec.decode(b64(d),{stream:true})},
+        done:()=>{if(code>=400)rej(new Error('HTTP '+code));else res()},
+        err:e=>rej(e)
+      });
+    });
+    return extractReadable(html,url);
+  }catch(e){
+    return 'Gagal browse: '+e.message;
+  }
+}
+function extractReadable(html,baseUrl){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  // hapus script, style, nav, footer, aside, header, noscript, iframe, form
+  doc.querySelectorAll('script,style,nav,footer,aside,header,noscript,iframe,form,[role="navigation"],[role="banner"],[role="contentinfo"],.ads,.advertisement,.sidebar,.menu,.navigation,.header,.footer').forEach(e=>e.remove());
+  // cari main content
+  let main=doc.querySelector('main,article,[role="main"],.content,.post,.article,.entry,.post-content,.entry-content,#content,#main');
+  if(!main)main=doc.body;
+  // ambil teks, bersihkan whitespace
+  let text=main.innerText||main.textContent||'';
+  text=text.replace(/\s+/g,' ').replace(/\n\s*\n/g,'\n').trim();
+  // batasi panjang (maks ~8000 char untuk context window)
+  if(text.length>8000)text=text.slice(0,8000)+'\n...(dipotong)';
+  return text||'Konten tidak bisa diekstrak';
+}
+// ===== TOOL DEFINITIONS =====
+const TOOLS_DEF=[
+  {type:'function',function:{name:'browse',description:'Buka dan baca isi halaman web. Gunakan saat butuh info terbaru, fakta, artikel, dokumentasi, harga, cuaca, berita, dll. Parameter: url (string, wajib).',parameters:{type:'object',properties:{url:{type:'string',description:'URL lengkap halaman yang mau dibaca (harus http/https)'}},required:['url']}}}
+];
+async function executeTool(name,args){
+  if(name==='browse')return browseTool(args.url);
+  return 'Tool tidak dikenal: '+name;
+}
 window.__onPerm=(tipe,ok)=>{if(ok&&window.__pendingPick){A&&A.pick?A.pick(window.__pendingPick):pickWeb(window.__pendingPick);window.__pendingPick=null}else{toast('Izin ditolak. Buka Pengaturan untuk mengaktifkan')}};
 function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;rq(id,method,PROV[cfg.route].base+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
 function errMsg(raw){try{const j=JSON.parse(raw);return j.error&&j.error.message||j.message||raw}catch(e){return raw.slice(0,200)||'Tidak ada detail dari server'}}
@@ -353,15 +394,76 @@ function send(text){
   if(!cfg.model){go('set');toast('Pilih model lalu uji koneksi');return}
   let c=chat();if(!c){c={id:'c'+Date.now(),title:text.slice(0,40),ts:Date.now(),msgs:[]};chats.unshift(c);cur=c.id}
   const uc=buildUser(text),hadImg=att.some(x=>x.mime.indexOf('image/')===0);
-  const payload=[{role:'system',content:sysPrompt()}].concat(c.msgs.filter(m=>!m.err).map(m=>({role:m.role,content:m.content})),[{role:'user',content:uc}]);
+  let messages=[{role:'system',content:sysPrompt()}].concat(c.msgs.filter(m=>!m.err).map(m=>({role:m.role,content:m.content})),[{role:'user',content:uc}]);
   c.msgs.push({role:'user',content:text,img:att.length||undefined});att=[];renderAtt();const a={role:'assistant',content:''};c.msgs.push(a);c.ts=Date.now();render();
-  let buf='',code=0,eb='',dec=new TextDecoder();
-  busy=call('POST','/chat/completions',{model:cfg.model,messages:payload,stream:true,temperature:+cfg.temp},{
-    status:x=>code=+x,
-    chunk:d=>{const s=dec.decode(b64(d),{stream:true});if(code>=400){eb+=s;return}buf+=s;const ls=buf.split('\n');buf=ls.pop();
-      for(const l of ls){if(l.indexOf('data:')!==0)continue;const j=l.slice(5).trim();if(!j||j==='[DONE]')continue;try{const d0=JSON.parse(j).choices[0].delta||{};a.content+=d0.content||'';const r=d0.reasoning_content||d0.reasoning;if(r)a.think=((a.think||'')+r).slice(-160)}catch(e){}}paint()},
-    done:()=>{if(code>=400){a.err=true;a.content=hadImg&&code<500?'Gagal mengirim lampiran ('+code+'): '+errMsg(eb)+'\n\nPastikan model yang dipilih mendukung gambar.':hint(code,eb)}else if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';fin()},
-    err:e=>{a.err=true;a.content='Gagal terhubung: '+e;fin()}});
+  let buf='',code=0,eb='',dec=new TextDecoder(),toolBuffer='',inToolCall=false,toolName='',toolArgs='',toolId='';
+  
+  async function runCompletion(msgs){
+    return new Promise((resolve,reject)=>{
+      let localBuf='',localCode=0,localEb='',localDec=new TextDecoder(),localToolBuf='',localInTool=false,localToolName='',localToolArgs='',localToolId='';
+      busy=call('POST','/chat/completions',{model:cfg.model,messages:msgs,stream:true,temperature:+cfg.temp,tools:TOOLS_DEF,tool_choice:'auto'},{
+        status:x=>localCode=+x,
+        chunk:d=>{
+          const s=localDec.decode(b64(d),{stream:true});
+          if(localCode>=400){localEb+=s;return}
+          localBuf+=s;
+          const ls=localBuf.split('\n');localBuf=ls.pop();
+          for(const l of ls){
+            if(l.indexOf('data:')!==0)continue;
+            const j=l.slice(5).trim();
+            if(!j||j==='[DONE]')continue;
+            try{
+              const d0=JSON.parse(j).choices[0].delta||{};
+              // Handle tool calls
+              if(d0.tool_calls){
+                for(const tc of d0.tool_calls){
+                  if(tc.id)localToolId=tc.id;
+                  if(tc.function?.name)localToolName=tc.function.name;
+                  if(tc.function?.arguments)localToolArgs+=tc.function.arguments;
+                }
+                localInTool=true;
+              }else{
+                a.content+=d0.content||'';
+                const r=d0.reasoning_content||d0.reasoning;
+                if(r)a.think=((a.think||'')+r).slice(-160);
+              }
+            }catch(e){}
+            paint();
+          }
+        },
+        done:()=>{
+          if(localCode>=400){
+            a.err=true;
+            a.content=hadImg&&localCode<500?'Gagal mengirim lampiran ('+localCode+'): '+errMsg(localEb)+'\n\nPastikan model yang dipilih mendukung gambar.':hint(localCode,localEb);
+            fin();
+            resolve(false);
+            return;
+          }
+          // Check if there are tool calls to execute
+          if(localInTool && localToolName && localToolId){
+            // Execute tool and continue conversation
+            executeTool(localToolName,JSON.parse(localToolArgs)).then(result=>{
+              // Add assistant message with tool_calls
+              msgs.push({role:'assistant',content:null,tool_calls:[{id:localToolId,type:'function',function:{name:localToolName,arguments:localToolArgs}}]});
+              // Add tool result
+              msgs.push({role:'tool',tool_call_id:localToolId,content:result});
+              // Recursively call for next response
+              runCompletion(msgs).then(resolve);
+            }).catch(e=>{
+              a.err=true;a.content='Tool error: '+e;fin();resolve(false);
+            });
+          }else{
+            if(!a.content)a.content='(Model tidak mengirim balasan. Coba model lain.)';
+            fin();
+            resolve(true);
+          }
+        },
+        err:e=>{a.err=true;a.content='Gagal terhubung: '+e;fin();resolve(false);}
+      });
+    });
+  }
+  
+  runCompletion(messages);
   setBtn();
 }
 const hint=(c,e)=>c===402?'Saldo akun penyedia tidak cukup untuk model ini. Pilih model gratis atau isi saldo.':c===429?'Batas pemakaian gratis tercapai. Tunggu beberapa menit atau pilih model lain.':(c===401||c===403)?'Akses ditolak ('+c+'): '+errMsg(e)+'\n\nPeriksa API key di Pengaturan. Pastikan key milik penyedia yang dipilih.':'Gagal ('+c+'): '+errMsg(e)+'\n\nKalau model ini tidak mendukung format chat standar, pilih model lain.';
@@ -470,7 +572,7 @@ function eaAct(a){
   else if(a==='temp'){cfg.temp=+$('#etm').value;save();closeSheet();renderSet();toast('Kreativitas disimpan')}
 }
 document.addEventListener('input',e=>{if(e.target.id==='etm')$('#etv').textContent=e.target.value});
-const SYS_BASE='Kamu adalah DIVJUN AI, asisten AI yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.\nNama aplikasi ini adalah DIVJUN AI. Aplikasi ini dibuat oleh 0xmahen di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan siapa pembuat atau pengembang aplikasi, jawab bahwa DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan model atau teknologi apa yang dipakai, JANGAN sebutkan nama model atau penyedia. Cukup jelaskan kemampuan dan fitur yang bisa kamu lakukan, misalnya: menjawab pertanyaan, membantu menulis, meringkas teks, menjelaskan konsep, membantu coding, menerjemahkan bahasa, memberi ide kreatif, dan membantu belajar. Fokus pada manfaat untuk pengguna, bukan nama teknis.';
+const SYS_BASE='Kamu adalah DIVJUN AI, asisten AI yang ramah, jelas, dan ringkas. Jawab dalam bahasa yang dipakai pengguna.\nNama aplikasi ini adalah DIVJUN AI. Aplikasi ini dibuat oleh 0xmahen di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan siapa pembuat atau pengembang aplikasi, jawab bahwa DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS.\nJika pengguna menanyakan model atau teknologi apa yang dipakai, JANGAN sebutkan nama model atau penyedia. Cukup jelaskan kemampuan dan fitur yang bisa kamu lakukan, misalnya: menjawab pertanyaan, membantu menulis, meringkas teks, menjelaskan konsep, membantu coding, menerjemahkan bahasa, memberi ide kreatif, membantu belajar, dan **membaca halaman web untuk info terbaru**. Fokus pada manfaat untuk pengguna, bukan nama teknis.\n\nKamu memiliki akses ke tool **browse(url)** — gunakan saat butuh info terbaru, fakta aktual, harga, cuaca, berita, dokumentasi, dll. Contoh: browse("https://example.com"). Hasil browsing akan dikembalikan sebagai teks bersih yang bisa kamu gunakan untuk menjawab.';
 function sysPrompt(){return SYS_BASE+(cfg.system?'\n'+cfg.system:'')}
 let att=[];
 function buildUser(text){
