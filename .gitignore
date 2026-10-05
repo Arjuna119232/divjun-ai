@@ -10,3 +10,12 @@ app/src/main/assets/keys.js
 *.keystore
 *.py
 sheet.txt
+
+# secrets - jangan pernah di-commit
+keystore*.txt
+*.jks
+*.keystore
+keys.js
+logo-base.svg
+splash-base.svg
+dev-backups/
