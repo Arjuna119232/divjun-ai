@@ -1,8 +1,20 @@
 <resources>
     <color name="bg">#1F1E1D</color>
+    <color name="panel">#2B2A27</color>
+    <color name="line">#3D3B36</color>
+    <color name="tx">#F3F1EB</color>
+    <color name="mu">#A5A199</color>
+    <color name="ac">#F3F1EB</color>
+    <color name="acx">#1F1E1D</color>
+    <color name="ub">#34322E</color>
+    <color name="lk">#A99DFF</color>
+    <color name="ok">#5EEAD4</color>
+    <color name="er">#FF8A80</color>
+
     <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/bg</item>
         <item name="android:statusBarColor">@color/bg</item>
         <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>

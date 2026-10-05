@@ -1,0 +1,105 @@
+<resources>
+    <string name="app_name">DIVJUN AI</string>
+    <string name="chat_tab">Chat</string>
+    <string name="history_tab">History</string>
+    <string name="tools_tab">AI Tools</string>
+    <string name="settings_tab">Settings</string>
+    <string name="new_chat">New Chat</string>
+    <string name="send_message">Send</string>
+    <string name="message_placeholder">Chat with AI\u2026</string>
+    <string name="attach_file">Attach</string>
+    <string name="voice_input">Voice</string>
+    <string name="model_selector">Select Model</string>
+    <string name="api_key_label">API Key</string>
+    <string name="api_key_hint">Paste your API key here</string>
+    <string name="save_and_test">Save & Test Connection</string>
+    <string name="get_api_key">Get API Key</string>
+    <string name="system_prompt_label">System Instructions</string>
+    <string name="system_prompt_hint">e.g., always answer concisely</string>
+    <string name="temperature_label">Creativity: %s</string>
+    <string name="save_behavior">Save Behavior</string>
+    <string name="theme_label">Theme</string>
+    <string name="theme_auto">Auto</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="font_size_label">Font Size</string>
+    <string name="font_size_small">Small</string>
+    <string name="font_size_normal">Normal</string>
+    <string name="font_size_large">Large</string>
+    <string name="export_chats">Export All Chats</string>
+    <string name="clear_history">Clear History</string>
+    <string name="wipe_data">Wipe All Data</string>
+    <string name="documentation">Provider Documentation</string>
+    <string name="about_app">About DIVJUN AI</string>
+    <string name="version_prefix">Version </string>
+    <string name="app_description">Chat AI via Gemini and Groq, plus collection of AI tools in one app.</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="connection_success">Connected. %d models available.</string>
+    <string name="connection_failed">Failed: %s</string>
+    <string name="key_saved">API key saved</string>
+    <string name="model_selected">Model: %s</string>
+    <string name="history_not_saved">History not saved</string>
+    <string name="history_saved">History saved</string>
+    "history_cleared": "History cleared",
+    "all_data_wiped": "All data wiped",
+    "permission_denied": "Permission denied. Open Settings to enable.",
+    "max_attachments": "Maximum 4 attachments",
+    "attachment_too_large": "File too large (max 200 KB)",
+    "image_read_error": "Cannot read image",
+    "file_read_error": "Cannot read file",
+    "no_camera": "Camera not available on this device",
+    "no_microphone": "Microphone not available on this device",
+    "voice_listening": "Listening\u2026",
+    "voice_stopped": "Stopped",
+    "voice_send": "Send",
+    "thinking": "Thinking\u2026",
+    "copy": "Copy",
+    "retry": "Retry",
+    "regenerate": "Regenerate",
+    "share": "Share",
+    "rename": "Rename",
+    "pin": "Pin",
+    "delete": "Delete",
+    "search_chats": "Search conversations\u2026",
+    "search_tools": "Search AI tools\u2026",
+    "no_chats": "No conversations yet. Start a new chat.",
+    "no_matching_chats": "No matching conversations.",
+    "no_favorites": "No favorites yet. Tap star on AI tools.",
+    "no_matching_tools": "No matching tools.",
+    "category_all": "All",
+    "category_favorites": "Favorites",
+    "toast_copied": "Copied to clipboard",
+    "toast_shared": "Shared",
+    "toast_renamed": "Renamed",
+    "toast_pinned": "Pinned",
+    "toast_unpinned": "Unpinned",
+    "toast_deleted": "Deleted",
+    "toast_api_key_required": "Please set API key first",
+    "toast_model_required": "Please select a model first",
+    "toast_waiting": "Wait for response to finish",
+    "error_network": "Connection failed. Check internet.",
+    "error_api_key": "Invalid API key. Check Settings.",
+    "error_rate_limit": "Rate limit reached. Try another model.",
+    "error_quota": "Account quota exceeded. Use free model or add credits.",
+    "error_image_model": "Selected model doesn't support images.",
+    "provider_groq": "Groq",
+    "provider_gemini": "Gemini",
+    "provider_openrouter": "OpenRouter",
+    "provider_openai": "OpenAI",
+    "provider_anthropic": "Anthropic",
+    "splash_tagline": "DIVARJUNA STUDIOS",
+    "greeting_morning": "Good morning, what can I help with?",
+    "greeting_afternoon": "Good afternoon, what can I help with?",
+    "greeting_evening": "Good evening, what can I help with?",
+    "greeting_night": "Up late? What can I help with?",
+    "tip_1": "Drink water first, stay focused.",
+    "tip_2": "Take a 5 min break every 25 min.",
+    "tip_3": "Don't skip meals.",
+    "tip_4": "Rest eyes from screen every 20 min.",
+    "tip_5": "Sleep 7-8 hours daily.",
+    "tip_6": "Deep breath, calm mind.",
+    "tip_7": "10 min walk refreshes the brain.",
+    "tip_8": "Less late nights, body needs rest.",
+    "tip_9": "Calm mind, clearer answers.",
+    "tip_10": "Relax today, stay motivated tomorrow."
+</resources>

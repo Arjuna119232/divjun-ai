@@ -9,17 +9,20 @@ def groqKey = System.getenv('GROQ_API_KEY') ?: kp.getProperty('GROQ_API_KEY', ''
 def geminiKey = System.getenv('GEMINI_API_KEY') ?: kp.getProperty('GEMINI_API_KEY', '')
 
 android {
-    buildFeatures { buildConfig true }
+    buildFeatures {
+        buildConfig true
+    }
     namespace 'com.divjun.ai'
     compileSdk 34
     defaultConfig {
         applicationId 'com.divjun.ai'
         minSdk 24
         targetSdk 34
-        versionCode 13
-        versionName '1.8.0'
+        versionCode 19
+        versionName '1.9.0'
         buildConfigField 'String', 'GROQ_KEY', "\"${groqKey}\""
         buildConfigField 'String', 'GEMINI_KEY', "\"${geminiKey}\""
+        vectorDrawables.useSupportLibrary = true
     }
     signingConfigs {
         release {
@@ -38,6 +41,7 @@ android {
         }
         release {
             minifyEnabled false
+            shrinkResources false
             signingConfig System.getenv('KEYSTORE_PATH') ? signingConfigs.release : signingConfigs.debug
         }
     }
@@ -46,8 +50,29 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = '17' }
+    aaptOptions {
+        noCompress 'ttf', 'json', 'lottie'
+        additionalParameters "--no-version-vectors"
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/*'
+        }
+    }
 }
 
 dependencies {
     implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.work:work-runtime-ktx:2.9.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.2'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.airbnb.android:lottie:6.4.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
 }

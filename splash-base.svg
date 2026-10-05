@@ -1,0 +1,20 @@
+<svg width="1080" height="1920" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1F1E1D;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2B2A27;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1F1E1D;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C8CFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A99DFF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#bgGrad)"/>
+  <circle cx="540" cy="760" r="120" fill="url(#iconGrad)"/>
+  <path d="M420 680 L420 840 A72 72 0 0 1 660 840 L660 680 A72 72 0 0 0 420 680 Z M484 712 V808 H596 V712 H484 Z" fill="#1F1E1D"/>
+  <circle cx="540" cy="760" r="24" fill="#7C8CFF"/>
+  <text x="540" y="1000" font-family="system-ui, sans-serif" font-size="48" font-weight="600" fill="#F3F1EB" text-anchor="middle">DIVJUN AI</text>
+  <text x="540" y="1060" font-family="system-ui, sans-serif" font-size="20" fill="#A5A199" text-anchor="middle">DIVARJUNA STUDIOS</text>
+  <text x="540" y="1600" font-family="system-ui, sans-serif" font-size="16" fill="#78756D" text-anchor="middle">Memuat...</text>
+</svg>

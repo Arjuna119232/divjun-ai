@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="new_chat"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="@string/new_chat"
+        android:shortcutLongLabel="@string/new_chat"
+        android:shortcutDisabledMessage="@string/new_chat">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetClass="com.divjun.ai.MainActivity"
+            android:targetPackage="com.divjun.ai" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="voice_chat"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="Voice Chat"
+        android:shortcutLongLabel="Start voice conversation"
+        android:shortcutDisabledMessage="Voice not available">
+        <intent
+            android:action="com.divjun.ai.VOICE_CHAT"
+            android:targetClass="com.divjun.ai.MainActivity"
+            android:targetPackage="com.divjun.ai" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="camera_scan"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:shortcutShortLabel="Scan Image"
+        android:shortcutLongLabel="Analyze image with AI"
+        android:shortcutDisabledMessage="Camera not available">
+        <intent
+            android:action="com.divjun.ai.CAMERA_SCAN"
+            android:targetClass="com.divjun.ai.MainActivity"
+            android:targetPackage="com.divjun.ai" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>
