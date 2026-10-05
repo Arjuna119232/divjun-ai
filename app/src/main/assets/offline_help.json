@@ -1,417 +1,547 @@
 {
-  "version": "1.9.1",
-  "lang": "id-ID",
-  "title": "Bantuan DIVJUN AI",
-  "sections": [
+ "version": "1.15.0",
+ "lang": "id-ID",
+ "title": "Pusat Bantuan DIVJUN AI",
+ "sections": [
+  {
+   "id": "mulai",
+   "title": "Memulai dengan benar",
+   "icon": "rocket",
+   "blocks": [
     {
-      "id": "mulai",
-      "title": "Memulai",
-      "icon": "rocket",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "DIVJUN AI adalah asisten AI di dalam aplikasi. Kamu bisa ngobrol, minta AI membaca halaman web, cek cuaca, kirim foto atau file, dan catatan semua tersimpan di HP kamu."
-        },
-        {
-          "type": "h",
-          "t": "Langkah pertama"
-        },
-        {
-          "type": "steps",
-          "items": [
-            "Buka tab Pengaturan (ikon roda gigi di drawer atau bawah).",
-            "Pilih Penyedia AI, lalu masukkan API key.",
-            "Ketuk Simpan dan uji koneksi sampai muncul hijau 'Terhubung'.",
-            "Kembali ke tab Chat, ketuk chip model di atas kolom input untuk pilih model.",
-            "Mulai ngobrol."
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Dapatkan API key gratis"
-        },
-        {
-          "type": "p",
-          "t": "Groq memberi akses gratis dengan batas pemakaian. Ambil key di situsnya, tempel di Pengaturan. Key disimpan hanya di HP ini."
-        },
-        {
-          "type": "note",
-          "t": "Kalau aplikasi sudah punya key bawaan, kolom API key akan menampilkan 'Tertanam di aplikasi' dan tidak perlu diisi."
-        }
-      ]
+     "type": "p",
+     "t": "DIVJUN AI adalah asisten AI yang tinggal di HP kamu. Tidak ada akun, tidak ada langganan, dan tidak ada biaya. Kamu hanya butuh API key dari Groq yang gratis."
     },
     {
-      "id": "model",
-      "title": "Pilih Model",
-      "icon": "cpu",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "Model dengan reasoning (berpikir) lebih akurat tapi lebih lambat. Model biasa lebih cepat untuk percakapan harian."
-        },
-        {
-          "type": "h",
-          "t": "Rekomendasi"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Butuh jawaban kilat → allam-2-7b atau model ringan lain",
-            "Coding, hitung, analisis → model reasoning seperti GPT OSS",
-            "Bahasa Indonesia → allam-2-7b, atau Qwen",
-            "Tugas panjang (banyak konteks) → model dengan konteks 128K"
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Kenapa model's Thinking perluasan?"
-        },
-        {
-          "type": "p",
-          "t": "Kolom 'Thinking' menyimpan proses berpikir model. Bagian ini disembunyikan supaya jawaban terlihat bersih. Ketuk tombol 'Berpikir...' di bawah jawaban kalau mau melihatnya."
-        },
-        {
-          "type": "h",
-          "t": "Batas pemakaian gratis"
-        },
-        {
-          "type": "p",
-          "t": "Kalau muncul 'Rate limit', tunggu beberapa menit atau pilih model lain. Kalau 'quota exceeded', pakai model gratis lain atau isi saldo."
-        }
-      ]
+     "type": "h",
+     "t": "Langkah wajib"
     },
     {
-      "id": "web",
-      "title": "Membaca Web",
-      "icon": "globe",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "AI bisa membuka halaman web dan membaca isinya. Ini dipakai otomatis saat kamu tanya soal berita, harga, dokumentasi, atau fakta terbaru."
-        },
-        {
-          "type": "h",
-          "t": "Cara memaksa"
-        },
-        {
-          "type": "p",
-          "t": "Sebut URL-nya langsung di chat, contoh: 'Baca https://developer.android.com dan jelaskan adaptive icon'. AI akan membuka halaman itu."
-        },
-        {
-          "type": "h",
-          "t": "Batasan"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Halaman yang isinya muncul setelah scroll atau butuh login bisa kurang terbaca.",
-            "Some situs berat (YouTube, X/Twitter, aplikasi web dinamis) sering kosong karena isinya dirender lewat JavaScript.",
-            "Halaman berbayar atau yang memblokir akses otomatis bisa gagal dimuat.",
-            "Teks panjang dipotong supaya tidak overflow."
-          ]
-        },
-        {
-          "type": "note",
-          "t": "Kalau browse gagal, coba buka URL-nya manual di browser dan salin teksnya ke chat."
-        }
-      ]
+     "type": "steps",
+     "items": [
+      "Buka tab **Pengaturan** lewat ikon roda gigi di drawer kiri.",
+      "Atur **Jenis font** dan **Ukuran teks** sampai nyaman dibaca.",
+      "Cek bagian **Model AI**. Kalau tertulis \"Otomatis\", berarti semuanya sudah beres.",
+      "Kembali ke tab **Chat**, lalu ketuk kolom input dan mulai bertanya."
+     ]
     },
     {
-      "id": "cuaca",
-      "title": "Cek Cuaca",
-      "icon": "cloud",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "AI punya akses data cuaca real-time. Tinggal tanya seperti 'cuaca Jakarta sekarang' atau 'besok Bandung hujan tidak'."
-        },
-        {
-          "type": "h",
-          "t": "Data yang didapat"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Suhu sekarang dan terasanya",
-            "Kelembapan, kecepatan dan arah angin",
-            "Indeks UV dan visibilitas",
-            "Suhu min/max hari ini dan besok",
-            "Waktu sunrise dan sunset"
-          ]
-        },
-        {
-          "type": "p",
-          "t": "Kalau pertanyaan kamu soal cuaca, AI memakai tool cuaca khusus supaya jawabannya cepat dan tidak perlu berpikir panjang."
-        }
-      ]
+     "type": "note",
+     "t": "Kalau kolom input menampilkan ikon telepon, berarti kolomnya kosong. Ketuk ikon itu untuk langsung bicara dengan AI tanpa mengetik."
     },
     {
-      "id": "lampiran",
-      "title": "Foto dan File",
-      "icon": "paperclip",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "Klik tombol + di kolom chat untuk menambahkan lampiran."
-        },
-        {
-          "type": "h",
-          "t": "Jenis yang didukung"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Foto atau gambar → dikirim ke model sebagai gambar, harus pakai model yang mendukung vision",
-            "File teks (txt, md, csv, json) → isinya dibaca jadi bagian dari pesan",
-            "Maksimal 4 lampiran per pesan",
-            "Ukuran file teks maksimal 200 KB"
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Tips"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Foto otomatis dikecilkan supaya hemat kuota dan cepat diproses.",
-            "Orientasi foto otomatis diperbaiki.",
-            "Kalau model tidak bisa baca gambar, pilih model lain atau jelaskan isi fotonya manual."
-          ]
-        }
-      ]
+     "type": "h",
+     "t": "Kenapa ikon sering berubah?"
     },
     {
-      "id": "suara",
-      "title": "Input Suara",
-      "icon": "mic",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "Ketuk ikon mikrofon untuk bicara langsung ke kolom chat."
-        },
-        {
-          "type": "list",
-          "items": [
-            "Bahasa default Indonesia, ganti dengan suara menu.",
-            "Butuh izin mikrofon, akan muncul permintaan izin.",
-            "Ketuk ■ untuk berhenti, lalu Ketuk Kirim untuk memakai hasil."
-          ]
-        },
-        {
-          "type": "note",
-          "t": "Fitur suara butuh Google app yang mendukung speech recognition di HP."
-        }
-      ]
-    },
-    {
-      "id": "riwayat",
-      "title": "Riwayat dan Data",
-      "icon": "clock",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "Semua percakapan tersimpan di HP ini. Tidak ada yang dikirim ke server kami."
-        },
-        {
-          "type": "h",
-          "t": "Yang bisa dilakukan"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Cari percakapan lama lewat kolom pencarian di tab Obrolan",
-            "Sematkan percakapan penting agar selalu di atas",
-            "Ganti nama percakapan supaya mudah dicari",
-            "Ekspor semua percakapan ke teks untuk dicadangkan",
-            "Bersihkan riwayat tanpa menghapus API key dan pengaturan"
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Matikan penyimpanan riwayat"
-        },
-        {
-          "type": "p",
-          "t": "Di Pengaturan, matikan 'Simpan riwayat obrolan' kalau kamu tidak ingin percakapan disimpan."
-        }
-      ]
-    },
-    {
-      "id": "privasi",
-      "title": "Privasi",
-      "icon": "shield",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "Aplikasi ini dirancang supaya data kamu tetap di tangan kamu."
-        },
-        {
-          "type": "list",
-          "items": [
-            "API key, riwayat, dan pengaturan disimpan di HP ini.",
-            "Yang dikirim ke server hanya isi chat yang kamu tulis.",
-            "Saat AI memakai tool web, halaman yang dibuka memang dikirim ke penyedia AI.",
-            "Tidak ada analitik atau pelacakan pengguna."
-          ]
-        },
-        {
-          "type": "note",
-          "t": "Penting: API key yang tertanam di dalam APK bisa diekstrak siapa pun yang memegang file APK-nya. Jangan bagikan APK ke orang yang tidak kamu percaya."
-        }
-      ]
-    },
-    {
-      "id": "tips",
-      "title": "Tips Pakai",
-      "icon": "bulb",
-      "blocks": [
-        {
-          "type": "h",
-          "t": "Prompt yang efektif"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Sebut peran: 'Kamu seorang editor' atau 'Jelaskan seperti untuk anak SMA'",
-            "Beri konteks, jangan cuma perintah singkat",
-            "Tentukan format: 'dalam 5 poin', 'sebagai tabel', 'maksimal 200 kata'",
-            "Sebut batasan yang tidak boleh dilanggar"
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Hasil lebih baik"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Kreativitas rendah (0-0.3) untuk fakta, kode, dan terjemahan",
-            "Kreativitas sedang (0.5-0.8) untuk ide dan tulisan",
-            "Kreativitas tinggi (1.0-1.5) untuk cerita dan brainstorming",
-            "Kirim ulang pertanyaan yang sama untuk melihat jawaban lain"
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Menghemat kuota"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Pakai model ringan untuk percakapan biasa",
-            "Matikan reasoning kalau tidak butuh jawaban mendalam",
-            "Bersihkan riwayat lama supaya app lebih ringan",
-            "Gunakan instruksi sistem untuk mengatur gaya jawaban sekali saja"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "trouble",
-      "title": "Troubleshooting",
-      "icon": "wrench",
-      "blocks": [
-        {
-          "type": "h",
-          "t": "'Gagal: Isi API key dulu'"
-        },
-        {
-          "type": "p",
-          "t": "Buka Pengaturan, pilih penyedia yang mau dipakai, lalu isi API key dan ketuk Simpan dan uji koneksi."
-        },
-        {
-          "type": "h",
-          "t": "'Akses ditolak (401/403)'"
-        },
-        {
-          "type": "p",
-          "t": "API key salah atau kedaluwarsa. Pastikan key dibuat dari akun yang sama dengan penyedia yang dipilih."
-        },
-        {
-          "type": "h",
-          "t": "'Batas pemakaian gratis tercapai'"
-        },
-        {
-          "type": "p",
-          "t": "Tunggu beberapa menit lalu coba lagi, atau ganti ke model lain."
-        },
-        {
-          "type": "h",
-          "t": "'Model tidak mendukung gambar'"
-        },
-        {
-          "type": "p",
-          "t": "Pilih model yang mendukung vision, atau tuliskan isi gambar secara manual."
-        },
-        {
-          "type": "h",
-          "t": "'Gagal terhubung'"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Cek koneksi internet.",
-            "Coba ganti dari WiFi ke data seluler atau sebaliknya.",
-            "Tutup aplikasi lalu buka lagi."
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Aplikasi lambat"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Ganti ke model yang lebih ringan.",
-            "Tutup tab lain yang banyak memakai RAM.",
-            "Bersihkan riwayat obrolan yang sudah sangat banyak."
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Browse kosong"
-        },
-        {
-          "type": "p",
-          "t": "Situs tujuan mungkin butuh JavaScript atau login. Coba salin isi halaman manual ke chat."
-        }
-      ]
-    },
-    {
-      "id": "tentang",
-      "title": "Tentang Aplikasi",
-      "icon": "info",
-      "blocks": [
-        {
-          "type": "p",
-          "t": "DIVJUN AI adalah aplikasi chat AI yang menggabungkan beberapa penyedia AI dalam satu tempat, ditambah direktori alat AI."
-        },
-        {
-          "type": "h",
-          "t": "Yang kamu dapatkan"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Chat AI streaming dengan dukungan tool",
-            "Pembaca halaman web langsung dari chat",
-            "Cek cuaca real-time",
-            "Input suara, foto, dan file",
-            "Riwayat percakapan yang tersimpan lokal",
-            "Direktori alat AI dari banyak kategori",
-            "Mode terang/gelap dan ukuran teks yang bisa diatur"
-          ]
-        },
-        {
-          "type": "h",
-          "t": "Dibuat oleh"
-        },
-        {
-          "type": "p",
-          "t": "DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS."
-        }
-      ]
+     "type": "p",
+     "t": "Ikon di pojok kanan bawah menyesuaikan isi kolom. Kosong berarti telepon untuk mode suara, ada teks berarti panah kirim, dan sedang menjawab berarti tombol stop. Semuanya berjalan otomatis."
     }
-  ]
+   ]
+  },
+  {
+   "id": "api-key",
+   "title": "API key explained",
+   "icon": "key",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "API key adalah kunci pribadi kamu di Groq. Semua permintaan ke AI memakai key ini, dan itulah yang membuat AI bisa menjawab."
+    },
+    {
+     "type": "h",
+     "t": "Kenapa key tidak perlu saya isi sendiri?"
+    },
+    {
+     "type": "p",
+     "t": "Key sudah tertanam di dalam aplikasi ini. Semua pengguna memakai key yang sama, sehingga kamu tidak perlu mencari, menyalin, atau menyimpannya sendiri. Aplikasi juga tidak menampilkan teks key demi keamanan, sehingga orang lain yang memegang file APK tidak akan dengan sengaja membacanya."
+    },
+    {
+     "type": "h",
+     "t": "Kalau model tidak bisa dimuat"
+    },
+    {
+     "type": "steps",
+     "items": [
+      "Buka Pengaturan, pastikan status di bagian atas tertulis **Terhubung**.",
+      "Kalau tertulis **Belum terhubung**, berarti koneksi ke server Groq gagal.",
+      "Coba ganti dari WiFi ke data seluler atau sebaliknya.",
+      "Tutup aplikasi lalu buka lagi karena daftar model diambil ulang otomatis."
+     ]
+    },
+    {
+     "type": "note",
+     "t": "Groq punya batas pemakaian gratis. Kalau batasnya tercapai, tunggu beberapa menit atau pilih model lain di tab Alat AI."
+    }
+   ]
+  },
+  {
+   "id": "model",
+   "title": "Memahami model AI",
+   "icon": "cpu",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Model AI adalah otak yang menjawab pertanyaanmu. Semua model di tab **Alat AI** diambil langsung dari API key kamu, jadi yang tampil hanya model yang benar-benar bisa kamu pakai."
+    },
+    {
+     "type": "h",
+     "t": "Kategori model"
+    },
+    {
+     "type": "list",
+     "items": [
+      "**Reasoning** - berpikir bertahap sebelum menjawab. Paling akurat untuk hitungan, logika, dan kode, tapi butuh waktu lebih lama.",
+      "**Cepat** - model kecil dengan jawaban nyaris instan. Cocok untuk percakapan sehari-hari.",
+      "**Umum** - seimbang antara kecepatan dan kualitas. Bagus untuk sebagian besar kebutuhan.",
+      "**Vision** - bisa membaca gambar. Wajib dipakai kalau kamu mengirim foto.",
+      "**Audio** - untuk suara, tidak dipakai untuk chat biasa."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Kenapa tidak perlu memilih model sendiri?"
+    },
+    {
+     "type": "p",
+     "t": "Aplikasi memilih model paling cocok secara otomatis untuk setiap pertanyaan. Kalau model itu gagal, terlalu lama, atau kehabisan kuota, aplikasi diam-diam pindah ke model lain. Kamu tetap bisa melihat model yang sedang dipakai lewat chip kecil di samping tombol plus."
+    },
+    {
+     "type": "h",
+     "t": "Arti badge pada model"
+    },
+    {
+     "type": "list",
+     "items": [
+      "**stabil** - model inireload sering berhasil dipakai.",
+      "**sering gagal** - model ini pernah gagal beberapa kali, jadi dipilih lebih jarang.",
+      "**Gambar** - model ini bisa menganalisis foto.",
+      "**131K atau 128K** - panjang konteks, yaitu seberapa banyak teks yang bisa dibahas dalam satu percakapan.",
+      "**20B atau 70B** - jumlah parameter model. Semakin besar umumnya semakin pintar, tapi juga semakin lambat."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gambar",
+   "title": "Kirim foto dan gambar",
+   "icon": "camera",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Kamu bisa mengirim foto lalu bertanya tentang isinya. Aplikasi akan membaca gambar dan menjawab berdasarkan apa yang terlihat."
+    },
+    {
+     "type": "h",
+     "t": "Cara mengirim"
+    },
+    {
+     "type": "steps",
+     "items": [
+      "Ketuk tombol **plus** di kolom input.",
+      "Pilih **Kamera** untuk foto baru, atau **Foto** untuk memilih dari galeri.",
+      "Tunggu thumbnail muncul di atas kolom input.",
+      "Ketuk tombol kirim."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Syarat penting"
+    },
+    {
+     "type": "note",
+     "t": "Tidak semua model bisa membaca gambar. Aplikasi otomatis memilih model yang mendukung gambar. Kalau kebetulan tidak ada, kamu akan melihat badge peringatan dan pertanyaan dikirim tanpa gambar, lalu AI meminta kamu menjelaskan isinya."
+    },
+    {
+     "type": "h",
+     "t": "Tips hasil lebih bagus"
+    },
+    {
+     "type": "list",
+     "items": [
+      "Ambil foto yang jelas dan terang.",
+      "Pakai jarak dekat supaya tulisan terbaca.",
+      "Kalau ada banyak teks, ambil per bagian.",
+      "Tambahkan pertanyaan spesifik. Contoh: \"apa tertulis di sudut kanan?\" jauh lebih baik daripada \"ini apa?\"."
+     ]
+    },
+    {
+     "type": "note",
+     "t": "Gambar otomatis dikecilkan supaya hemat kuota dan tidak lambat diproses."
+    }
+   ]
+  },
+  {
+   "id": "suara",
+   "title": "Berbicara dengan AI",
+   "icon": "phone",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Ada dua cara bicara dengan AI, keduanya tanpa perlu mengetik."
+    },
+    {
+     "type": "h",
+     "t": "Mode 1 - Sekali dengar"
+    },
+    {
+     "type": "p",
+     "t": "Cocok untuk bertanya singkat. Ikon telepon muncul di kanan bawah kalau kolom input kosong."
+    },
+    {
+     "type": "steps",
+     "items": [
+      "Ketuk ikon telepon.",
+      "Bicara seperti biasa.",
+      "Ketika kamu berhenti bicara, teks langsung terkirim otomatis."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Mode 2 - Ngobrol panjang"
+    },
+    {
+     "type": "p",
+     "t": "Cocok untuk ngobrol bebas tanpa menyentuh HP. Ketuk ikon telepon di header, di samping tombol obrolan baru."
+    },
+    {
+     "type": "list",
+     "items": [
+      "Mikrofon menyala terus tanpa perlu ditekan-tahan.",
+      "Kamu bicara, AI mendengar, lalu AI menjawab dengan suara.",
+      "Mikrofon dijeda otomatis saat AI bicara supaya AI tidak mendengar dirinya sendiri.",
+      "Tombol **Bisukan** mematikan mikrofon sementara.",
+      "Tombol merah besar mengakhiri panggilan.",
+      "Timer di atas menampilkan durasi panggilan."
+     ]
+    },
+    {
+     "type": "note",
+     "t": "Semua suara diproses di HP. Kalau HP tidak punya data suara Indonesia, aplikasi otomatis memakai suara Inggris."
+    }
+   ]
+  },
+  {
+   "id": "web",
+   "title": "Membaca internet",
+   "icon": "globe",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "AI bisa membuka halaman web lalu menjawab berdasarkan isi halaman itu. Ini untuk informasi yang berubah-ubah seperti berita, harga, jadwal, atau hasil pertandingan."
+    },
+    {
+     "type": "h",
+     "t": "Cara memaksa AI membaca web"
+    },
+    {
+     "type": "list",
+     "items": [
+      "Sebut URL-nya langsung. Contoh: \"baca developer.android.com lalu jelaskan adaptive icon\".",
+      "Atau tanya dengan kata \"terbaru\", \"berita\", \"hari ini\", atau \"harga\". Aplikasi akan mencari dulu lalu membaca hasilnya.",
+      "Untuk hal yang cepat berubah: \"berapa harga terbaru iPhone?\""
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Kapan tidak bisa dibaca"
+    },
+    {
+     "type": "list",
+     "items": [
+      "Situs yang isinya muncul setelah diklik, seperti Twitter, YouTube, dan aplikasi web dinamis. Kontennya dirender dengan JavaScript.",
+      "Situs yang butuh login atau berbayar.",
+      "Tulisan yang ada di dalam gambar. AI membaca gambar, bukan kode HTML halaman."
+     ]
+    },
+    {
+     "type": "note",
+     "t": "Kalau gagal, buka URL-nya manual di browser lalu salin teksnya ke chat. Tetap bisa dibantu."
+    }
+   ]
+  },
+  {
+   "id": "cuaca",
+   "title": "Mengecek cuaca",
+   "icon": "cloud",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Tanya cuaca dan AI akan mengambil data real-time, bukan mengarang. Contoh: \"cuaca Jakarta sekarang\" atau \"besok Bandung hujan tidak\"."
+    },
+    {
+     "type": "h",
+     "t": "Data yang didapat"
+    },
+    {
+     "type": "list",
+     "items": [
+      "Suhu sekarang dan suhu yang dirasakan",
+      "Kelembapan udara",
+      "Kecepatan dan arah angin",
+      "Indeks UV atau radiasi matahari",
+      "Suhu minimum dan maksimum hari ini",
+      "Waktu terbit dan terbenam",
+      "Prakiraan besok"
+     ]
+    },
+    {
+     "type": "note",
+     "t": "Untuk pertanyaan cuaca, AI memakai jalur data khusus supaya jawabannya cepat tanpa menunggu model berpikir panjang."
+    }
+   ]
+  },
+  {
+   "id": "riwayat",
+   "title": "Riwayat dan proyek",
+   "icon": "clock",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Semua percakapan tersimpan di HP kamu. Yang dikirim ke server hanya isi chat yang kamu tulis."
+    },
+    {
+     "type": "h",
+     "t": "Menu tekan panjang"
+    },
+    {
+     "type": "p",
+     "t": "Tekan dan tahan percakapan di riwayat untuk membuka menu berisi Ganti nama, Sematkan, Tambah ke proyek, dan Hapus."
+    },
+    {
+     "type": "h",
+     "t": "Proyek"
+    },
+    {
+     "type": "p",
+     "t": "Proyek adalah kelompokan percakapan. Buat lewat menu Tambah ke proyek lalu Buat proyek baru. Chip proyek muncul di bagian atas riwayat, dan tekan-tahan chip itu untuk mengubah nama atau menghapus proyek."
+    },
+    {
+     "type": "h",
+     "t": "Mencari percakapan lama"
+    },
+    {
+     "type": "p",
+     "t": "Kolom pencarian cocokkan judul dan isi pesan sekaligus, jadi tidak perlu ingat kata kuncinya persis."
+    },
+    {
+     "type": "h",
+     "t": "Membersihkan"
+    },
+    {
+     "type": "p",
+     "t": "Menu Bersihkan riwayat menghapus semua percakapan tapi mempertahankan pengaturan dan pilihan font. Menu Hapus semua data menghapus semuanya termasuk preferensi."
+    }
+   ]
+  },
+  {
+   "id": "edit",
+   "title": "Edit dan kirim ulang",
+   "icon": "edit",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Salah ketik? Tidak perlu menghapus seluruh riwayat."
+    },
+    {
+     "type": "steps",
+     "items": [
+      "Di bawah pesanmu akan muncul tombol **Edit**.",
+      "Ubah teksnya sesuai yang kamu mau.",
+      "Banner biru muncul dengan tombol **Kirim ulang**.",
+      "Setelah diketuk, percakapan setelah pesan itu dipotong dan pesan barunya dikirim."
+     ]
+    },
+    {
+     "type": "note",
+     "t": "Kalau berubah pikiran, tekan tombol silang di banner. Percakapan tidak berubah sama sekali."
+    }
+   ]
+  },
+  {
+   "id": "tampilan",
+   "title": "Tampilan dan keterbacaan",
+   "icon": "font",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Semua teks aplikasi bisa diatur supaya nyaman untuk mata dan gaya baca kamu."
+    },
+    {
+     "type": "h",
+     "t": "Jenis font"
+    },
+    {
+     "type": "list",
+     "items": [
+      "**Inter** - netral dan paling mudah dibaca.",
+      "**Inter Light** - ringan, enak untuk baca panjang.",
+      "**Inter Medium** - agak tegas, cocok untuk data.",
+      "**Inter SemiBold** - tegas tanpa terasa berat.",
+      "**Inter Bold** - untuk yang ingin jawaban tegas.",
+      "**Inter ExtraBold** - paling tebal.",
+      "**JetBrains Mono** - monospace, paling enak untuk membaca kode."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Ukuran teks"
+    },
+    {
+     "type": "p",
+     "t": "Tiga pilihan: kecil, normal, dan besar. Pengaturan ini memengaruhi seluruh aplikasi termasuk jawaban AI."
+    },
+    {
+     "type": "h",
+     "t": "Mode warna"
+    },
+    {
+     "type": "p",
+     "t": "Otomatis mengikuti pengaturan HP. Kalau HP dalam mode gelap, aplikasi ikut gelap dan sebaliknya. Gelap dan Terang memaksa mode tertentu. Bilah status dan bilah navigasi juga ikut menyesuaikan."
+    }
+   ]
+  },
+  {
+   "id": "privacy",
+   "title": "Privasi dan keamanan",
+   "icon": "shield",
+   "blocks": [
+    {
+     "type": "p",
+     "t": "Aplikasi ini dirancang supaya data tetap di tangan kamu."
+    },
+    {
+     "type": "list",
+     "items": [
+      "Riwayat obrolan, pengaturan, dan pilihan font disimpan hanya di HP ini.",
+      "Yang dikirim ke server hanya isi chat yang kamu tulis.",
+      "Saat AI memakai browser, isi halaman yang dibaca memang dikirim ke penyedia AI. Ini konsekuensi dari meminta AI membaca web.",
+      "Tidak ada analitik, tidak ada pelacakan, dan tidak ada iklan.",
+      "Izin kamera, mikrofon, dan foto hanya diminta saat kamu benar-benar memakai fiturnya."
+     ]
+    },
+    {
+     "type": "note",
+     "t": "Penting: API key yang tertanam di dalam APK secara teknis bisa diekstrak oleh orang yang sangat gigih. Karena itu jangan bagikan file APK ke orang yang tidak kamu percaya. Lebih baik beri tahu orang lain cara memasang dari sumber resmi."
+    }
+   ]
+  },
+  {
+   "id": "tips",
+   "title": "Tips memakai AI",
+   "icon": "bulb",
+   "blocks": [
+    {
+     "type": "h",
+     "t": "Cara bertanya yang hasilnya bagus"
+    },
+    {
+     "type": "list",
+     "items": [
+      "Sebut peran. Contoh: \"Kamu seorang editor berpengalaman\" atau \"Jelaskan seperti untuk anak SMA\".",
+      "Beri konteks, jangan hanya perintah satu kalimat.",
+      "Tentukan format. Contoh: \"dalam 5 poin\", \"sebagai tabel\", atau \"maksimal 200 kata\".",
+      "Sebut batasan yang tidak boleh dilanggar."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Mengatur Kreativitas di Pengaturan"
+    },
+    {
+     "type": "list",
+     "items": [
+      "**0.0 sampai 0.3** - untuk fakta, kode, terjemahan, dan hitungan.",
+      "**0.5 sampai 0.8** - untuk penjelasan dan ide.",
+      "1.0 sampai 1.5 - untuk cerita, puisi, dan brainstorming."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Instruksi tambahan"
+    },
+    {
+     "type": "p",
+     "t": "Di Pengaturan bagian Instruksi tambahan, kamu bisa mengaturnya sekali saja, misalnya \"selalu jawab singkat\". Semua percakapan berikutnya ikut aturan itu tanpa perlu mengulang."
+    },
+    {
+     "type": "h",
+     "t": "Hemat kuota"
+    },
+    {
+     "type": "list",
+     "items": [
+      "Pakai model ringan untuk percakapan biasa karena aplikasi sudah memilih otomatis.",
+      "Matikan simpan riwayat kalau tidak perlu.",
+      "Bersihkan riwayat lama supaya aplikasi tetap ringan.",
+      "Gunakan instruksi tambahan untuk mengatur gaya, bukan mengulang di tiap pesan."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "trouble",
+   "title": "Mengatasi masalah",
+   "icon": "wrench",
+   "blocks": [
+    {
+     "type": "h",
+     "t": "Status Belum terhubung"
+    },
+    {
+     "type": "steps",
+     "items": [
+      "Cek koneksi internet.",
+      "Buka Pengaturan dan lihat status koneksi.",
+      "Tutup aplikasi lalu buka lagi."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Batas pemakaian gratis tercapai"
+    },
+    {
+     "type": "p",
+     "t": "Tunggu beberapa menit lalu coba lagi. Kalau sering terjadi, pilih model lain di tab Alat AI."
+    },
+    {
+     "type": "h",
+     "t": "Gagal mengirim lampiran"
+    },
+    {
+     "type": "p",
+     "t": "Model yang dipakai tidak bisa membaca gambar. Aplikasi otomatis mencoba model lain yang bisa. Kalau tetap gagal, kirim ulang dengan cara biasa."
+    },
+    {
+     "type": "h",
+     "t": "Izin ditolak"
+    },
+    {
+     "type": "p",
+     "t": "Buka Izin dan Privasi di drawer, atau lewat Pengaturan Android ke Aplikasi lalu DIVJUN AI. Kalau Android sudah memblokir izin setelah dua kali ditolak, satu-satunya cara adalah lewat Pengaturan Android."
+    },
+    {
+     "type": "h",
+     "t": "Suara tidak bunyi"
+    },
+    {
+     "type": "steps",
+     "items": [
+      "Cek volume HP.",
+      "Cek izin mikrofon.",
+      "Pastikan tidak ada aplikasi lain yang sedang memakai mikrofon.",
+      "Tutup aplikasi lalu buka lagi."
+     ]
+    },
+    {
+     "type": "h",
+     "t": "Pengaturan tampilan tidak berubah"
+    },
+    {
+     "type": "p",
+     "t": "Tutup aplikasi sepenuhnya dari Recent lalu buka lagi. Pengaturan font dan mode warna dibaca saat aplikasi dimulai."
+    }
+   ]
+  }
+ ]
 }

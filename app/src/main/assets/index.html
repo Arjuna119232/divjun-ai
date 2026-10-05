@@ -11,14 +11,29 @@
 <style>
 @font-face{font-family:'InterVar';src:url('fonts/InterVariable.ttf') format('truetype-variations');font-weight:100 900;font-style:normal;font-display:swap}
 @font-face{font-family:'InterVar';src:url('fonts/InterVariable-Italic.ttf') format('truetype-variations');font-weight:100 900;font-style:italic;font-display:swap}
+@font-face{font-family:'InterThin';src:url('fonts/Inter-Thin.ttf') format('truetype');font-weight:300;font-display:swap}
+@font-face{font-family:'InterThin';src:url('fonts/Inter-Light.ttf') format('truetype');font-weight:300;font-display:swap}
+@font-face{font-family:'InterLit';src:url('fonts/Inter-Light.ttf') format('truetype');font-weight:300;font-display:swap}
+@font-face{font-family:'InterLit';src:url('fonts/Inter-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'InterLit';src:url('fonts/Inter-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'InterMed';src:url('fonts/Inter-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'InterMed';src:url('fonts/Inter-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:'InterSemi';src:url('fonts/Inter-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:'InterSemi';src:url('fonts/Inter-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+@font-face{font-family:'InterBold';src:url('fonts/Inter-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+@font-face{font-family:'InterBold';src:url('fonts/Inter-ExtraBold.ttf') format('truetype');font-weight:800;font-display:swap}
+@font-face{font-family:'InterBlack';src:url('fonts/Inter-ExtraBold.ttf') format('truetype');font-weight:800;font-display:swap}
+@font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-Light.ttf') format('truetype');font-weight:300;font-display:swap}
 @font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
 @font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
 @font-face{font-family:'JBMono';src:url('fonts/JetBrainsMono-Italic.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap}
-:root{--bg:#FAF9F7;--panel:#FFF;--line:#E4E1DA;--tx:#1F1E1D;--mu:#78756D;--ac:#141413;--acx:#FFF;--ub:#F0EEE8;--lk:#5B4FD1;--ok:#1B8A6B;--er:#C9372C;--fs:1;--sf:"InterVar",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+:root{--bg:#FAF9F7;--panel:#FFF;--line:#E4E1DA;--tx:#1F1E1D;--mu:#78756D;--ac:#141413;--acx:#FFF;--ub:#F0EEE8;--lk:#5B4FD1;--ok:#1B8A6B;--er:#C9372C;--fs:1;--fi:'InterVar';--sf:"InterVar",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 :root[data-th=dark]{--bg:#1F1E1D;--panel:#2B2A27;--line:#3D3B36;--tx:#F3F1EB;--mu:#A5A199;--ac:#F3F1EB;--acx:#1F1E1D;--ub:#34322E;--lk:#A99DFF;--ok:#5EEAD4;--er:#FF8A80}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{height:100%;background:var(--bg);color:var(--tx);font:calc(16px*var(--fs))/1.55 "InterVar",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:background .25s,color .25s}
+html,body{height:100%;background:var(--bg);color:var(--tx);font:calc(16px*var(--fs))/1.55 var(--fi),system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:background .25s,color .25s}
 #app{display:flex;flex-direction:column;height:100%}
 header{display:flex;align-items:center;gap:6px;padding:10px 12px;min-height:60px}
 .sd{min-width:92px;display:flex}.rg{justify-content:flex-end}.cact{display:flex;gap:6px}
@@ -306,6 +321,13 @@ pre.mp-pre .n{color:#0550AE}
 [data-th=dark] pre.mp-pre .s{color:#7EE787}
 [data-th=dark] pre.mp-pre .n{color:#79C0FF}
 
+/* ===== FONT PICKER ===== */
+.fontgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.fcard{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel);text-align:left}
+.fcard b{display:block;font-size:1.1em;margin-bottom:2px}
+.fcard small{display:block;color:var(--mu);font-size:.72em}
+.fcard.on{border-color:var(--lk);box-shadow:0 0 0 1px var(--lk) inset}
+.fprev{font-size:.82em;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* ===== AUTOPILOT STATUS ===== */
 .mstat{display:inline-flex;align-items:center;gap:8px;background:var(--ub);border-radius:999px;padding:7px 13px;font-size:.83em;color:var(--mu);margin-bottom:9px}
 .mstat .dots i{width:6px;height:6px;margin:0;background:var(--lk)}
@@ -543,6 +565,30 @@ let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('sh
 function ask(o){return new Promise(res=>{$('#mt').textContent=o.title;$('#mb').textContent=o.body||'';const i=$('#mi'),has=o.input!=null;i.style.display=has?'block':'none';i.value=o.input||'';const ok=$('#mok');ok.textContent=o.ok||'Oke';ok.className='btn '+(o.danger?'dng':'pri');$('#modal').classList.add('open');if(has)setTimeout(()=>i.focus(),250);modalRes=v=>{$('#modal').classList.remove('open');modalRes=null;res(v)};ok.onclick=()=>modalRes(has?i.value.trim():true);$('#mno').onclick=()=>modalRes(null)})}
 const darkMQ=matchMedia('(prefers-color-scheme: dark)');
 function themeNow(){return cfg.theme==='dark'||(cfg.theme==='auto'&&darkMQ.matches)?'dark':'light'}
+const FONTS=[
+  {id:'InterVar',n:'Inter',w:'100-900',d:'Default - palingnetral',s:'Aa Bb Cc 123'},
+  {id:'InterLit',n:'Inter Light',w:'300',d:'Ringan, nyaman dibaca lama',s:'Aa Bb Cc 123'},
+  {id:'InterMed',n:'Inter Medium',w:'500',d:'Agak tegas, cocok untuk data',s:'Aa Bb Cc 123'},
+  {id:'InterSemi',n:'Inter SemiBold',w:'600',d:'Tegas tanpa berat',s:'Aa Bb Cc 123'},
+  {id:'InterBold',n:'Inter Bold',w:'700',d:'Bold, untuk jawaban tegas',s:'Aa Bb Cc 123'},
+  {id:'InterBlack',n:'Inter ExtraBold',w:'800',d:'Paling tebal di семей ini',s:'Aa Bb Cc 123'},
+  {id:'JBMono',n:'JetBrains Mono',w:'300-700',d:'Monospace, enak untuk kode',s:'const x=1;'}
+];
+function applyFont(){
+  const f=FONTS.find(x=>x.id===cfg.font)||FONTS[0];
+  document.documentElement.style.setProperty('--fi',"'"+f.id+"'");
+  document.documentElement.style.setProperty('--fw',f.w);
+}
+function renderFontPicker(){
+  const cur=cfg.font||FONTS[0].id;
+  const grid='<div class="fontgrid">'+FONTS.map(f=>
+    '<button class="fcard'+(f.id===cur?' on':'')+'" data-font="'+f.id+'">'+
+    '<b style="font-family:\''+f.id+'\'">'+f.n+'</b>'+
+    '<small>'+f.d+'</small>'+
+    '<div class="fprev" style="font-family:\''+f.id+'\'">'+f.s+'</div></button>').join('')+'</div>'+
+    '<button class="btn pri" data-ea="savefont" style="width:100%;margin-top:14px">Simpan pilihan</button>';
+  $('#sp').innerHTML='<div class="sh"><button class="ib" data-sx="1" aria-label="Tutup">'+sv('<path d="M6 6l12 12M18 6L6 18"/>')+'</button><b>Font Teks</b></div>'+grid;
+}
 function applyTheme(){
   const th=themeNow();
   document.documentElement.dataset.th=th;
@@ -1176,13 +1222,13 @@ function renderSet(){
   const sw=(k,ic,t,on)=>'<button class="sr" data-se="'+k+'">'+ic+'<span><b>'+t+'</b></span><i class="sw'+(on?' on':'')+'"></i></button>';
   $('#setp').innerHTML='<div class="sg"><div class="sr top"><span><b>'+p.name+'</b></span><i class="bdg">'+(realKey()?'Terhubung':'Belum terhubung')+'</i></div></div>'+
    '<div class="sg">'+r('model',SI.model,'Model AI',usedM?fn(usedM)+' (otomatis)':'Otomatis — terbaik sendiri')+'</div>'+
-   '<div class="sg">'+r('theme',SI.moon,'Mode warna',(cfg.theme==='auto'?'Otomatis':TH[cfg.theme])+' · '+(themeNow()==='dark'?'Gelap':'Terang'))+r('fs',SI.font,'Ukuran teks',FS[cfg.fs]||'Normal')+'</div>'+
+   '<div class="sg">'+r('theme',SI.moon,'Mode warna',(cfg.theme==='auto'?'Otomatis':TH[cfg.theme])+' · '+(themeNow()==='dark'?'Gelap':'Terang'))+r('font',SI.fontx||SI.font,'Jenis font',(FONTS.find(f=>f.id===(cfg.font||FONTS[0].id))||FONTS[0]).n)+r('fs',SI.font,'Ukuran teks',FS[cfg.fs]||'Normal')+'</div>'+
    '<div class="sg">'+r('sys',SI.sys,'Instruksi tambahan',cfg.system?cfg.system.slice(0,40)+(cfg.system.length>40?'...':''):'Tidak ada (identitas DIVJUN AI sudah bawaan)')+r('temp',SI.temp,'Kreativitas jawaban',String(cfg.temp))+'</div>'+
    '<div class="sg">'+sw('hist',SI.hist,'Simpan riwayat obrolan',cfg.hist!==false)+r('exp',IC.share,'Ekspor semua obrolan')+r('clr',IC.trash,'Bersihkan riwayat')+'</div>'+
    '<div class="sg">'+r('perm',SI.shield,'Izin aplikasi',permSummary())+r('docs',SI.book,'Dokumentasi penyedia')+r('about',SI.info,'Tentang DIVJUN AI','Versi '+ver())+'</div>'+
    '<div class="sg">'+r('wipe',IC.trash,'Hapus semua data','', ' dg')+'</div>';
 }
-function refreshSheet(){sheetMode==='model'?renderSheet():(sheetMode==='chatmenu'||sheetMode==='projmenu'?renderChatMenu():renderEdit())}
+function refreshSheet(){sheetMode==='model'?renderSheet():(sheetMode==='fontpick'?renderFontPicker():(sheetMode==='chatmenu'||sheetMode==='projmenu'?renderChatMenu():renderEdit()))}
 // ===== MENU TEKAN PANJANG (riwayat) =====
 let lpTimer=null,lpInfo=null,lpFired=false;
 function lpCancel(){clearTimeout(lpTimer);lpTimer=null;lpInfo=null}
@@ -1296,6 +1342,7 @@ function seAct(k){
   else if(k==='model')openSheet();
   else if(k==='prov'||k==='key')toast('API key sudah tertanam di aplikasi');
   else if(['theme','fs','sys','temp'].includes(k))openEdit(k);
+  else if(k==='font'){sheetMode='fontpick';renderFontPicker();$('#sheet').classList.add('open')}
   else if(k==='hist'){cfg.hist=cfg.hist===false;save();persist();renderSet();toast(cfg.hist===false?'Riwayat tidak disimpan':'Riwayat disimpan')}
   else if(k==='exp')chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
   else if(k==='clr')ask({title:'Bersihkan riwayat?',body:'Semua percakapan akan dihapus. API key dan pengaturan tetap aman.',ok:'Bersihkan',danger:1}).then(v=>{if(v){chats=[];cur='';persist();render();toast('Riwayat dibersihkan')}});
@@ -1304,6 +1351,7 @@ function seAct(k){
   else if(k==='wipe')$('#wipe').click();
 }
 function eaAct(a){
+  if(a==='savefont'){cfg.font=document.querySelector('.fcard.on')?.dataset.font||FONTS[0].id;save();applyFont();closeSheet();renderSet();toast('Font disimpan')}
   if(a==='eye'){const k=$('#ek');k.type=k.type==='password'?'text':'password'}
   else if(a==='get'){const u=PROV[cfg.route].keyUrl;A?A.open(u):window.open(u)}
   else if(a==='key'){const v=$('#ek').value.trim();cfg.key=v;cfg.kk[cfg.route]=v;save();const s=$('#es');s.style.color='var(--mu)';s.textContent='Menguji koneksi...';loadModels((ok,info)=>{s.style.color=ok?'var(--ok)':'var(--er)';s.textContent=ok?'Terhubung. '+info+' model tersedia.':'Gagal: '+info;if(ok){render();renderSet();toast('Terhubung')}})}
@@ -1438,7 +1486,7 @@ function pickWeb(kind){
 }
 document.addEventListener('click',async e=>{
   if(lpFired){lpFired=false;return}
-  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-pk],[data-rm],[data-se],[data-ea],[data-more],[data-m],[data-sp],[data-mo],[data-sx],[data-dc],[data-t],[data-usem],[data-lp],[data-lpp],[data-cm],[data-pm],[data-pa],[data-hf],[data-ed]');
+  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-pk],[data-rm],[data-se],[data-ea],[data-more],[data-m],[data-sp],[data-mo],[data-sx],[data-dc],[data-t],[data-usem],[data-lp],[data-lpp],[data-cm],[data-pm],[data-pa],[data-hf],[data-ed],[data-font]');
   if(!t)return;const d=t.dataset;
   if(d.q)send(d.q);
   else if(d.go)go(d.go);
@@ -1449,6 +1497,7 @@ document.addEventListener('click',async e=>{
   else if(d.pm){pmAct(d.pm)}
   else if(d.pa!==undefined){paAct(d.pa)}
   else if(d.hf){hFilter=d.hf;renderHist()}
+  else if(d.font){const c=e.target.closest('.fcard');if(c){document.querySelectorAll('.fcard').forEach(x=>x.classList.remove('on'));c.classList.add('on')}}
   else if(d.ed!==undefined){startEdit(+d.ed)}
   else if(d.usem){setModel(d.usem)}
   else if(d.u){A?A.open(d.u):window.open(d.u)}
@@ -1923,7 +1972,7 @@ function submitEdit(){
 $('#new').innerHTML=IC.plus;$('#more').innerHTML=IC.more;$('#burger').innerHTML=IC.menu;$('#eye').innerHTML=IC.eye;
 $('#route').innerHTML=Object.keys(PROV).map(k=>'<option value="'+k+'">'+PROV[k].name+'</option>').join('');renderProv();$('#mname').value=cfg.model;$('#sys').value=cfg.system;$('#tmp').value=cfg.temp;$('#tv').textContent=cfg.temp;
 $('#ver').textContent=A?'v'+A.version():'';
-fillModels([]);applyTheme();renderSeg();setBtn();render();loadModels();
+fillModels([]);applyFont();applyTheme();renderSeg();setBtn();render();loadModels();
 setTimeout(function(){var el=document.getElementById('splash');if(el){el.classList.add('out');setTimeout(function(){el.remove()},600)}
   if(st.get('onb')!=='1')onbShow();else updChip();},1500);
 </script>
