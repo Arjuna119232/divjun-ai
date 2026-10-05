@@ -18,8 +18,8 @@ android {
         applicationId 'com.divjun.ai'
         minSdk 24
         targetSdk 34
-        versionCode 22
-        versionName '1.10.0'
+        versionCode 23
+        versionName '1.10.1'
         buildConfigField 'String', 'GROQ_KEY', "\"${groqKey}\""
         buildConfigField 'String', 'GEMINI_KEY', "\"${geminiKey}\""
         vectorDrawables.useSupportLibrary = true

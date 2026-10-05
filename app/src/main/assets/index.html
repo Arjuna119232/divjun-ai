@@ -621,6 +621,35 @@ function paint(){const m=msgs(),el=document.querySelector('.a[data-i="'+(m.lengt
 const setBtn=()=>$('#send').innerHTML=busy?IC.stop:IC.send;
 function fin(){busy=null;persist();setBtn();updChip();render()}
 
+// Suntik konteks web ke pesan user TERAKHIR tanpa merusak format API.
+// Bentuk pesan bisa string (teks) atau array of parts (teks + gambar).
+function injectCtx(messages,ctx,a){
+  const i=messages.length-1;
+  const m=messages[i];
+  if(!m)return;
+  const block='\n\n'+CTX_TAG+'\n'+ctx;
+  if(a)a.status='Mengambil data dari web...';
+  if(typeof m.content==='string'){
+    m.content+=block;
+  }else if(Array.isArray(m.content)){
+    const part=m.content.find(x=>x&&x.type==='text');
+    if(part)part.text=(part.text||'')+block;
+    else m.content.unshift({type:'text',text:block.trim()});
+  }else{
+    m.content=block.trim();
+  }
+  if(a)paint();
+}
+const CTX_TAG='[DATA DARI WEB - ini hasil pembacaan internet, pakai untuk menjawab. Jangan bilang tidak bisa akses web.]';
+function stripCtx(messages){
+  const i=messages.length-1,m=messages[i];
+  if(!m)return false;
+  let did=false;
+  const cut=t=>{if(typeof t==='string'&&t.indexOf(CTX_TAG)>=0){did=true;return t.slice(0,t.indexOf(CTX_TAG))}return t};
+  if(typeof m.content==='string')m.content=cut(m.content);
+  else if(Array.isArray(m.content)){const part=m.content.find(x=>x&&x.type==='text');if(part)part.text=cut(part.text||'')}
+  return did;
+}
 function send(text){
   text=(text||'').trim();if(busy||(!text&&!att.length))return;if(!text)text='Jelaskan lampiran ini.';
   useBuilt();
@@ -635,15 +664,7 @@ function send(text){
   // PRE-FETCH: ambil data web dulu (kalau perlu) lalu ONE-shot ke model.
   // Ini menghapus 2-3 round trip tool-calling -> jauh lebih cepat.
   gatherContext(text).then(ctx=>{
-    if(ctx){
-      a.status='Mengambil data dari web...';
-      paint();
-      const lastIdx=messages.length-1;
-      const u=typeof messages[lastIdx]==='string'?messages[lastIdx]:(messages[lastIdx].text||'');
-      const withCtx=String(u)+'\n\n[DATA DARI WEB - gunakan ini untuk menjawab, jangan bilang tidak bisa akses web]\n'+ctx;
-      if(typeof messages[lastIdx]==='string')messages[lastIdx]=withCtx;
-      else messages[lastIdx].text=withCtx;
-    }
+    if(ctx)injectCtx(messages,ctx,a);
     runPlan(messages,a,hadImg);
   });
 }
@@ -753,6 +774,11 @@ function runPlan(messages,a,hadImg){
             // model ini tidak dukung tools → coba lagi tanpa tools
             if(code===400&&!tNoTools&&/tool|function|schema/i.test(raw)){
               delete pend[busy];attempt(true);return res(false);
+            }
+            // 400 + ada konteks web -> sekali lagi tanpa konteks (self-healing)
+            if(code===400&&!noTools&&stripCtx(messages)){
+              noteHealth(tModel,false);idx++;retried++;
+              delete pend[busy];attempt(noTools);return res(false);
             }
             const retryable=[408,409,425,429,500,502,503,504,520,522,524].indexOf(code)>=0;
             if(retryable&&idx<plan.length-1&&retried<MAXSW){
