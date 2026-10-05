@@ -12,7 +12,7 @@
     <string name="model_selector">Pilih Model</string>
     <string name="api_key_label">API Key</string>
     <string name="api_key_hint">Tempel API key di sini</string>
-    <string name="save_and_test">Simpan & Uji Koneksi</string>
+    <string name="save_and_test">Simpan &amp; Uji Koneksi</string>
     <string name="get_api_key">Dapatkan API Key</string>
     <string name="system_prompt_label">Instruksi Sistem</string>
     <string name="system_prompt_hint">Contoh: jawab selalu singkat</string>

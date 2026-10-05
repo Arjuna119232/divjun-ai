@@ -12,7 +12,7 @@
     <string name="model_selector">Select Model</string>
     <string name="api_key_label">API Key</string>
     <string name="api_key_hint">Paste your API key here</string>
-    <string name="save_and_test">Save & Test Connection</string>
+    <string name="save_and_test">Simpan &amp; Uji Koneksi</string>
     <string name="get_api_key">Get API Key</string>
     <string name="system_prompt_label">System Instructions</string>
     <string name="system_prompt_hint">e.g., always answer concisely</string>
