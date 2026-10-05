@@ -73,6 +73,11 @@ class MainActivity : Activity() {
                 web.evaluateJavascript("window.__ttsDone&&window.__ttsDone()", null)
             }
         }
+        speaker.onError = { why ->
+            runOnUiThread {
+                web.evaluateJavascript("window.__ttsErr&&window.__ttsErr('" + why + "')", null)
+            }
+        }
         speaker.init()
     }
 
@@ -357,7 +362,7 @@ class MainActivity : Activity() {
         }
 
         /** TTS untuk mode panggilan. */
-        @JavascriptInterface fun ttsReady(): Boolean = speaker.isSpeaking
+        @JavascriptInterface fun ttsReady(): Boolean = speaker.ready()
 
         @JavascriptInterface fun ttsSay(sentences: String) {
             val list = try {

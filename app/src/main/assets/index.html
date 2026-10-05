@@ -515,6 +515,7 @@ pre.mp-pre .n{color:#0550AE}
   </div>
   <div class="cbot">
     <button class="cbtn" id="cmute" aria-label="Bisukan"></button>
+  <button class="cbtn" id="cvoice" aria-label="Suara AI"></button>
     <button class="cend" id="cend" aria-label="Akhiri panggilan"></button>
   </div>
 </div>
@@ -1771,7 +1772,7 @@ window.__onPerm=(tipe,ok,blocked)=>{
 
 // ===== MODE PANGGILAN SUARA (ngobrol seperti telepon) =====
 const CAL={
-  on:false,muted:false,phase:'idle',   // listen | think | speak | idle
+  on:false,muted:false,phase:'idle',speak:true,   // listen | think | speak | idle
   t:0,timer:null,rms:.06,sayBuf:'',said:false,ttsOk:false,fails:0
 };
 const CW=$('#call');
@@ -1808,6 +1809,7 @@ function cIcon(){
 }
 function callStart(){
   if(!A||!A.ttsSay){toast('Mode panggilan hanya tersedia di aplikasi');return}
+  CAL.speak=true;paintVoiceBtn();
   CAL.on=true;CAL.t=Date.now();CAL.sayBuf='';CAL.said=false;CAL.muted=false;CAL.fails=0;cLastStart=0;
   $('#cmute').classList.remove('on');
   $('#cavai').innerHTML='<img src="logo_mark.png" alt="">';
@@ -1815,7 +1817,11 @@ function callStart(){
   CW.classList.add('on');
   if(!cRAF)cRAF=requestAnimationFrame(cPaint);
   clearInterval(CAL.timer);CAL.timer=setInterval(cClock,1000);cClock();
-  if(!CAL.ttsOk&&A.voiceAvailable&&A.voiceAvailable())CAL.ttsOk=true;
+  CAL.ttsOk=false;
+  if(A&&A.ttsReady){try{CAL.ttsOk=!!A.ttsReady()}catch(e){}}
+  if(!CAL.ttsOk){
+    cSay('Suara belum siap.-teks tetap tampil, suara akan aktif begitu siap.');
+  }
   cPhase('listen','Menyiapkan\u2026');
   setTimeout(()=>cListen(),420);
 }
@@ -1864,15 +1870,15 @@ function callFeed(text,final){
   const r=takeSentences(CAL.sayBuf,4);
   CAL.sayBuf=r.rest;
   if(r.out.length){
-    if(!CAL.said){CAL.sayStart=Date.now();CAL.said=true;cPauseMic()}
-    try{A.ttsSay(JSON.stringify(r.out))}catch(e){}
+    if(CAL.speak&&!CAL.said){CAL.sayStart=Date.now();CAL.said=true;cPauseMic()}
+    if(CAL.speak&&CAL.ttsOk){try{A.ttsSay(JSON.stringify(r.out))}catch(e){}}
   }
   if(final){
     const rest=CAL.sayBuf.trim();
     CAL.sayBuf='';
-    if(rest.length>1){
+    if(rest.length>1&&CAL.speak&&CAL.ttsOk){
       try{A.ttsSay(JSON.stringify([rest]))}catch(e){}
-      if(!CAL.said){CAL.said=true;cPauseMic()}
+      if(CAL.speak&&!CAL.said){CAL.said=true;cPauseMic()}
     }
   }
 }
@@ -1886,7 +1892,17 @@ function callSend(text){
   const t=setTimeout(()=>send(text),60);
 }
 window.__voiceRms=v=>{CAL.rms=CAL.phase==='speak'?.30:v;if(!CAL.on)vRms=v};
-window.__ttsReady=ok=>{CAL.ttsOk=!!ok};
+window.__ttsReady=ok=>{
+  CAL.ttsOk=!!ok;paintVoiceBtn();
+  if(CAL.on)toast(ok?'Suara AI siap':'Suara AI tidak tersedia - jawaban tetap tampil sebagai teks');
+};
+window.__ttsErr=why=>{
+  if(why==='tts-stuck'){
+    // engine tidak memberi callback -> paksa selesai agar mic hidup lagi
+    callSetIdle();
+    if(CAL.on)setTimeout(()=>{if(CAL.on&&!busy)cListen()},300);
+  }
+};
 window.__ttsStart=()=>{if(CAL.on){cPhase('speak','DIVJUN AI bicara\u2026')}};
 window.__ttsDone=()=>{
   if(!CAL.on)return;
@@ -1929,6 +1945,18 @@ window.__voiceEv=ev=>{
   }
   window.__voiceEvOrig&&window.__voiceEvOrig(ev);
 };
+// Suara AI on/off - kalau tidak tersedia, user diberi tahu dan tetap bisa teks
+$('#cvoice').onclick=()=>{
+  CAL.speak=!CAL.speak;
+  if(!CAL.speak){try{A.ttsStop()}catch(e){}}
+  paintVoiceBtn();
+  toast(CAL.speak?'Suara AI dinyalakan':'Suara AI dimatikan - jawaban jadi teks saja');
+};
+function paintVoiceBtn(){
+  const b=$('#cvoice');if(!b)return;
+  b.classList.toggle('on',!!CAL.speak);
+  b.style.opacity=(CAL.speak?1:.55);
+}
 $('#cmute').onclick=()=>{
   CAL.muted=!CAL.muted;
   $('#cmute').classList.toggle('on',CAL.muted);

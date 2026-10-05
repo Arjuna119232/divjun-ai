@@ -19,6 +19,16 @@ class Speaker(private val act: MainActivity) {
     private val seq = AtomicInteger(0)
     private var pending = 0
 
+    // Kalimat yang arrive sebelum TTS siap. Dulu kata-kata ini DIBAWAH diam-diam,
+    // jadi user cuma lihat teks tanpa suara sama sekali.
+    private val backlog = ArrayList<String>()
+
+    // Kalau engine tidak pernah memanggil onDone/onError (umum saat HP tidak punya
+    // data suara), pending akan macet >0 dan mikrofon tidak akan hidup lagi.
+    // Watchdog ini yang compulsiveNzMaka grafik: setelah 6 detik paksa selesai.
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var watchdog: Runnable? = null
+
     var onReady: ((Boolean) -> Unit)? = null
     var onSpeakStart: (() -> Unit)? = null
     var onQueueDone: (() -> Unit)? = null
@@ -40,7 +50,14 @@ class Speaker(private val act: MainActivity) {
                 tts?.setPitch(1.0f)
             }
             inited = ok
-            act.runOnUiThread { onReady?.invoke(ok) }
+            act.runOnUiThread {
+                if (ok && backlog.isNotEmpty()) {
+                    val q = ArrayList(backlog)
+                    backlog.clear()
+                    say(q)
+                }
+                onReady?.invoke(ok)
+            }
         }
         tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {}
@@ -91,20 +108,28 @@ class Speaker(private val act: MainActivity) {
     }
 
     fun stop() {
-        val t = tts ?: return
         act.runOnUiThread {
-            t.stop()
+            watchdog?.let { mainHandler.removeCallbacks(it) }
+            watchdog = null
+            synchronized(backlog) { backlog.clear() }
+            tts?.stop()
             pending = 0
             onQueueDone?.invoke()
         }
     }
 
+    /** true kalau suara siap dipakai. */
+    fun ready(): Boolean = inited
+
     fun release() {
         try {
+            watchdog?.let { mainHandler.removeCallbacks(it) }
+            synchronized(backlog) { backlog.clear() }
             tts?.stop()
             tts?.shutdown()
         } catch (e: Exception) {
         }
+        watchdog = null
         tts = null
         inited = false
     }
