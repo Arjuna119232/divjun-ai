@@ -1008,6 +1008,20 @@ function voice(){voiceStart()}
 function voiceSend(){const t=$('#vtext').textContent;voiceClose();if(t&&t!=='Silakan bicara...'&&t!=='Suara tidak bisa dipakai'){$('#in').value=t;$('#in').focus()}}
 function voice(){voiceStart()}
 window.__voice=t=>{const i=$('#in');i.value=(i.value?i.value+' ':'')+t;i.dispatchEvent(new Event('input'));i.focus()}
+function doPick(kind){
+  window.__pendingPick=kind;
+  closeSheet();
+  if(!A||!A.minta){pickWeb(kind);window.__pendingPick=null;return}
+  try{A.minta(kind)}catch(e){pickWeb(kind);window.__pendingPick=null;return}
+  // jaring pengaman: kalau bridge tidak menjawab dalam 2.5s, pakai chooser bawaan
+  clearTimeout(window.__pickGuard);
+  window.__pickGuard=setTimeout(()=>{
+    if(window.__pendingPick){
+      const k=window.__pendingPick;window.__pendingPick=null;
+      pickWeb(k);
+    }
+  },2500);
+}
 function pickWeb(kind){
   const i=document.createElement('input');i.type='file';i.accept=kind==='file'?'image/*,text/*,.md,.json,.csv':'image/*';if(kind==='camera')i.capture='environment';
   i.onchange=()=>{const f=i.files[0];if(!f)return;
@@ -1032,7 +1046,7 @@ document.addEventListener('click',async e=>{
   else if(d.fs){cfg.fs=d.fs;save();applyTheme();renderSeg();refreshSheet();renderSet()}
   else if(d.dc)closeAll();
   else if(d.sx)closeSheet();
-  else if(d.pk){if(A&&A.minta){window.__pendingPick=d.pk;A.minta(d.pk)}else{pickWeb(d.pk)}}
+  else if(d.pk){doPick(d.pk)}
   else if(d.rm){att.splice(+d.rm,1);renderAtt()}
   else if(d.se)seAct(d.se);
   else if(d.ea)eaAct(d.ea);

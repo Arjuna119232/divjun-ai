@@ -86,19 +86,36 @@ object Perms {
         return sb.append('}').toString()
     }
 
-    /** Minta izin. Kirim status akhir balik ke WebView sebagai __onPerm(type, ok). */
+    /**
+     * Minta izin lalu kirim status akhir ke WebView sebagai __onPerm(id, ok, blocked).
+     *
+     * CATATAN PENTING: evaluateJavascript WAJIB dipanggil di UI thread. Method ini bisa
+     * dipanggil dari thread bridge WebView (bukan UI thread), jadi semua akses UI
+     * dibungkus runOnUiThread - kalau tidak, panggilan diam-diam gagal dan user
+     * merasa "tidak ada reaksi" saat menekan kamera/file.
+     */
     fun request(activity: MainActivity, id: String) {
         val info = list(id) ?: return
-        if (info.perms.isEmpty() || granted(activity, info.perms)) {
-            activity.web.evaluateJavascript(
-                "window.__onPerm&&window.__onPerm('${info.id}',true)",
-                null
-            )
-            return
-        }
+        val alreadyOk = info.perms.isEmpty() || granted(activity, info.perms)
         activity.runOnUiThread {
-            activity.pendingPermId = info.id
-            ActivityCompat.requestPermissions(activity, info.perms, requestCodeFor(info.id))
+            if (alreadyOk) {
+                activity.web.evaluateJavascript(
+                    "window.__onPerm&&window.__onPerm('${info.id}',true,false)",
+                    null
+                )
+            } else {
+                activity.pendingPermId = info.id
+                try {
+                    ActivityCompat.requestPermissions(activity, info.perms, requestCodeFor(info.id))
+                } catch (e: Exception) {
+                    // gagal membuka dialog -> kabari JS supaya ada fallback
+                    activity.pendingPermId = ""
+                    activity.web.evaluateJavascript(
+                        "window.__onPerm&&window.__onPerm('${info.id}',false,false)",
+                        null
+                    )
+                }
+            }
         }
     }
 
