@@ -29,7 +29,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 class MainActivity : Activity() {
-    private lateinit var web: WebView
+    lateinit var web: WebView
+        private set
+    internal var pendingPermId: String = ""
     private val conns = ConcurrentHashMap<String, HttpURLConnection>()
     private val REQ_CAMERA = 101
     private val REQ_GALLERY = 102
@@ -55,10 +57,17 @@ class MainActivity : Activity() {
 
     override fun onRequestPermissionsResult(code: Int, perms: Array<out String>, grants: IntArray) {
         super.onRequestPermissionsResult(code, perms, grants)
-        val ok = grants.isNotEmpty() && grants.all { it == PackageManager.PERMISSION_GRANTED }
-        val map = mapOf(REQ_CAMERA to "camera", REQ_GALLERY to "gallery", REQ_STORAGE to "storage")
-        val tipe = map[code] ?: "unknown"
-        web.evaluateJavascript("window.__onPerm&&window.__onPerm('" + tipe + "'," + ok + ")", null)
+        val tipe = pendingPermId.ifEmpty { "unknown" }
+        val ok = perms.isNotEmpty() && grants.isNotEmpty() &&
+            perms.size == grants.size && grants.all { it == PackageManager.PERMISSION_GRANTED }
+        pendingPermId = ""
+        val blocked = !ok && Perms.isBlocked(this, tipe)
+        runOnUiThread {
+            web.evaluateJavascript(
+                "window.__onPerm&&window.__onPerm('" + tipe + "'," + ok + "," + blocked + ")",
+                null
+            )
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -152,6 +161,10 @@ class MainActivity : Activity() {
             startActivity(Intent.createChooser(i, "Bagikan"))
         }
 
+        @JavascriptInterface fun toast(msg: String) {
+            runOnUiThread { web.evaluateJavascript("window.toast&&window.toast(" + JSONObject.quote(msg) + ")", null) }
+        }
+
         @JavascriptInterface fun version(): String =
             packageManager.getPackageInfo(packageName, 0).versionName ?: ""
 
@@ -161,20 +174,51 @@ class MainActivity : Activity() {
             else -> ""
         }
 
-        private fun cekIzin(tipe: String): Array<String> = when (tipe) {
-            "camera" -> arrayOf(android.Manifest.permission.CAMERA)
-            "photo" -> if (android.os.Build.VERSION.SDK_INT >= 33) arrayOf("android.permission.READ_MEDIA_IMAGES") else arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-            else -> if (android.os.Build.VERSION.SDK_INT >= 33) arrayOf() else arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        @JavascriptInterface
+        fun minta(tipe: String) {
+            val id = when (tipe) {
+                "camera" -> "camera"
+                "photo" -> "photo"
+                "mic", "voice" -> "mic"
+                else -> "photo"
+            }
+            Perms.request(this@MainActivity, id)
         }
 
-        @JavascriptInterface fun minta(tipe: String) {
-            val izin = cekIzin(tipe)
-            val code = when (tipe) { "camera" -> REQ_CAMERA; "photo" -> REQ_GALLERY; else -> REQ_STORAGE }
-            val belum = izin.filter { ContextCompat.checkSelfPermission(this@MainActivity, it) != PackageManager.PERMISSION_GRANTED }
-            if (belum.isEmpty()) {
-                runOnUiThread { web.evaluateJavascript("window.__onPerm&&window.__onPerm('" + tipe + "',true)", null) }
-            } else {
-                ActivityCompat.requestPermissions(this@MainActivity, belum.toTypedArray(), code)
+        /** Alasan + daftar izin, untuk sheet penjelasan di UI. */
+        @JavascriptInterface
+        fun permInfo(): String {
+            val sb = StringBuilder("[")
+            Perms.all().forEachIndexed { i, info ->
+                if (i > 0) sb.append(',')
+                sb.append('{')
+                sb.append("\"id\":\"").append(info.id).append("\",")
+                sb.append("\"title\":\"").append(info.title).append("\",")
+                sb.append("\"why\":\"").append(info.why).append("\",")
+                sb.append("\"granted\":").append(Perms.grantedId(this@MainActivity, info.id))
+                sb.append(",\"blocked\":").append(Perms.isBlocked(this@MainActivity, info.id))
+                sb.append('}')
+            }
+            return sb.append(']').toString()
+        }
+
+        @JavascriptInterface
+        fun permGranted(id: String): Boolean = Perms.grantedId(this@MainActivity, id)
+
+        /** Buka pengaturan sistem supaya user bisa mencabut/memberikan izin. */
+        @JavascriptInterface
+        fun openAppSettings() {
+            runOnUiThread {
+                try {
+                    val i = android.content.Intent(
+                        android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        android.net.Uri.fromParts("package", packageName, null)
+                    )
+                    i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(i)
+                } catch (e: Exception) {
+                    web.evaluateJavascript("window.toast&&window.toast('Gagal membuka pengaturan')", null)
+                }
             }
         }
 

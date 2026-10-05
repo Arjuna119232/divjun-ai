@@ -181,6 +181,31 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 .tile i{width:60px;height:60px;border-radius:50%;background:var(--ub);display:grid;place-items:center}
 
 
+
+.lgm{width:26px;height:26px;border-radius:8px;flex:none;display:block}
+.av0{overflow:hidden}
+#splash .sl{width:64px;height:64px;flex:none}
+.hero .mk{width:76px;height:76px;filter:drop-shadow(0 6px 18px rgba(91,79,209,.28))}
+
+
+/* ===== PERMISSION PRIMER ===== */
+#perm{position:fixed;inset:0;background:var(--bg);z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:.25s}
+#perm.on{opacity:1;visibility:visible}
+#perm .pcard{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:22px;max-height:88vh;overflow-y:auto}
+#perm h3{font-family:var(--sf);font-size:1.15em;font-weight:650;margin:0 0 4px;color:var(--tx)}
+#perm .psub{color:var(--mu);font-size:.88em;margin-bottom:16px;line-height:1.5}
+#perm .pi{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:16px;margin-bottom:9px;background:var(--bg)}
+#perm .pi.done{opacity:.62;border-color:var(--lk)}
+#perm .pi .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;flex:none;margin-top:1px;transition:.2s}
+#perm .pi.on .box{background:var(--lk);border-color:var(--lk)}
+#perm .pi .box svg{width:14px;height:14px;stroke:#fff;stroke-width:3;opacity:0;transition:.2s}
+#perm .pi.on .box svg{opacity:1}
+#perm .pi .tx{flex:1;min-width:0}
+#perm .pi .tx b{display:block;font-weight:600;font-size:.95em;color:var(--tx)}
+#perm .pi .tx small{display:block;color:var(--mu);font-size:.83em;line-height:1.5;margin-top:3px}
+.pfull{width:100%;margin:0}
+#perm .blk{color:var(--er);font-size:.8em;margin-top:4px}
+
 /* ===== AUTOPILOT STATUS ===== */
 .mstat{display:inline-flex;align-items:center;gap:8px;background:var(--ub);border-radius:999px;padding:7px 13px;font-size:.83em;color:var(--mu);margin-bottom:9px}
 .mstat .dots i{width:6px;height:6px;margin:0;background:var(--lk)}
@@ -247,7 +272,7 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 </div>
 <div id="splash">
   <div class="row">
-    <svg class="sl" viewBox="0 0 96 96"><path fill="currentColor" fill-rule="evenodd" d="M24,16h24a32,32 0 0 1 0,64h-24z M38,30v36h10a18,18 0 0 0 0,-36z"/></svg>
+    <svg class="sl" viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C8CFF"/><stop offset="100%" stop-color="#5B4FD1"/></linearGradient></defs><rect x="4" y="4" width="88" height="88" rx="22" fill="url(#lg1)"/><path fill="#fff" fill-rule="evenodd" d="M30,22h20a26,26 0 0 1 0,52h-20z M42,33v30h8a15,15 0 0 0 0,-30z"/></svg>
     <h1>DIVJUN AI</h1>
   </div>
   <small>DIVARJUNA STUDIOS</small>
@@ -325,7 +350,8 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 <select id="model" hidden></select>
 <div id="dov" data-dc="1"></div>
 <aside id="drawer"><div class="dh">DIVJUN AI</div><div id="dtabs"></div><div class="dl" id="drec"></div>
-<div class="df"><button class="av0" id="dav" aria-label="Pengaturan">D</button><button class="pill" id="dnew">+ Chat baru</button></div></aside>
+<button class="di" id="dperm">Izin & Privasi</button>
+<div class="df"><button class="av0" id="dav" aria-label="Pengaturan"><svg class="lgm" viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C8CFF"/><stop offset="100%" stop-color="#5B4FD1"/></linearGradient></defs><rect x="4" y="4" width="88" height="88" rx="22" fill="url(#lg1)"/><path fill="#fff" fill-rule="evenodd" d="M30,22h20a26,26 0 0 1 0,52h-20z M42,33v30h8a15,15 0 0 0 0,-30z"/></svg></button><button class="pill" id="dnew">+ Chat baru</button></div></aside>
 <div id="menu"><button data-m="share">Bagikan</button><button data-m="rename">Ganti nama</button><button data-m="pin">Sematkan</button><button data-m="del" class="dg">Hapus</button></div>
 <div id="sheet"><div id="sp"></div></div>
 <div id="modal"><div id="mp"><h3 id="mt"></h3><p id="mb"></p><input id="mi"><div class="two"><button class="btn" id="mno">Batal</button><button class="btn pri" id="mok">Oke</button></div></div></div>
@@ -336,6 +362,16 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
       <b>Ringkasan</b>
     </div>
     <div class="tkl" id="tkl"></div>
+  </div>
+</div>
+<div id="perm">
+  <div class="pcard">
+    <h3>Izin yang dibutuhkan</h3>
+    <p class="psub">Semua opsional. Tolak yang tidak kamu pakai — app tetap jalan.</p>
+    <div id="plist"></div>
+    <button class="btn pri pfull" id="pgrant">Izinkan yang dipilih</button>
+    <button class="btn pfull" id="pskip" style="margin-top:8px">Nanti saja</button>
+    <button class="btn pfull" id="popenset" style="margin-top:8px">Buka Pengaturan Android</button>
   </div>
 </div>
 <div id="toast"></div>
@@ -392,86 +428,135 @@ function fetchReq(id,method,url,headers,body){
 }
 window.__net=(id,t,d)=>{const p=pend[id];if(p&&p[t])p[t](d)};
 
+// ===== WEB: PRE-FETCH CEPAT (bypass bolak-balik model) =====
+// Kalau user menyebut URL, ambil isinya dulu sebelum model berpikir.
+// Kalau user tanya yang butuh info terkini, cari dulu lewat search.
+// Hasilnya jadi konteks -> SATU kali panggilan, jauh lebih cepat.
+const URLRE=/\b((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
+const NEEDRE=/\b(cari|search|cek|browse|lihat|buka|terbaru|berita|hari ini|now|latest|news|harga|jadwal|hasil|score|siapa|berapa|kenapa)\b/i;
+function grabURLs(t){
+  const out=[];let m;URLRE.lastIndex=0;
+  while((m=URLRE.exec(t))){
+    let u=m[1].replace(/[).,;:!?]+$/,'');
+    if(!/^https?:/i.test(u))u='https://'+u;
+    if(out.indexOf(u)<0&&out.length<3)out.push(u);
+  }
+  return out;
+}
+function httpGet(url,accept){
+  return new Promise(res=>{
+    let raw='',code=0,dec=new TextDecoder();
+    const id='g'+(++seq);
+    pend[id]={status:x=>code=+x,chunk:d=>raw+=dec.decode(b64(d),{stream:true}),done:()=>res({code,raw}),err:e=>res({code:-1,raw:'',err:e})};
+    rq(id,'GET',url,JSON.stringify({'Accept':accept||'text/html,*/*','User-Agent':'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'}),'');
+  });
+}
+async function fastBrowse(url){
+  try{
+    const r=await httpGet(url,'text/html,application/xhtml+xml');
+    if(r.code<0)return 'Gagal membuka '+url+': '+r.err;
+    if(r.code>=400)return 'Gagal membuka '+url+' (HTTP '+r.code+')';
+    return extractReadable(r.raw,url);
+  }catch(e){return 'Gagal membuka '+url+': '+e.message}
+}
+async function fastSearch(q){
+  try{
+    const r=await httpGet('https://html.duckduckgo.com/html/?q='+encodeURIComponent(q),'text/html');
+    if(r.code<0)return 'Pencarian gagal: '+r.err;
+    if(r.code>=400)return 'Pencarian gagal (HTTP '+r.code+')';
+    const doc=new DOMParser().parseFromString(r.raw,'text/html');
+    const rows=[...doc.querySelectorAll('.result__body, .web-result, article')].slice(0,6);
+    if(!rows.length)return 'Tidak ada hasil untuk "'+q+'".';
+    const out=rows.map((el,i)=>{
+      const a=el.querySelector('a[href]'),sn=el.querySelector('.result__snippet, .snippet, p');
+      let href=a?a.getAttribute('href'):'';
+      const m=href&&href.match(/uddg=([^&]+)/);
+      if(m)href=decodeURIComponent(m[1]);
+      const t=(a?a.textContent:'').trim().replace(/\s+/g,' ').slice(0,110);
+      const d=(sn?sn.textContent:'').trim().replace(/\s+/g,' ').slice(0,260);
+      return (i+1)+'. '+t+'\n   '+href+'\n   '+d;
+    }).join('\n\n');
+    return 'Hasil pencarian "'+q+'":\n\n'+out;
+  }catch(e){return 'Pencarian gagal: '+e.message}
+}
+async function gatherContext(text,onProg){
+  const urls=grabURLs(text);
+  const wants=NEEDRE.test(text);
+  const jobs=[];
+  urls.forEach(u=>jobs.push({label:'Membaca '+u.replace(/^https?:\/\//,'').slice(0,44),run:()=>fastBrowse(u)}));
+  if(!urls.length&&wants&&text.trim().length>8&&text.trim().length<400){
+    const q=text.replace(NEEDRE,'').trim().replace(/[?!.]+$/,'').slice(0,120);
+    if(q)jobs.push({label:'Mencari di web',run:()=>fastSearch(q)});
+  }
+  if(!jobs.length)return '';
+  const res=await Promise.all(jobs.map(j=>j.run()));
+  let out='';
+  jobs.forEach((j,i)=>{out+='\n\n=== '+j.label+' ===\n'+String(res[i]).slice(0,9000)});
+  return out;
+}
 // ===== BROWSE TOOL =====
 async function browseTool(url){
   try{
-    const id='browse'+Date.now();
-    let html='',code=0,dec=new TextDecoder();
-    await new Promise((res,rej)=>{
-      call('GET',url,null,JSON.stringify({'Accept':'text/html,application/xhtml+xml'}),'',{
-        status:x=>code=+x,
-        chunk:d=>{html+=dec.decode(b64(d),{stream:true})},
-        done:()=>{if(code>=400)rej(new Error('HTTP '+code));else res()},
-        err:e=>rej(e)
-      });
-    });
-    return extractReadable(html,url);
-  }catch(e){
-    return 'Gagal browse: '+e.message;
-  }
+    const r=await httpGet(url,'text/html,application/xhtml+xml');
+    if(r.code<0)return 'Gagal browse: '+r.err;
+    if(r.code>=400)return 'Gagal browse: HTTP '+r.code;
+    return extractReadable(r.raw,url);
+  }catch(e){return 'Gagal browse: '+e.message}
 }
-// ===== WEATHER TOOL (dedicated, fast JSON) =====
+// ===== WEATHER TOOL =====
 async function weatherTool(city){
   try{
-    const url='https://wttr.in/'+encodeURIComponent(city)+'?format=j1';
-    const id='weather'+Date.now();
-    let json='',code=0,dec=new TextDecoder();
-    await new Promise((res,rej)=>{
-      call('GET',url,null,JSON.stringify({'Accept':'application/json'}),'',{
-        status:x=>code=+x,
-        chunk:d=>{json+=dec.decode(b64(d),{stream:true})},
-        done:()=>{if(code>=400)rej(new Error('HTTP '+code));else res()},
-        err:e=>rej(e)
-      });
-    });
-    const data=JSON.parse(json);
-    const cur=data.current_condition[0];
-    const area=data.nearest_area[0];
-    const today=data.weather[0];
+    const r=await httpGet('https://wttr.in/'+encodeURIComponent(city)+'?format=j1','application/json');
+    if(r.code<0)return 'Gagal cuaca: '+r.err;
+    if(r.code>=400)return 'Gagal cuaca: HTTP '+r.code+' (nama kota mungkin salah)';
+    const data=JSON.parse(r.raw),cur=data.current_condition[0],area=data.nearest_area[0],today=data.weather[0];
+    const ring=data.weather.slice(0,2).map((w,i)=>(i?'Besok':'Hari ini')+': '+w.mintempC+'-'+w.maxtempC+'C, '+((w.hourly&&w.hourly[4]&&w.hourly[4].weatherDesc[0].value)||''));
     return JSON.stringify({
-      location:area.areaName[0].value+', '+area.region[0].value+', '+area.country[0].value,
-      now:{
-        tempC:cur.temp_C,feelsLikeC:cur.FeelsLikeC,
-        desc:cur.weatherDesc[0].value,
-        humidity:cur.humidity,windKmph:cur.windspeedKmph,windDir:cur.winddir16Point,
-        uv:cur.uvIndex,visibility:cur.visibility
-      },
-      today:{
-        minC:today.mintempC,maxC:today.maxtempC,
-        sunrise:today.astronomy[0].sunrise,sunset:today.astronomy[0].sunset,
-        uvMax:today.uvIndex
-      },
-      tomorrow:data.weather[1]?{minC:data.weather[1].mintempC,maxC:data.weather[1].maxtempC,desc:data.weather[1].hourly[4]?.weatherDesc[0]?.value||''}:null
+      lokasi:area.areaName[0].value+', '+area.region[0].value+', '+area.country[0].value,
+      sekarang:{suhuC:cur.temp_C,terasaC:cur.FeelsLikeC,cuaca:cur.weatherDesc[0].value,lembap:cur.humidity,anginKmph:cur.windspeedKmph,arahAngin:cur.winddir16Point,uv:cur.uvIndex},
+      hariIni:{minC:today.mintempC,maxC:today.maxtempC,terbit:today.astronomy[0].sunrise,terbenam:today.astronomy[0].sunset,uvMaks:today.uvIndex},
+      ringkasan:ring
     });
-  }catch(e){
-    return 'Gagal cuaca: '+e.message;
-  }
+  }catch(e){return 'Gagal cuaca: '+e.message}
 }
 function extractReadable(html,baseUrl){
   const doc=new DOMParser().parseFromString(html,'text/html');
-  // hapus script, style, nav, footer, aside, header, noscript, iframe, form
-  doc.querySelectorAll('script,style,nav,footer,aside,header,noscript,iframe,form,[role="navigation"],[role="banner"],[role="contentinfo"],.ads,.advertisement,.sidebar,.menu,.navigation,.header,.footer').forEach(e=>e.remove());
-  // cari main content
-  let main=doc.querySelector('main,article,[role="main"],.content,.post,.article,.entry,.post-content,.entry-content,#content,#main');
-  if(!main)main=doc.body;
-  // ambil teks, bersihkan whitespace
-  let text=main.innerText||main.textContent||'';
-  text=text.replace(/\s+/g,' ').replace(/\n\s*\n/g,'\n').trim();
-  // batasi panjang (maks ~8000 char untuk context window)
-  if(text.length>8000)text=text.slice(0,8000)+'\n...(dipotong)';
-  return text||'Konten tidak bisa diekstrak';
+  doc.querySelectorAll('script,style,nav,footer,aside,header,noscript,iframe,form,button,[role="navigation"],[role="banner"],[role="contentinfo"],.ads,.advertisement,.sidebar,.menu,.navigation,.header,.footer,.comment,.related,.share,.social,.newsletter,.cookie,.popup,.modal,.breadcrumb,.pagination').forEach(e=>e.remove());
+  let main=doc.querySelector('article,main,[role="main"],.post-content,.entry-content,.article-content,.post,.entry,.article,.content,#content,#main')||doc.body;
+  if(!main)return 'Konten tidak bisa dibaca';
+  const parts=[];
+  const walk=el=>{
+    for(const c of el.childNodes){
+      if(c.nodeType===3){const t=c.textContent.replace(/\s+/g,' ').trim();if(t)parts.push(t);continue}
+      if(c.nodeType!==1)continue;
+      const tag=c.tagName.toLowerCase();
+      if(/^h[1-4]$/.test(tag)){parts.push('\n\n## '+c.textContent.replace(/\s+/g,' ').trim()+'\n');continue}
+      if(tag==='li'){parts.push('\n- '+c.textContent.replace(/\s+/g,' ').trim());continue}
+      if(tag==='pre'){parts.push('\n```\n'+c.textContent.slice(0,2000)+'\n```\n');continue}
+      if(tag==='p'||tag==='div'||tag==='section'||tag==='tr'||tag==='blockquote'){walk(c);parts.push('\n');continue}
+      walk(c);
+    }
+  };
+  walk(main);
+  let text=parts.join('').replace(/\n{3,}/g,'\n\n').trim();
+  if(text.length>10000)text=text.slice(0,10000)+'\n\n[...dipotong, masih ada isi berikutnya...]';
+  return text||'Halaman tidak punya teks yang bisa dibaca (kemungkinan butuh JavaScript atau login).';
 }
 // ===== TOOL DEFINITIONS =====
 const TOOLS_DEF=[
-  {type:'function',function:{name:'browse',description:'Buka dan baca isi halaman web. Gunakan saat butuh info terbaru, fakta, artikel, dokumentasi, harga, berita, dll. Parameter: url (string, wajib).',parameters:{type:'object',properties:{url:{type:'string',description:'URL lengkap halaman yang mau dibaca (harus http/https)'}},required:['url']}}},
-  {type:'function',function:{name:'weather',description:'Cek cuaca real-time untuk kota. Gunakan untuk pertanyaan cuaca, suhu, hujan, dll. Parameter: city (string, wajib, nama kota bahasa Indonesia/Inggris).',parameters:{type:'object',properties:{city:{type:'string',description:'Nama kota, mis: Jakarta, Bandung, Surabaya, Tokyo, London'}},required:['city']}}}
+  {type:'function',function:{name:'browse',description:'Baca isi satu halaman web. Pakai HANYA kalau pengguna memberi URL atau butuh isi halaman tertentu. Parameter: url.',parameters:{type:'object',properties:{url:{type:'string',description:'URL lengkap, wajib http/https'}},required:['url']}}},
+  {type:'function',function:{name:'search',description:'Cari info terkini di web, dapat hasil singkat + tautan. Pakai untuk berita, harga, jadwal, hasil pertandingan, jawaban yang berubah-ubah. Parameter: query.',parameters:{type:'object',properties:{query:{type:'string',description:'Kata kunci pencarian'}},required:['query']}}},
+  {type:'function',function:{name:'weather',description:'Cek cuaca real-time sebuah kota. Parameter: city.',parameters:{type:'object',properties:{city:{type:'string',description:'Nama kota, mis: Jakarta, Bandung, Tokyo'}},required:['city']}}}
 ];
 async function executeTool(name,args){
-  if(name==='browse')return browseTool(args.url);
-  if(name==='weather')return weatherTool(args.city);
+  try{
+    if(name==='browse')return await browseTool(args.url);
+    if(name==='weather')return await weatherTool(args.city);
+    if(name==='search')return await fastSearch(args.query||'');
+  }catch(e){return 'Tool gagal: '+(e&&e.message||e)}
   return 'Tool tidak dikenal: '+name;
 }
-window.__onPerm=(tipe,ok)=>{if(ok&&window.__pendingPick){A&&A.pick?A.pick(window.__pendingPick):pickWeb(window.__pendingPick);window.__pendingPick=null}else{toast('Izin ditolak. Buka Pengaturan untuk mengaktifkan')}};
+// (handler __onPerm dipindah ke blok permission di bawah)
 function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;rq(id,method,PROV[cfg.route].base+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
 function errMsg(raw){try{const j=JSON.parse(raw);return j.error&&j.error.message||j.message||raw}catch(e){return raw.slice(0,200)||'Tidak ada detail dari server'}}
 const isFree=(p,i)=>p.free?p.free.test(i):true;
@@ -523,7 +608,20 @@ function send(text){
   c.msgs.push({role:'user',content:text,img:att.length||undefined});att=[];renderAtt();
   const a={role:'assistant',content:''};c.msgs.push(a);c.ts=Date.now();render();
   setBtn();
-  runPlan(messages,a,hadImg);
+  // PRE-FETCH: ambil data web dulu (kalau perlu) lalu ONE-shot ke model.
+  // Ini menghapus 2-3 round trip tool-calling -> jauh lebih cepat.
+  gatherContext(text).then(ctx=>{
+    if(ctx){
+      a.status='Mengambil data dari web...';
+      paint();
+      const lastIdx=messages.length-1;
+      const u=typeof messages[lastIdx]==='string'?messages[lastIdx]:(messages[lastIdx].text||'');
+      const withCtx=String(u)+'\n\n[DATA DARI WEB - gunakan ini untuk menjawab, jangan bilang tidak bisa akses web]\n'+ctx;
+      if(typeof messages[lastIdx]==='string')messages[lastIdx]=withCtx;
+      else messages[lastIdx].text=withCtx;
+    }
+    runPlan(messages,a,hadImg);
+  });
 }
 
 // ===== AI AUTOPILOT: pilih model sendiri + failover otomatis =====
@@ -702,7 +800,7 @@ function renderSeg(){
   $('#fsz').innerHTML=[['0.9','Kecil'],['1','Normal'],['1.12','Besar']].map(x=>'<button class="chip'+(cfg.fs===x[0]?' on':'')+'" data-fs="'+x[0]+'">'+x[1]+'</button>').join('');
 }
 
-const MARK='<svg class="mk" viewBox="0 0 96 96"><path fill="currentColor" fill-rule="evenodd" d="M24,16h24a32,32 0 0 1 0,64h-24z M38,30v36h10a18,18 0 0 0 0,-36z"/></svg>';
+const MARK='<svg class="mk" viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C8CFF"/><stop offset="100%" stop-color="#5B4FD1"/></linearGradient></defs><rect x="4" y="4" width="88" height="88" rx="22" fill="url(#lg1)"/><path fill="#fff" fill-rule="evenodd" d="M30,22h20a26,26 0 0 1 0,52h-20z M42,33v30h8a15,15 0 0 0 0,-30z"/></svg>';
 const greet=()=>{const h=new Date().getHours();const q=h<4?[0,1,2]:h<11?[3,4,5]:h<15?[6,7,8]:h<18?[9,10,11]:[0,1,12];const s=["Anda begadang, apa yang bisa saya bantu?","Mau memikirkan apa malam ini?","Malam ini mau bahas apa?","Mau mulai hari dengan apa?","Ada rencana apa pagi ini?","Pagi ini mau bahas apa?","Mau bahas apa siang ini?","Ada yang bisa dibantu?","Siang ini mau ngapain?","Sore ini mau ngapain?","Ada yang bisa dibantu?","Mau bahas apa sore ini?","Ada yang bisa dibantu malam ini?"];return s[q[Math.floor(Math.random()*q.length)]]};
 function rel(t){const d=(Date.now()-t)/1000;if(d<60)return 'Baru saja';if(d<3600)return Math.floor(d/60)+' menit yang lalu';if(d<86400)return Math.floor(d/3600)+' jam yang lalu';const n=Math.floor(d/86400);if(n===1)return 'Kemarin';if(n<7)return n+' hari yang lalu';return new Date(t).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
 const tips=()=>{const t=["Minum air dulu, biar fokus tetap terjaga.","Istirahat 5 menit tiap 25 menit kerja.","Jangan lupa makan tepat waktu.","Mata butuh istirahat dari layar tiap 20 menit.","Tidur cukup 7-8 jam sehari.","Tarik napas dalam, tenangkan pikiran.","Jalan kaki 10 menit bisa segarkan otak.","Kurangi begadang, tubuh butuh istirahat.","Pikiran tenang, jawaban lebih jernih.","Hari ini boleh santai, besok tetap semangat."];return t[Math.floor(Math.random()*t.length)]};
@@ -737,8 +835,9 @@ function menuAct(a){
 }
 document.addEventListener('click',e=>{if(!e.target.closest('#menu,#more'))$('#menu').classList.remove('open')});
 const ver=()=>A&&A.version?A.version():'web';
+const permSummary=()=>{const l=loadPerms();if(!l.length)return 'Tidak ada';const g=l.filter(p=>p.granted).length;return g+' dari '+l.length+' diizinkan'};
 const bkey=()=>{try{return (A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){return ''}};
-const SI={prov:sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><path d="M16.5 13v7M13 16.5h7"/>'),key:sv('<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3"/>'),model:sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'),moon:sv('<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>'),font:sv('<path d="M4 19l5-14 5 14M6 14h6M17 19v-6M17 15c0-2.5 4-2.5 4 0v4"/>'),sys:sv('<path d="M5 6h14M5 12h14M5 18h9"/>'),temp:sv('<path d="M12 4v10"/><circle cx="12" cy="17" r="3"/>'),hist:sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),info:sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),book:sv('<path d="M5 5h10a3 3 0 0 1 3 3v11H8a3 3 0 0 1-3-3z"/>')};
+const SI={prov:sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><path d="M16.5 13v7M13 16.5h7"/>'),key:sv('<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3"/>'),model:sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'),moon:sv('<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>'),font:sv('<path d="M4 19l5-14 5 14M6 14h6M17 19v-6M17 15c0-2.5 4-2.5 4 0v4"/>'),sys:sv('<path d="M5 6h14M5 12h14M5 18h9"/>'),temp:sv('<path d="M12 4v10"/><circle cx="12" cy="17" r="3"/>'),hist:sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),info:sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),book:sv('<path d="M5 5h10a3 3 0 0 1 3 3v11H8a3 3 0 0 1-3-3z"/>'),shield:sv('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>')};
 const TH={auto:'Sistem',dark:'Gelap',light:'Terang'},FS={'0.9':'Kecil','1':'Normal','1.12':'Besar'};
 function renderSet(){
   const p=PROV[cfg.route],ks=!cfg.key?'Belum diisi':(cfg.key===bkey()?'Tertanam di aplikasi':'Diisi manual');
@@ -749,7 +848,7 @@ function renderSet(){
    '<div class="sg">'+r('theme',SI.moon,'Mode warna',TH[cfg.theme])+r('fs',SI.font,'Ukuran teks',FS[cfg.fs]||'Normal')+'</div>'+
    '<div class="sg">'+r('sys',SI.sys,'Instruksi tambahan',cfg.system?cfg.system.slice(0,40)+(cfg.system.length>40?'...':''):'Tidak ada (identitas DIVJUN AI sudah bawaan)')+r('temp',SI.temp,'Kreativitas jawaban',String(cfg.temp))+'</div>'+
    '<div class="sg">'+sw('hist',SI.hist,'Simpan riwayat obrolan',cfg.hist!==false)+r('exp',IC.share,'Ekspor semua obrolan')+r('clr',IC.trash,'Bersihkan riwayat')+'</div>'+
-   '<div class="sg">'+r('docs',SI.book,'Dokumentasi penyedia')+r('about',SI.info,'Tentang DIVJUN AI','Versi '+ver())+'</div>'+
+   '<div class="sg">'+r('perm',SI.shield,'Izin aplikasi',permSummary())+r('docs',SI.book,'Dokumentasi penyedia')+r('about',SI.info,'Tentang DIVJUN AI','Versi '+ver())+'</div>'+
    '<div class="sg">'+r('wipe',IC.trash,'Hapus semua data','', ' dg')+'</div>';
 }
 function refreshSheet(){sheetMode==='model'?renderSheet():renderEdit()}
@@ -767,7 +866,8 @@ function renderEdit(){
   $('#sp').innerHTML='<div class="sh"><button class="ib" data-sx="1" aria-label="Tutup">'+sv('<path d="M6 6l12 12M18 6L6 18"/>')+'</button><b>'+T+'</b></div>'+b;
 }
 function seAct(k){
-  if(k==='model')openSheet();
+  if(k==='perm')openPerm();
+  else if(k==='model')openSheet();
   else if(['prov','key','theme','fs','sys','temp'].includes(k))openEdit(k);
   else if(k==='hist'){cfg.hist=cfg.hist===false;save();persist();renderSet();toast(cfg.hist===false?'Riwayat tidak disimpan':'Riwayat disimpan')}
   else if(k==='exp')chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
@@ -874,7 +974,7 @@ function toggleThink(btn){const wrap=btn.closest('.think-wrap'),content=wrap.que
 $('#tkx').onclick=thinkClose;
 $('#think').onclick=e=>{if(e.target.id==='think')thinkClose()};
 $('#vcancel').onclick=voiceClose;$('#vstop').onclick=voiceClose;$('#vsend').onclick=voiceSend;$('#info').innerHTML=SI.info;$('#info').onclick=()=>seAct('about');$('#fab').onclick=newChat;
-$('#burger').onclick=openDrawer;$('#mchip').onclick=()=>toast('Model dipilih otomatis. App pindah ke model lain bila perlu.');$('#dav').onclick=()=>go('set');$('#dnew').onclick=()=>{closeDrawer();newChat()};
+$('#burger').onclick=openDrawer;$('#mchip').onclick=()=>toast('Model dipilih otomatis. App pindah ke model lain bila perlu.');$('#dav').onclick=()=>go('set');$('#dperm').onclick=()=>{closeDrawer();openPerm()};$('#dnew').onclick=()=>{closeDrawer();newChat()};
 $('#more').onclick=()=>$('#menu').classList.toggle('open');$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeSheet()};
 (function(){
   var sp=document.getElementById('sp'),sy=0,dy=0,on=false;
@@ -914,7 +1014,7 @@ function paintOnb(){
   $('#onext').textContent=oi===ONB.length-1?'Mulai':'Lanjut';
 }
 function onbShow(){oi=0;paintOnb();$('#onb').classList.add('on')}
-function onbClose(){$('#onb').classList.remove('on');st.set('onb','1')}
+function onbClose(){$('#onb').classList.remove('on');st.set('onb','1');if(!st.get('permdone'))setTimeout(openPerm,320)}
 $('#onext').onclick=()=>{if(oi<ONB.length-1){oi++;paintOnb()}else onbClose()};
 $('#oback').onclick=()=>{if(oi>0){oi--;paintOnb()}};
 $('#oskip').onclick=onbClose;
@@ -979,6 +1079,67 @@ document.addEventListener('click',e=>{
   const c=e.target.closest('[data-pt],[data-ptx]');
   if(c){const d=c.dataset;if(d.pt)renderPts(d.pt);else{$('#in').value=d.ptt.replace(/\{[^}]*\}/g,'').trim();$('#in').dispatchEvent(new Event('input'));$('#in').focus();go('chat');toast('Template diisi, lengkapi bagian dalam kurung kurawal')}}
 });
+
+// ===== PERMISSION PRIMER =====
+let PERMS=[],pSel={};
+const PCHK=sv('<path d="M5 12l5 5 9-10"/>');
+function permIcons(){return {camera:sv('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),mic:sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),photo:sv('<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 17l5-5 4 4 2-2 3 3"/>'),notif:sv('<path d="M18 15V10a6 6 0 0 0-12 0v5l-2 3h16zM10 21h4"/>')}};
+function loadPerms(){
+  if(!A||!A.permInfo)return [];
+  try{return JSON.parse(A.permInfo())}catch(e){return[]}
+}
+function paintPerms(){
+  const ic=permIcons(),box=$('#plist');
+  box.innerHTML=PERMS.map(p=>{
+    const on=pSel[p.id]||p.granted;
+    return '<button class="pi'+(on?' on':'')+(p.granted?' done':'')+'" data-pi="'+esc(p.id)+'">'
+      +'<span class="box">'+PCHK+'</span>'
+      +'<span class="tx"><b>'+esc(p.title)+(p.granted?' — sudah diizinkan':'')+'</b><small>'+esc(p.why)+'</small>'
+      +(p.blocked?'<small class="blk">Sudah diblokir. Buka Pengaturan Android untuk mengizinkan.</small>':'')+'</span>'
+      +'</button>';
+  }).join('');
+  const n=PERMS.filter(p=>pSel[p.id]&&!p.granted).length;
+  $('#pgrant').textContent=n?n('Izinkan '+n+' izin yang dipilih'):'Semua sudah diizinkan';
+  $('#pgrant').disabled=!n;
+}
+function openPerm(){
+  PERMS=loadPerms();
+  if(!PERMS.length){st.set('permdone','1');toast('Izin tidak tersedia di sini');return}
+  pSel={};PERMS.forEach(p=>{if(p.granted)pSel[p.id]=1});
+  paintPerms();$('#perm').classList.add('on');
+}
+function closePerm(){$('#perm').classList.remove('on')}
+$('#perm').onclick=e=>{if(e.target.id==='perm')closePerm()};
+$('#pskip').onclick=()=>{st.set('permdone','1');closePerm()};
+$('#popenset').onclick=()=>{if(A&&A.openAppSettings)A.openAppSettings()};
+$('#pgrant').onclick=()=>{
+  const want=PERMS.filter(p=>pSel[p.id]&&!p.granted).map(p=>p.id);
+  if(!want.length){closePerm();return}
+  let i=0;
+  const next=()=>{
+    if(i>=want.length){st.set('permdone','1');paintPerms();toast('Izin diperbarui');return}
+    const id=want[i++];
+    window.__permAfter=()=>{window.__permAfter=null;setTimeout(next,160)};
+    if(A&&A.minta)A.minta(id);
+    else next();
+  };
+  next();
+};
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-pi]');
+  if(t){const id=t.dataset.pi;pSel[id]=!pSel[id];paintPerms()}
+});
+// panggil balik dari native
+window.toast=t=>toast(t);
+window.__onPerm=(tipe,ok,blocked)=>{
+  window.__permAfter&&window.__permAfter();
+  if(ok&&window.__pendingPick){A&&A.pick?A.pick(window.__pendingPick):pickWeb(window.__pendingPick);window.__pendingPick=null}
+  else if(!ok){
+    if(blocked)ask({title:'Izin diblokir',body:'Izin '+tipe+' sudah diblokir di pengaturan Android. Buka pengaturan untuk mengizinkan.',ok:'Buka Pengaturan'}).then(v=>{if(v&&A&&A.openAppSettings)A.openAppSettings()});
+    else toast('Izin ditolak — fitur ini tidak bisa dipakai');
+  }
+  if($('#perm').classList.contains('on')){PERMS=loadPerms();paintPerms()}
+};
 
 $('#new').innerHTML=IC.plus;$('#more').innerHTML=IC.more;$('#burger').innerHTML=IC.menu;$('#eye').innerHTML=IC.eye;
 $('#route').innerHTML=Object.keys(PROV).map(k=>'<option value="'+k+'">'+PROV[k].name+'</option>').join('');renderProv();$('#mname').value=cfg.model;$('#sys').value=cfg.system;$('#tmp').value=cfg.temp;$('#tv').textContent=cfg.temp;
