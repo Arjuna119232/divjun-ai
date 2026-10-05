@@ -33,6 +33,8 @@ class MainActivity : Activity() {
     var pendingPermId: String = ""
     private val conns = ConcurrentHashMap<String, HttpURLConnection>()
     private lateinit var voice: Voice
+    private lateinit var speaker: Speaker
+    var callMode: Boolean = false
 
     private fun applyBars(dark: Boolean) {
         var f = 0
@@ -49,6 +51,26 @@ class MainActivity : Activity() {
             window.navigationBarColor = bg
         } catch (e: Exception) {
         }
+    }
+
+    private fun initSpeaker() {
+        speaker = Speaker(this)
+        speaker.onReady = { ok ->
+            runOnUiThread {
+                web.evaluateJavascript("window.__ttsReady&&window.__ttsReady(" + ok + ")", null)
+            }
+        }
+        speaker.onSpeakStart = {
+            runOnUiThread {
+                web.evaluateJavascript("window.__ttsStart&&window.__ttsStart()", null)
+            }
+        }
+        speaker.onQueueDone = {
+            runOnUiThread {
+                web.evaluateJavascript("window.__ttsDone&&window.__ttsDone()", null)
+            }
+        }
+        speaker.init()
     }
 
     private fun initVoice() {
@@ -70,6 +92,7 @@ class MainActivity : Activity() {
 
     override fun onDestroy() {
         if (::voice.isInitialized) voice.stop()
+        if (::speaker.isInitialized) speaker.release()
         super.onDestroy()
     }
     private val REQ_CAMERA = 101
@@ -89,6 +112,7 @@ class MainActivity : Activity() {
         web.addJavascriptInterface(Bridge(), "Android")
         setContentView(web)
         initVoice()
+        initSpeaker()
         web.loadUrl("file:///android_asset/index.html")
     }
 
@@ -206,6 +230,25 @@ class MainActivity : Activity() {
         @JavascriptInterface fun setTheme(dark: Boolean) {
             runOnUiThread { applyBars(dark) }
         }
+
+        /** TTS untuk mode panggilan. */
+        @JavascriptInterface fun ttsReady(): Boolean = speaker.isSpeaking
+
+        @JavascriptInterface fun ttsSay(sentences: String) {
+            val list = try {
+                val arr = org.json.JSONArray(sentences)
+                (0 until arr.length()).map { arr.getString(it) }
+            } catch (e: Exception) {
+                emptyList<String>()
+            }
+            if (list.isNotEmpty()) speaker.say(list)
+        }
+
+        @JavascriptInterface fun ttsStop() {
+            speaker.stop()
+        }
+
+        @JavascriptInterface fun ttsSpeaking(): Boolean = speaker.isSpeaking
 
         @JavascriptInterface fun version(): String =
             packageManager.getPackageInfo(packageName, 0).versionName ?: ""

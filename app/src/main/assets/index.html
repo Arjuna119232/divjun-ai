@@ -237,6 +237,32 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
 .tg.bad{color:var(--er)}
 .mcheck{width:20px;height:20px;color:var(--lk);flex:none;fill:none;stroke:currentColor;stroke-width:2.4}
 
+
+/* ===== MODE PANGGILAN SUARA ===== */
+#call{position:fixed;inset:0;background:var(--bg);z-index:8500;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top,0)) 20px calc(26px + env(safe-area-inset-bottom,0));opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+#call.on{opacity:1;visibility:visible}
+.ctop{display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
+.clabel{font-size:.82em;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:600}
+.ctime{font-family:"JBMono",ui-monospace,Menlo,monospace;font-size:.95em;color:var(--tx);font-variant-numeric:tabular-nums}
+.cmid{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:0 8px}
+.cava{width:104px;height:104px;border-radius:50%;background:var(--ub);display:grid;place-items:center;position:relative;transition:transform .2s}
+.cava.on{transform:scale(1.07)}
+.cava::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--lk);opacity:0;transition:opacity .25s}
+.cava.on::after{opacity:.55;animation:pulse 1.6s infinite}
+@keyframes pulse{0%{transform:scale(.94);opacity:.55}100%{transform:scale(1.12);opacity:0}}
+.cava img{width:56px;height:56px;object-fit:contain}
+.cst{font-size:1.02em;color:var(--tx);font-weight:600;text-align:center;min-height:1.4em}
+.cwave{display:flex;align-items:center;gap:4px;height:44px}
+.cwave i{width:4px;height:10px;border-radius:2px;background:var(--lk);opacity:.3;transition:height .09s linear,opacity .09s linear}
+.csay{color:var(--mu);font-size:.9em;text-align:center;line-height:1.55;max-width:340px;min-height:2.6em}
+.cbot{display:flex;justify-content:center;align-items:center;gap:34px;padding:14px 0 4px}
+.cbtn{width:58px;height:58px;border-radius:50%;background:var(--ub);border:1px solid var(--line);display:grid;place-items:center}
+.cbtn svg{width:24px;height:24px}
+.cbtn.on{background:var(--ac);border-color:var(--ac)}
+.cbtn.on svg{fill:#fff;stroke:#fff}
+.cend{width:72px;height:72px;border-radius:50%;background:#D9342B;border:0;display:grid;place-items:center;box-shadow:0 8px 26px rgba(217,52,43,.32)}
+.cend svg{width:28px;height:28px;fill:#fff;stroke:#fff}
+
 /* ===== AUTOPILOT STATUS ===== */
 .mstat{display:inline-flex;align-items:center;gap:8px;background:var(--ub);border-radius:999px;padding:7px 13px;font-size:.83em;color:var(--mu);margin-bottom:9px}
 .mstat .dots i{width:6px;height:6px;margin:0;background:var(--lk)}
@@ -314,7 +340,7 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
 <header>
   <div class="sd"><button class="ib" id="burger" aria-label="Menu"></button></div>
   <div id="ttl"></div>
-  <div class="sd rg"><span class="cact"><button class="ib fl" id="new" aria-label="Obrolan baru"></button><button class="ib" id="more" aria-label="Opsi"></button></span><button class="ib" id="info" aria-label="Tentang"></button></div>
+  <div class="sd rg"><span class="cact"><button class="ib fl" id="callb" aria-label="Panggilan suara"></button><button class="ib fl" id="new" aria-label="Obrolan baru"></button><button class="ib" id="more" aria-label="Opsi"></button></span><button class="ib" id="info" aria-label="Tentang"></button></div>
 </header>
 <main>
   <section id="chat" class="on">
@@ -407,6 +433,19 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
     <button class="btn pri pfull" id="pgrant">Izinkan yang dipilih</button>
     <button class="btn pfull" id="pskip" style="margin-top:8px">Nanti saja</button>
     <button class="btn pfull" id="popenset" style="margin-top:8px">Buka Pengaturan Android</button>
+  </div>
+</div>
+<div id="call">
+  <div class="ctop"><span class="clabel">Panggilan AI</span><span class="ctime" id="ctime">00:00</span></div>
+  <div class="cmid">
+    <div class="cava" id="cava"><span id="cavai"></span></div>
+    <p class="cst" id="cst">Menghubungkan…</p>
+    <div class="cwave" id="cwave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="csay" id="csay"></p>
+  </div>
+  <div class="cbot">
+    <button class="cbtn" id="cmute" aria-label="Bisukan"></button>
+    <button class="cend" id="cend" aria-label="Akhiri panggilan"></button>
   </div>
 </div>
 <div id="toast"></div>
@@ -791,6 +830,7 @@ function runPlan(messages,a,hadImg){
                 const c0=d0.content||'';
                 if(c0){gotFirst=true;a.status=''}
                 a.content+=c0;
+                if(CAL.on&&c0)callFeed(c0,false);
                 const r=d0.reasoning_content||d0.reasoning;
                 if(r)a.think=((a.think||'')+r).slice(-200);
               }
@@ -839,6 +879,7 @@ function runPlan(messages,a,hadImg){
             return;
           }
           noteHealth(tModel,true);
+          if(CAL.on)callFeed('',true);
           if(!a.content)a.content='(Model tidak mengirim balasan. Coba lagi.)';
           a.status='';fin();res(true);
         },
@@ -849,6 +890,7 @@ function runPlan(messages,a,hadImg){
             attempt(noTools);return res(false);
           }
           noteHealth(tModel,false);
+          if(CAL.on&&a.content)callFeed('',true);
           a.err=true;a.status='';a.content='Gagal terhubung: '+e;fin();res(false);
         }
       });
@@ -1185,7 +1227,12 @@ document.addEventListener('click',async e=>{
 });
 $('#send').onclick=()=>{if(busy){const id=busy;delete pend[id];cancelReq(id);const m=msgs(),a=m[m.length-1];if(!a.content)a.content='(Dihentikan)';fin()}else{const i=$('#in'),v=i.value;i.value='';i.style.height='auto';send(v)}};
 $('#in').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,140)+'px'};
-$('#new').onclick=newChat;$('#plus').innerHTML=IC.plus;$('#plus').onclick=()=>openEdit('attach');$('#mic').innerHTML=sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>');$('#mic').onclick=voice;function copyPre(btn){
+$('#new').onclick=newChat;
+$('#callb').onclick=()=>{
+  if(!A||!A.ttsSay){toast('Panggilan suara hanya tersedia di aplikasi');return}
+  if(!A.voiceAvailable||!A.voiceAvailable()){toast('Mikrofon tidak tersedia di HP ini');return}
+  callStart();
+};$('#plus').innerHTML=IC.plus;$('#plus').onclick=()=>openEdit('attach');$('#mic').innerHTML=sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>');$('#mic').onclick=voice;function copyPre(btn){
   const wrap=btn.parentElement;
   const code=wrap.querySelector('code');
   if(!code)return;
@@ -1230,7 +1277,8 @@ $('#saveBtn').onclick=()=>{cfg.key=$('#key').value.trim();cfg.model=$('#mname').
 $('#saveAi').onclick=()=>{cfg.system=$('#sys').value.trim()||cfg.system;cfg.temp=+$('#tmp').value;save();toast('Pengaturan AI disimpan')};
 $('#expAll').onclick=()=>chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
 $('#wipe').onclick=async()=>{if(await ask({title:'Hapus semua data?',body:'Semua percakapan, API key, dan pengaturan akan dihapus dari HP ini.',ok:'Hapus semua',danger:1})){chats=[];cur='';cfg={...cfg,key:'',model:'',fav:[],kk:{},mm:{},ml:{},cs:[]};save();persist();$('#key').value='';$('#mname').value='';fillModels([]);render();toast('Semua data dihapus')}};
-window.__back=()=>{if(modalRes){modalRes(null);return true}if($('#sheet').classList.contains('open')){closeSheet();return true}if(document.body.classList.contains('dr')||$('#menu').classList.contains('open')){closeAll();return true}if(tab!=='chat'){go('chat');return true}return false};
+window.__back=()=>{
+  if(CAL.on){callEnd();return true}if(modalRes){modalRes(null);return true}if($('#sheet').classList.contains('open')){closeSheet();return true}if(document.body.classList.contains('dr')||$('#menu').classList.contains('open')){closeAll();return true}if(tab!=='chat'){go('chat');return true}return false};
 if(darkMQ.addEventListener)darkMQ.addEventListener('change',()=>{if(cfg.theme==='auto')applyTheme()});
 else if(darkMQ.addListener)darkMQ.addListener(()=>{if(cfg.theme==='auto')applyTheme()});
 
@@ -1377,6 +1425,165 @@ window.__onPerm=(tipe,ok,blocked)=>{
   }
   if($('#perm').classList.contains('on')){PERMS=loadPerms();paintPerms()}
 };
+
+// ===== MODE PANGGILAN SUARA (ngobrol seperti telepon) =====
+const CAL={
+  on:false,muted:false,phase:'idle',   // listen | think | speak | idle
+  t:0,timer:null,rms:.06,sayBuf:'',said:false,ttsOk:false,fails:0
+};
+const CW=$('#call');
+function cW(){return CW.querySelectorAll('.cwave i')}
+let cRAF=null;
+function cPaint(){
+  const bars=cW(),n=bars.length;
+  for(let k=0;k<n;k++){
+    const d=Math.abs(k-(n-1)/2)/((n-1)/2);
+    const env=Math.max(.15,1-d*.6);
+    let base=CAL.phase==='speak'?.30:.16;
+    let amp=CAL.rms;
+    const h=8+(base+amp*52*env*(.6+.4*Math.sin(Date.now()/170+k*.8)))*1;
+    bars[k].style.height=Math.max(6,Math.min(58,h))+'px';
+    bars[k].style.opacity=(.25+(CAL.phase==='speak'?.5:.65)*Math.min(1,amp*1.6+.25)).toFixed(2);
+  }
+  cRAF=requestAnimationFrame(cPaint);
+}
+function cClock(){
+  const d=new Date(Date.now()-CAL.t),m=String(Math.floor(d/60000)).padStart(2,'0'),s=String(Math.floor(d%60000/1000)).padStart(2,'0');
+  const e=$('#ctime');if(e)e.textContent=m+':'+s;
+}
+function cPhase(p,txt){
+  CAL.phase=p;
+  const st=$('#cst');if(st)st.textContent=txt;
+  const av=$('#cava');if(av)av.classList.toggle('on',p==='listen'||p==='speak');
+}
+function cSay(t){
+  const e=$('#csay');if(e)e.textContent=t||'';
+}
+function cIcon(){
+  $('#cmute').innerHTML=IC.micOff||sv('<path d="M3 3l18 18M9 9v3a3 3 0 0 0 4.6 2.5M15 11V6a3 3 0 0 0-5.8-1M5 11a7 7 0 0 0 11 5.7M12 18v3"/>');
+  $('#cend').innerHTML=sv('<path d="M5 4h14l-1 9a6 6 0 0 1-12 0z"/><path d="M12 19v3M8.5 4l2.5-2 2.5 2"/>');
+}
+function callStart(){
+  if(!A||!A.ttsSay){toast('Mode panggilan hanya tersedia di aplikasi');return}
+  CAL.on=true;CAL.t=Date.now();CAL.sayBuf='';CAL.said=false;CAL.muted=false;CAL.fails=0;cLastStart=0;
+  $('#cmute').classList.remove('on');
+  $('#cavai').innerHTML='<img src="logo_mark.png" alt="">';
+  cIcon();
+  CW.classList.add('on');
+  if(!cRAF)cRAF=requestAnimationFrame(cPaint);
+  clearInterval(CAL.timer);CAL.timer=setInterval(cClock,1000);cClock();
+  if(!CAL.ttsOk&&A.voiceAvailable&&A.voiceAvailable())CAL.ttsOk=true;
+  cPhase('listen','Menyiapkan\u2026');
+  setTimeout(()=>cListen(),420);
+}
+function callEnd(){
+  CAL.on=false;CAL.phase='idle';
+  clearInterval(CAL.timer);CAL.timer=null;
+  if(cRAF){cancelAnimationFrame(cRAF);cRAF=null}
+  if(A){try{A.voiceStop()}catch(e){}try{A.ttsStop()}catch(e){}}
+  CW.classList.remove('on');
+  render();updChip();
+}
+let cLastStart=0;
+function cListen(){
+  if(!CAL.on||CAL.muted||busy)return;
+  const now=Date.now();
+  // cegah restart bertubi-tubi (ERROR_RECOGNIZER_BUSY)
+  if(now-cLastStart<700)return;
+  if(CAL.fails>=4){
+    cPhase('idle','Mikrofon bermasalah');
+    cSay('Ketuk mikrofon lagi untuk mencoba ulang.');
+    return;
+  }
+  cLastStart=now;
+  cPhase('listen','Mendengarkan\u2026');
+  try{A.voice()}catch(e){CAL.fails++}
+}
+// AI sedang bicara -> MIC berhenti supaya AI tidak mendengar dirinya sendiri
+function cPauseMic(){
+  if(A){try{A.voiceStop()}catch(e){}}
+  CAL.rms=.05;
+}
+// kalimat lengkap -> dikirim ke TTS
+function takeSentences(buf,max){
+  const re=/[.!?…]+(\s+|$)/g;
+  const out=[];let last=0,m;
+  while((m=re.exec(buf))&&out.length<(max||4)){
+    const t=buf.slice(last,m.index).trim();
+    if(t.length>1)out.push(t);
+    last=re.lastIndex;
+  }
+  return {out:out,rest:buf.slice(last)};
+}
+function callFeed(text,final){
+  if(!CAL.on)return;
+  CAL.sayBuf+=text;
+  const r=takeSentences(CAL.sayBuf,4);
+  CAL.sayBuf=r.rest;
+  if(r.out.length){
+    if(!CAL.said){CAL.sayStart=Date.now();CAL.said=true;cPauseMic()}
+    try{A.ttsSay(JSON.stringify(r.out))}catch(e){}
+  }
+  if(final){
+    const rest=CAL.sayBuf.trim();
+    CAL.sayBuf='';
+    if(rest.length>1){
+      try{A.ttsSay(JSON.stringify([rest]))}catch(e){}
+      if(!CAL.said){CAL.said=true;cPauseMic()}
+    }
+  }
+}
+function callSetIdle(){
+  CAL.said=false;CAL.sayBuf='';
+}
+function callSend(text){
+  if(!text)return;
+  const c=chat();
+  if(!c){newChat()}
+  const t=setTimeout(()=>send(text),60);
+}
+window.__ttsReady=ok=>{CAL.ttsOk=!!ok};
+window.__ttsStart=()=>{if(CAL.on){cPhase('speak','DIVJUN AI bicara\u2026')}};
+window.__ttsDone=()=>{
+  if(!CAL.on)return;
+  callSetIdle();
+  setTimeout(()=>{if(CAL.on&&!busy){cPhase('listen','Siap listening\u2026');cListen()}},260);
+};
+window.__callRms=v=>{CAL.rms=CAL.phase==='speak'?.30:v};
+// voice callbacks diarahkan ke mode panggilan
+window.__voiceTextOrig=window.__voiceText;
+window.__voiceText=(txt,final)=>{
+  if(CAL.on){
+    cSay(txt);
+    if(final){CAL.fails=0;cSay(txt);cPhase('think','Memproses\u2026');callSetIdle();callSend(txt)}
+    return;
+  }
+  window.__voiceTextOrig&&window.__voiceTextOrig(txt,final);
+};
+window.__voiceEvOrig=window.__voiceEv;
+window.__voiceEv=ev=>{
+  if(CAL.on){
+    if(ev==='denied'){callEnd();openPerm()}
+    else if(ev==='nostop'){callEnd();toast('Suara tidak tersedia di HP ini')}
+    else if(ev==='ready'){CAL.fails=0;cPhase('listen','Mendengarkan\u2026');cSay('')}
+    else if(ev==='quiet'){
+      // diam sebentar = giliran AI; jangan langsung restart kalau AI masih jalan
+      if(!busy&&!CAL.said)setTimeout(()=>{if(CAL.on&&CAL.phase!=='speak')cListen()},420);
+    }
+    else if(ev==='end'){ if(!busy&&!CAL.said)setTimeout(()=>{if(CAL.on)cListen()},320) }
+    else if(ev==='neterror'){cPhase('listen','Suara butuh internet\u2026')}
+    return;
+  }
+  window.__voiceEvOrig&&window.__voiceEvOrig(ev);
+};
+$('#cmute').onclick=()=>{
+  CAL.muted=!CAL.muted;
+  $('#cmute').classList.toggle('on',CAL.muted);
+  if(CAL.muted){if(A){try{A.voiceStop()}catch(e){}}
+    cPhase('idle','Mikrofon mati');cSay('');}
+  else{CAL.fails=0;cLastStart=0;cPhase('listen','Mendengarkan\u2026');cListen()}
+};
+$('#cend').onclick=()=>{callEnd();toast('Panggilan selesai')};
 
 $('#new').innerHTML=IC.plus;$('#more').innerHTML=IC.more;$('#burger').innerHTML=IC.menu;$('#eye').innerHTML=IC.eye;
 $('#route').innerHTML=Object.keys(PROV).map(k=>'<option value="'+k+'">'+PROV[k].name+'</option>').join('');renderProv();$('#mname').value=cfg.model;$('#sys').value=cfg.system;$('#tmp').value=cfg.temp;$('#tv').textContent=cfg.temp;
