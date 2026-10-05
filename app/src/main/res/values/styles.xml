@@ -1,5 +1,18 @@
 <resources>
-    <!-- Light theme colors -->
+    <!-- Light theme colors (default) -->
+    <color name="bg">#FAF9F7</color>
+    <color name="panel">#FFFFFF</color>
+    <color name="line">#E4E1DA</color>
+    <color name="tx">#1F1E1D</color>
+    <color name="mu">#78756D</color>
+    <color name="ac">#141413</color>
+    <color name="acx">#FFFFFF</color>
+    <color name="ub">#F0EEE8</color>
+    <color name="lk">#5B4FD1</color>
+    <color name="ok">#1B8A6B</color>
+    <color name="er">#C9372C</color>
+
+    <!-- Light theme colors with suffix -->
     <color name="bg_light">#FAF9F7</color>
     <color name="panel_light">#FFFFFF</color>
     <color name="line_light">#E4E1DA</color>
@@ -26,9 +39,9 @@
     <color name="er_dark">#FF8A80</color>
 
     <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/bg_light</item>
-        <item name="android:statusBarColor">@color/bg_light</item>
-        <item name="android:navigationBarColor">@color/bg_light</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
         <item name="android:forceDarkAllowed">false</item>
     </style>
 
