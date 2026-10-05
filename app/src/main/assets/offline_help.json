@@ -1,0 +1,417 @@
+{
+  "version": "1.9.1",
+  "lang": "id-ID",
+  "title": "Bantuan DIVJUN AI",
+  "sections": [
+    {
+      "id": "mulai",
+      "title": "Memulai",
+      "icon": "rocket",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "DIVJUN AI adalah asisten AI di dalam aplikasi. Kamu bisa ngobrol, minta AI membaca halaman web, cek cuaca, kirim foto atau file, dan catatan semua tersimpan di HP kamu."
+        },
+        {
+          "type": "h",
+          "t": "Langkah pertama"
+        },
+        {
+          "type": "steps",
+          "items": [
+            "Buka tab Pengaturan (ikon roda gigi di drawer atau bawah).",
+            "Pilih Penyedia AI, lalu masukkan API key.",
+            "Ketuk Simpan dan uji koneksi sampai muncul hijau 'Terhubung'.",
+            "Kembali ke tab Chat, ketuk chip model di atas kolom input untuk pilih model.",
+            "Mulai ngobrol."
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Dapatkan API key gratis"
+        },
+        {
+          "type": "p",
+          "t": "Groq memberi akses gratis dengan batas pemakaian. Ambil key di situsnya, tempel di Pengaturan. Key disimpan hanya di HP ini."
+        },
+        {
+          "type": "note",
+          "t": "Kalau aplikasi sudah punya key bawaan, kolom API key akan menampilkan 'Tertanam di aplikasi' dan tidak perlu diisi."
+        }
+      ]
+    },
+    {
+      "id": "model",
+      "title": "Pilih Model",
+      "icon": "cpu",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "Model dengan reasoning (berpikir) lebih akurat tapi lebih lambat. Model biasa lebih cepat untuk percakapan harian."
+        },
+        {
+          "type": "h",
+          "t": "Rekomendasi"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Butuh jawaban kilat → allam-2-7b atau model ringan lain",
+            "Coding, hitung, analisis → model reasoning seperti GPT OSS",
+            "Bahasa Indonesia → allam-2-7b, atau Qwen",
+            "Tugas panjang (banyak konteks) → model dengan konteks 128K"
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Kenapa model's Thinking perluasan?"
+        },
+        {
+          "type": "p",
+          "t": "Kolom 'Thinking' menyimpan proses berpikir model. Bagian ini disembunyikan supaya jawaban terlihat bersih. Ketuk tombol 'Berpikir...' di bawah jawaban kalau mau melihatnya."
+        },
+        {
+          "type": "h",
+          "t": "Batas pemakaian gratis"
+        },
+        {
+          "type": "p",
+          "t": "Kalau muncul 'Rate limit', tunggu beberapa menit atau pilih model lain. Kalau 'quota exceeded', pakai model gratis lain atau isi saldo."
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "title": "Membaca Web",
+      "icon": "globe",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "AI bisa membuka halaman web dan membaca isinya. Ini dipakai otomatis saat kamu tanya soal berita, harga, dokumentasi, atau fakta terbaru."
+        },
+        {
+          "type": "h",
+          "t": "Cara memaksa"
+        },
+        {
+          "type": "p",
+          "t": "Sebut URL-nya langsung di chat, contoh: 'Baca https://developer.android.com dan jelaskan adaptive icon'. AI akan membuka halaman itu."
+        },
+        {
+          "type": "h",
+          "t": "Batasan"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Halaman yang isinya muncul setelah scroll atau butuh login bisa kurang terbaca.",
+            "Some situs berat (YouTube, X/Twitter, aplikasi web dinamis) sering kosong karena isinya dirender lewat JavaScript.",
+            "Halaman berbayar atau yang memblokir akses otomatis bisa gagal dimuat.",
+            "Teks panjang dipotong supaya tidak overflow."
+          ]
+        },
+        {
+          "type": "note",
+          "t": "Kalau browse gagal, coba buka URL-nya manual di browser dan salin teksnya ke chat."
+        }
+      ]
+    },
+    {
+      "id": "cuaca",
+      "title": "Cek Cuaca",
+      "icon": "cloud",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "AI punya akses data cuaca real-time. Tinggal tanya seperti 'cuaca Jakarta sekarang' atau 'besok Bandung hujan tidak'."
+        },
+        {
+          "type": "h",
+          "t": "Data yang didapat"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Suhu sekarang dan terasanya",
+            "Kelembapan, kecepatan dan arah angin",
+            "Indeks UV dan visibilitas",
+            "Suhu min/max hari ini dan besok",
+            "Waktu sunrise dan sunset"
+          ]
+        },
+        {
+          "type": "p",
+          "t": "Kalau pertanyaan kamu soal cuaca, AI memakai tool cuaca khusus supaya jawabannya cepat dan tidak perlu berpikir panjang."
+        }
+      ]
+    },
+    {
+      "id": "lampiran",
+      "title": "Foto dan File",
+      "icon": "paperclip",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "Klik tombol + di kolom chat untuk menambahkan lampiran."
+        },
+        {
+          "type": "h",
+          "t": "Jenis yang didukung"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Foto atau gambar → dikirim ke model sebagai gambar, harus pakai model yang mendukung vision",
+            "File teks (txt, md, csv, json) → isinya dibaca jadi bagian dari pesan",
+            "Maksimal 4 lampiran per pesan",
+            "Ukuran file teks maksimal 200 KB"
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Tips"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Foto otomatis dikecilkan supaya hemat kuota dan cepat diproses.",
+            "Orientasi foto otomatis diperbaiki.",
+            "Kalau model tidak bisa baca gambar, pilih model lain atau jelaskan isi fotonya manual."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "suara",
+      "title": "Input Suara",
+      "icon": "mic",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "Ketuk ikon mikrofon untuk bicara langsung ke kolom chat."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Bahasa default Indonesia, ganti dengan suara menu.",
+            "Butuh izin mikrofon, akan muncul permintaan izin.",
+            "Ketuk ■ untuk berhenti, lalu Ketuk Kirim untuk memakai hasil."
+          ]
+        },
+        {
+          "type": "note",
+          "t": "Fitur suara butuh Google app yang mendukung speech recognition di HP."
+        }
+      ]
+    },
+    {
+      "id": "riwayat",
+      "title": "Riwayat dan Data",
+      "icon": "clock",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "Semua percakapan tersimpan di HP ini. Tidak ada yang dikirim ke server kami."
+        },
+        {
+          "type": "h",
+          "t": "Yang bisa dilakukan"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Cari percakapan lama lewat kolom pencarian di tab Obrolan",
+            "Sematkan percakapan penting agar selalu di atas",
+            "Ganti nama percakapan supaya mudah dicari",
+            "Ekspor semua percakapan ke teks untuk dicadangkan",
+            "Bersihkan riwayat tanpa menghapus API key dan pengaturan"
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Matikan penyimpanan riwayat"
+        },
+        {
+          "type": "p",
+          "t": "Di Pengaturan, matikan 'Simpan riwayat obrolan' kalau kamu tidak ingin percakapan disimpan."
+        }
+      ]
+    },
+    {
+      "id": "privasi",
+      "title": "Privasi",
+      "icon": "shield",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "Aplikasi ini dirancang supaya data kamu tetap di tangan kamu."
+        },
+        {
+          "type": "list",
+          "items": [
+            "API key, riwayat, dan pengaturan disimpan di HP ini.",
+            "Yang dikirim ke server hanya isi chat yang kamu tulis.",
+            "Saat AI memakai tool web, halaman yang dibuka memang dikirim ke penyedia AI.",
+            "Tidak ada analitik atau pelacakan pengguna."
+          ]
+        },
+        {
+          "type": "note",
+          "t": "Penting: API key yang tertanam di dalam APK bisa diekstrak siapa pun yang memegang file APK-nya. Jangan bagikan APK ke orang yang tidak kamu percaya."
+        }
+      ]
+    },
+    {
+      "id": "tips",
+      "title": "Tips Pakai",
+      "icon": "bulb",
+      "blocks": [
+        {
+          "type": "h",
+          "t": "Prompt yang efektif"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Sebut peran: 'Kamu seorang editor' atau 'Jelaskan seperti untuk anak SMA'",
+            "Beri konteks, jangan cuma perintah singkat",
+            "Tentukan format: 'dalam 5 poin', 'sebagai tabel', 'maksimal 200 kata'",
+            "Sebut batasan yang tidak boleh dilanggar"
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Hasil lebih baik"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Kreativitas rendah (0-0.3) untuk fakta, kode, dan terjemahan",
+            "Kreativitas sedang (0.5-0.8) untuk ide dan tulisan",
+            "Kreativitas tinggi (1.0-1.5) untuk cerita dan brainstorming",
+            "Kirim ulang pertanyaan yang sama untuk melihat jawaban lain"
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Menghemat kuota"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Pakai model ringan untuk percakapan biasa",
+            "Matikan reasoning kalau tidak butuh jawaban mendalam",
+            "Bersihkan riwayat lama supaya app lebih ringan",
+            "Gunakan instruksi sistem untuk mengatur gaya jawaban sekali saja"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trouble",
+      "title": "Troubleshooting",
+      "icon": "wrench",
+      "blocks": [
+        {
+          "type": "h",
+          "t": "'Gagal: Isi API key dulu'"
+        },
+        {
+          "type": "p",
+          "t": "Buka Pengaturan, pilih penyedia yang mau dipakai, lalu isi API key dan ketuk Simpan dan uji koneksi."
+        },
+        {
+          "type": "h",
+          "t": "'Akses ditolak (401/403)'"
+        },
+        {
+          "type": "p",
+          "t": "API key salah atau kedaluwarsa. Pastikan key dibuat dari akun yang sama dengan penyedia yang dipilih."
+        },
+        {
+          "type": "h",
+          "t": "'Batas pemakaian gratis tercapai'"
+        },
+        {
+          "type": "p",
+          "t": "Tunggu beberapa menit lalu coba lagi, atau ganti ke model lain."
+        },
+        {
+          "type": "h",
+          "t": "'Model tidak mendukung gambar'"
+        },
+        {
+          "type": "p",
+          "t": "Pilih model yang mendukung vision, atau tuliskan isi gambar secara manual."
+        },
+        {
+          "type": "h",
+          "t": "'Gagal terhubung'"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Cek koneksi internet.",
+            "Coba ganti dari WiFi ke data seluler atau sebaliknya.",
+            "Tutup aplikasi lalu buka lagi."
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Aplikasi lambat"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Ganti ke model yang lebih ringan.",
+            "Tutup tab lain yang banyak memakai RAM.",
+            "Bersihkan riwayat obrolan yang sudah sangat banyak."
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Browse kosong"
+        },
+        {
+          "type": "p",
+          "t": "Situs tujuan mungkin butuh JavaScript atau login. Coba salin isi halaman manual ke chat."
+        }
+      ]
+    },
+    {
+      "id": "tentang",
+      "title": "Tentang Aplikasi",
+      "icon": "info",
+      "blocks": [
+        {
+          "type": "p",
+          "t": "DIVJUN AI adalah aplikasi chat AI yang menggabungkan beberapa penyedia AI dalam satu tempat, ditambah direktori alat AI."
+        },
+        {
+          "type": "h",
+          "t": "Yang kamu dapatkan"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Chat AI streaming dengan dukungan tool",
+            "Pembaca halaman web langsung dari chat",
+            "Cek cuaca real-time",
+            "Input suara, foto, dan file",
+            "Riwayat percakapan yang tersimpan lokal",
+            "Direktori alat AI dari banyak kategori",
+            "Mode terang/gelap dan ukuran teks yang bisa diatur"
+          ]
+        },
+        {
+          "type": "h",
+          "t": "Dibuat oleh"
+        },
+        {
+          "type": "p",
+          "t": "DIVJUN AI dibuat oleh 0xmahen, di bawah naungan DIVARJUNA STUDIOS."
+        }
+      ]
+    }
+  ]
+}
