@@ -116,11 +116,9 @@ section.on{opacity:1;visibility:visible;transform:none}
 input,.pad textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:11px 14px;outline:none;min-height:48px}.pad textarea{min-height:96px;max-height:none}
 input:focus,textarea:focus{border-color:var(--lk)}
 label{display:block;margin:14px 0 6px;font-weight:600}
-#hl .row,.tool{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}#hl .row{cursor:pointer}
+#hl .row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
 .row>svg{color:var(--mu)}.rt{flex:1;min-width:0}.rt b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rt span,.to span{color:var(--mu);font-size:.85em}
 .row .ib{width:36px;height:36px;color:var(--mu)}
-.to{flex:1;display:flex;gap:12px;align-items:center;background:none;border:0;text-align:left;padding:0;min-width:0}.to b{display:block;font-weight:500}
-.av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:700;color:#141413;flex:none}
 .empty{color:var(--mu);text-align:center;margin-top:40px}.two{display:flex;gap:8px;align-items:center}.two input{flex:1}
 .hint{color:var(--mu);font-size:.85em;margin-top:6px}#st{margin-top:12px;min-height:24px}
 #dov{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;visibility:hidden;transition:.2s;z-index:20}
@@ -354,7 +352,7 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
     <div id="hl"></div>
   </div><button class="pill fab" id="fab">+ Chat baru</button></section>
   <section id="tools"><div class="pad">
-    <h2>Alat AI</h2><p class="sub" id="tsub">Model AI yang tersedia dari API key kamu.</p>
+    <h2>Alat AI</h2><p class="sub" id="tsub">Semua model AI dari API key Groq kamu. Ketuk untuk langsung dipakai.</p>
     <input id="tq" type="search" placeholder="Cari model..." style="margin-bottom:12px">
     <div class="chips" id="cats"></div>
     <div class="mstat2" id="tstat"></div>
@@ -910,9 +908,6 @@ function renderHist(){
   const q=$('#hq').value.toLowerCase(),l=chats.filter(c=>!q||c.title.toLowerCase().includes(q)||c.msgs.some(m=>(m.content||'').toLowerCase().includes(q))).sort((a,b)=>(b.pin|0)-(a.pin|0)||b.ts-a.ts);
   $('#hl').innerHTML=l.length?l.map(c=>'<div class="row" data-o="'+c.id+'">'+IC.chat+'<div class="rt"><b>'+esc(c.title)+'</b><span>'+rel(c.ts)+'</span></div><button class="ib" data-rn="'+c.id+'" aria-label="Ubah nama">'+IC.edit+'</button><button class="ib" data-dl="'+c.id+'" aria-label="Hapus">'+IC.trash+'</button></div>').join(''):'<p class="empty">'+(q?'Tidak ada percakapan yang cocok.':'Belum ada percakapan. Mulai obrolan di tab Chat.')+'</p>';
 }
-const TOOLS=[['ChatGPT','https://chatgpt.com','Chat','Asisten serbaguna dari OpenAI'],['Gemini','https://gemini.google.com','Chat','Asisten AI dari Google'],['Claude','https://claude.ai','Chat','Asisten AI dari Anthropic'],['Grok','https://grok.com','Chat','Asisten AI dari xAI'],['DeepSeek','https://chat.deepseek.com','Chat','Model chat dan penalaran'],['Le Chat','https://chat.mistral.ai','Chat','Asisten AI dari Mistral'],['Meta AI','https://www.meta.ai','Chat','Asisten AI dari Meta'],['Copilot','https://copilot.microsoft.com','Chat','Asisten AI dari Microsoft'],['Perplexity','https://www.perplexity.ai','Riset','Pencarian dengan jawaban bersumber'],['NotebookLM','https://notebooklm.google.com','Riset','Belajar dari dokumen sendiri'],['Poe','https://poe.com','Riset','Satu tempat untuk banyak model'],['Midjourney','https://www.midjourney.com','Gambar','Pembuat gambar artistik'],['Leonardo','https://leonardo.ai','Gambar','Gambar dan aset kreatif'],['Ideogram','https://ideogram.ai','Gambar','Gambar dengan teks yang rapi'],['Canva','https://www.canva.com','Gambar','Desain dengan fitur AI'],['Runway','https://runwayml.com','Video','Membuat dan mengedit video'],['Kling','https://klingai.com','Video','Video dari teks atau gambar'],['Pika','https://pika.art','Video','Video pendek dari prompt'],['Suno','https://suno.com','Audio','Membuat lagu dari teks'],['ElevenLabs','https://elevenlabs.io','Audio','Suara dan pengisi suara AI'],['Cursor','https://cursor.com','Kode','Editor kode dengan AI'],['Replit','https://replit.com','Kode','Bangun aplikasi dari browser'],['Hugging Face','https://huggingface.co','Kode','Ribuan model dan demo terbuka'],['OpenCode','https://opencode.ai','Kode','Agen kode dan gerbang model AI']];
-const COL=['#7C8CFF','#5EEAD4','#FFB86B','#FF8FB1','#A5E36B','#8FD3FF'];
-let toolMode='model';
 const MODEL_CAT=[
   {id:'Semua',re:null},
   {id:'Reasoning',re:/gpt-oss|deepseek-r1|reasoner|thinking/i},
@@ -961,7 +956,6 @@ function renderTools(){
   const q=($('#tq')&&$('#tq').value||'').toLowerCase();
   const box=$('#grid');
   if(!box)return;
-  if(toolMode==='web')return renderWebTools(q);
 
   const ids=(LI&&LI.length)?LI.slice():(cfg.model?[cfg.model]:[]).filter(Boolean);
   if(!ids.length){
@@ -977,7 +971,7 @@ function renderTools(){
   const cats=['Semua'].concat([...new Set(pool.map(catOf))]);
   if(cats.indexOf(cat)<0)cat='Semua';
   $('#cats').innerHTML=cats.map(c=>'<button class="chip'+(c===cat?' on':'')+'" data-cat="'+esc(c)+'">'+esc(c)+'</button>').join('')
-    +'<button class="chip" data-mode="web">Alat web</button>';
+
 
   const l=pool.filter(i=>cat==='Semua'||catOf(i)===cat).filter(i=>!q||i.toLowerCase().indexOf(q)>=0)
     .sort((a,b)=>mScore(b,false)-mScore(a,false));
@@ -1001,16 +995,6 @@ function renderTools(){
         (on?'<i class="mcheck">'+IC.check+'</i>':'')+
       '</button></div>';
   }).join('');
-}
-function renderWebTools(q){
-  $('#tsub').textContent='Alat AI web favorit. Ketuk bintang untuk menyimpan.';
-  $('#tstat').innerHTML='';
-  const cats=['Semua','Favorit'].concat([...new Set(TOOLS.map(t=>t[2]))]);
-  if(cats.indexOf(cat)<0)cat='Semua';
-  $('#cats').innerHTML=cats.map(c=>'<button class="chip'+(c===cat?' on':'')+'" data-cat="'+esc(c)+'">'+esc(c)+'</button>').join('')
-    +'<button class="chip" data-mode="model">Model AI</button>';
-  const l=TOOLS.filter(t=>(cat==='Semua'||(cat==='Favorit'?cfg.fav.includes(t[0]):t[2]===cat))&&(!q||(t[0]+t[3]).toLowerCase().includes(q)));
-  $('#grid').innerHTML=l.length?l.map(t=>'<div class="tool"><button class="to" data-u="'+t[1]+'"><div class="av" style="background:'+COL[t[0].length%6]+'">'+t[0][0]+'</div><div><b>'+esc(t[0])+'</b><span>'+esc(t[3])+'</span></div></button><button class="ib'+(cfg.fav.includes(t[0])?' on':'')+'" data-f="'+esc(t[0])+'" aria-label="Favorit">'+IC.star+'</button></div>').join(''):'<p class="empty">'+(cat==='Favorit'?'Belum ada favorit. Ketuk bintang pada alat AI.':'Tidak ada alat yang cocok.')+'</p>';
 }
 function renderSeg(){
   $('#thm').innerHTML=[['auto','Otomatis'],['dark','Gelap'],['light','Terang']].map(x=>'<button class="chip'+(cfg.theme===x[0]?' on':'')+'" data-th="'+x[0]+'">'+x[1]+'</button>').join('');
@@ -1197,7 +1181,7 @@ function pickWeb(kind){
   i.click();
 }
 document.addEventListener('click',async e=>{
-  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-u],[data-f],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-pk],[data-rm],[data-se],[data-ea],[data-more],[data-m],[data-sp],[data-mo],[data-sx],[data-dc],[data-t],[data-usem],[data-mode]');
+  const t=e.target.closest('[data-q],[data-c],[data-r],[data-go],[data-cat],[data-o],[data-rn],[data-dl],[data-th],[data-fs],[data-pk],[data-rm],[data-se],[data-ea],[data-more],[data-m],[data-sp],[data-mo],[data-sx],[data-dc],[data-t],[data-usem]');
   if(!t)return;const d=t.dataset;
   if(d.q)send(d.q);
   else if(d.go)go(d.go);
@@ -1205,9 +1189,7 @@ document.addEventListener('click',async e=>{
   else if(d.c){const m=msgs()[+d.c];A?A.copy(m.content):navigator.clipboard.writeText(m.content);toast('Jawaban disalin')}
   else if(d.cat){cat=d.cat;renderTools()}
   else if(d.usem){setModel(d.usem)}
-  else if(d.mode){toolMode=d.mode;renderTools()}
   else if(d.u){A?A.open(d.u):window.open(d.u)}
-  else if(d.f){const i=cfg.fav.indexOf(d.f);i<0?cfg.fav.push(d.f):cfg.fav.splice(i,1);save();renderTools()}
   else if(d.rn){const c=chats.find(x=>x.id===d.rn),v=await ask({title:'Ubah nama percakapan',input:c.title,ok:'Simpan'});if(v){c.title=v.slice(0,60);persist();renderHist();toast('Nama diperbarui')}}
   else if(d.dl){const c=chats.find(x=>x.id===d.dl);if(await ask({title:'Hapus percakapan?',body:'"'+c.title+'" akan dihapus permanen.',ok:'Hapus',danger:1})){chats=chats.filter(x=>x.id!==c.id);if(cur===c.id)cur='';persist();renderHist();render();toast('Percakapan dihapus')}}
   else if(d.o){if(busy)return toast('Tunggu jawaban selesai');cur=d.o;persist();render();go('chat')}
