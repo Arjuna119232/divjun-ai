@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DIVJUN AI</title>
+<meta name="theme-color" content="#FAF9F7">
+<script>(function(){try{var d=window.matchMedia('(prefers-color-scheme: dark)').matches;var c=localStorage.getItem('cfg');var t=c?((JSON.parse(c).theme)||'auto'):'auto';document.documentElement.dataset.th=(t==='dark'||(t==='auto'&&d))?'dark':'light'}catch(e){}})();</script>
 <script src="keys.js"></script>
 <style>
 @font-face{font-family:'InterVar';src:url('fonts/InterVariable.ttf') format('truetype-variations');font-weight:100 900;font-style:normal;font-display:swap}
@@ -52,7 +54,7 @@ section.on{opacity:1;visibility:visible;transform:none}
 .think-content{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.85em;line-height:1.6;color:var(--tx);white-space:pre-wrap;max-height:200px;overflow-y:auto}
 .dots i{display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--mu);animation:b 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
-.hero{margin:auto 0;text-align:center;padding:0 8px 12vh}.hero .mk{width:48px;height:48px;color:var(--lk);stroke:none;margin-bottom:18px}
+.hero{margin:auto 0;text-align:center;padding:0 8px 12vh}
 .hero h1,h2{font-family:var(--sf);font-weight:600}.hero h1{font-size:1.45em;line-height:1.35;margin-bottom:22px;letter-spacing:-0.01em}
 .tips{font-size:.82em;color:var(--mu);margin-top:-14px;margin-bottom:18px;line-height:1.5;font-style:italic;opacity:.85}
 #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s ease,transform .6s ease;opacity:1;transform:scale(1)}
@@ -71,7 +73,7 @@ section.on{opacity:1;visibility:visible;transform:none}
 #voice .vt span:nth-child(3){animation-delay:.4s}
 @keyframes vd{0%,60%,100%{opacity:.2}30%{opacity:1}}
 #voice .vw{display:flex;align-items:center;gap:4px;height:80px;margin:30px 0}
-#voice .vw i{width:4px;height:20px;background:var(--lk);border-radius:2px;animation:vw 1.1s infinite ease-in-out}
+#voice .vw i{width:4px;height:14px;background:var(--lk);border-radius:2px;transition:height .08s linear,opacity .08s linear}
 #voice .vw i:nth-child(odd){animation-duration:1.3s}
 #voice .vw i:nth-child(3n){animation-duration:.9s}
 #voice .vw i:nth-child(2){animation-delay:.1s}
@@ -182,10 +184,12 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 
 
 
-.lgm{width:26px;height:26px;border-radius:8px;flex:none;display:block}
-.av0{overflow:hidden}
-#splash .sl{width:64px;height:64px;flex:none}
-.hero .mk{width:76px;height:76px;filter:drop-shadow(0 6px 18px rgba(91,79,209,.28))}
+img.mk{width:84px;height:84px;object-fit:contain;display:block;margin:0 auto 18px;filter:drop-shadow(0 6px 20px rgba(11,99,214,.22))}
+img.lgm{width:30px;height:30px;object-fit:contain;display:block}
+img.sl{width:76px;height:76px;object-fit:contain;flex:none}
+.av0{overflow:hidden;background:var(--ub)}
+[data-th=dark] img.mk{filter:drop-shadow(0 6px 24px rgba(45,180,255,.30))}
+#splash .row{gap:16px}
 
 
 /* ===== PERMISSION PRIMER ===== */
@@ -272,7 +276,7 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 </div>
 <div id="splash">
   <div class="row">
-    <svg class="sl" viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C8CFF"/><stop offset="100%" stop-color="#5B4FD1"/></linearGradient></defs><rect x="4" y="4" width="88" height="88" rx="22" fill="url(#lg1)"/><path fill="#fff" fill-rule="evenodd" d="M30,22h20a26,26 0 0 1 0,52h-20z M42,33v30h8a15,15 0 0 0 0,-30z"/></svg>
+    <img class="sl" src="logo_mark.png" alt="">
     <h1>DIVJUN AI</h1>
   </div>
   <small>DIVARJUNA STUDIOS</small>
@@ -299,7 +303,7 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
     <input id="tq" type="search" placeholder="Cari alat AI" style="margin-bottom:12px">
     <div class="chips" id="cats"></div><div id="grid"></div>
   </div></section>
-  <section id="set"><div class="pad" id="setp"></div><div id="legacy" hidden><div>
+  <section id="set"><div class="pad" id="setp"></div><div id="legacy" hidden style="display:none!important"><div>
     <h2>Pengaturan</h2>
     <h3>Koneksi</h3>
     <label for="route">Penyedia AI</label>
@@ -351,7 +355,7 @@ body.dr #drawer{transform:none}body.dr #dov{opacity:1;visibility:visible}
 <div id="dov" data-dc="1"></div>
 <aside id="drawer"><div class="dh">DIVJUN AI</div><div id="dtabs"></div><div class="dl" id="drec"></div>
 <button class="di" id="dperm">Izin & Privasi</button>
-<div class="df"><button class="av0" id="dav" aria-label="Pengaturan"><svg class="lgm" viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C8CFF"/><stop offset="100%" stop-color="#5B4FD1"/></linearGradient></defs><rect x="4" y="4" width="88" height="88" rx="22" fill="url(#lg1)"/><path fill="#fff" fill-rule="evenodd" d="M30,22h20a26,26 0 0 1 0,52h-20z M42,33v30h8a15,15 0 0 0 0,-30z"/></svg></button><button class="pill" id="dnew">+ Chat baru</button></div></aside>
+<div class="df"><button class="av0" id="dav" aria-label="Pengaturan"><img class="lgm" src="logo_mark.png" alt=""></button><button class="pill" id="dnew">+ Chat baru</button></div></aside>
 <div id="menu"><button data-m="share">Bagikan</button><button data-m="rename">Ganti nama</button><button data-m="pin">Sematkan</button><button data-m="del" class="dg">Hapus</button></div>
 <div id="sheet"><div id="sp"></div></div>
 <div id="modal"><div id="mp"><h3 id="mt"></h3><p id="mb"></p><input id="mi"><div class="two"><button class="btn" id="mno">Batal</button><button class="btn pri" id="mok">Oke</button></div></div></div>
@@ -400,7 +404,14 @@ if(!chats.length){const o=J('msgs',[]);if(o.length)chats=[{id:'c0',title:o[0].co
 const chat=()=>chats.find(c=>c.id===cur),msgs=()=>chat()?chat().msgs:[];
 const save=()=>st.set('cfg',JSON.stringify(cfg)),persist=()=>{st.set('chats',cfg.hist===false?'[]':JSON.stringify(chats.slice(0,100)));st.set('cur',cur||'')};
 
-function useBuilt(){if(cfg.key)return;let b='';try{b=(A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){}if(b){cfg.key=b;cfg.kk[cfg.route]=b}}
+function useBuilt(){
+  let b='';
+  try{b=(A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){}
+  if(b){cfg.key=b;cfg.kk[cfg.route]=b}
+  return b;
+}
+// Key tidak bisa diubah dari UI - selalu pakai yang tertanam di build
+function realKey(){let b='';try{b=(A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_KEYS||{})[cfg.route]||''}catch(e){}return b||cfg.key||''}
 if(/^Kamu adalah DIVJUN AI/.test(cfg.system||'')){cfg.system='';save()}
 useBuilt();
 const sv=p=>'<svg viewBox="0 0 24 24">'+p+'</svg>';
@@ -413,7 +424,18 @@ const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),DOTS='<span class="dots
 const fmtT=t=>new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2000)}
 function ask(o){return new Promise(res=>{$('#mt').textContent=o.title;$('#mb').textContent=o.body||'';const i=$('#mi'),has=o.input!=null;i.style.display=has?'block':'none';i.value=o.input||'';const ok=$('#mok');ok.textContent=o.ok||'Oke';ok.className='btn '+(o.danger?'dng':'pri');$('#modal').classList.add('open');if(has)setTimeout(()=>i.focus(),250);modalRes=v=>{$('#modal').classList.remove('open');modalRes=null;res(v)};ok.onclick=()=>modalRes(has?i.value.trim():true);$('#mno').onclick=()=>modalRes(null)})}
-function applyTheme(){const th=cfg.theme==='auto'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):cfg.theme;document.documentElement.dataset.th=th;document.documentElement.style.setProperty('--fs',cfg.fs)}
+const darkMQ=matchMedia('(prefers-color-scheme: dark)');
+function themeNow(){return cfg.theme==='dark'||(cfg.theme==='auto'&&darkMQ.matches)?'dark':'light'}
+function applyTheme(){
+  const th=themeNow();
+  document.documentElement.dataset.th=th;
+  document.documentElement.style.setProperty('--fs',cfg.fs);
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.setAttribute('content',th==='dark'?'#1F1E1D':'#FAF9F7');
+  if(A&&A.setTheme)try{A.setTheme(th==='dark')}catch(e){}
+  const lbl=$('#thnow');
+  if(lbl)lbl.textContent=(cfg.theme==='auto'?'Otomatis':TH[cfg.theme])+' · '+(th==='dark'?'Gelap':'Terang');
+}
 
 const ctl={};
 const rq=(...a)=>A?A.request(...a):fetchReq(...a);
@@ -557,7 +579,7 @@ async function executeTool(name,args){
   return 'Tool tidak dikenal: '+name;
 }
 // (handler __onPerm dipindah ke blok permission di bawah)
-function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;rq(id,method,PROV[cfg.route].base+path,JSON.stringify({'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
+function call(method,path,body,h){const id='r'+(++seq);pend[id]=h;rq(id,method,PROV[cfg.route].base+path,JSON.stringify({'Authorization':'Bearer '+realKey(),'Content-Type':'application/json'}),body?JSON.stringify(body):'');return id}
 function errMsg(raw){try{const j=JSON.parse(raw);return j.error&&j.error.message||j.message||raw}catch(e){return raw.slice(0,200)||'Tidak ada detail dari server'}}
 const isFree=(p,i)=>p.free?p.free.test(i):true;
 function fillModels(ids){
@@ -573,7 +595,8 @@ function fillModels(ids){
 function renderProv(){const p=PROV[cfg.route];$('#route').value=cfg.route;$('#key').value=cfg.key;$('#klab').textContent='API key '+p.name;$('#pnote').textContent=p.note;}
 function switchProv(id){cfg.kk[cfg.route]=cfg.key;cfg.mm[cfg.route]=cfg.model;cfg.route=id;cfg.key=cfg.kk[id]||'';cfg.model=cfg.mm[id]||'';LI=[];useBuilt();save();renderProv();fillModels([]);render();if(cfg.key)loadModels()}
 function loadModels(cb){
-  if(!cfg.key)return cb&&cb(false,'Isi API key dulu.');
+  useBuilt();
+  if(!realKey())return cb&&cb(false,'API key belum tersedia di build ini.');
   let raw='',code=0,dec=new TextDecoder();
   call('GET','/models',null,{status:c=>code=+c,chunk:d=>raw+=dec.decode(b64(d),{stream:true}),
     done:()=>{if(code>=400)return cb&&cb(false,errMsg(raw));try{const p=PROV[cfg.route],ids=JSON.parse(raw).data.map(m=>m.id.replace(/^models\//,'')).filter(i=>!p.ok||p.ok(i)).sort();LI=ids;cfg.ml=cfg.ml||{};cfg.ml[cfg.route]=ids;save();fillModels(ids);cb&&cb(true,ids.length)}catch(e){cb&&cb(false,'Respons tidak dikenali.')}},
@@ -600,7 +623,8 @@ function fin(){busy=null;persist();setBtn();updChip();render()}
 
 function send(text){
   text=(text||'').trim();if(busy||(!text&&!att.length))return;if(!text)text='Jelaskan lampiran ini.';
-  if(!cfg.key){go('set');toast('Isi API key dulu');return}
+  useBuilt();
+  if(!realKey()){go('set');toast('API key belum tersedia di build ini');return}
   if(!cfg.model){go('set');toast('Tunggu model terdeteksi dulu');return}
   let c=chat();if(!c){c={id:'c'+Date.now(),title:text.slice(0,40),ts:Date.now(),msgs:[]};chats.unshift(c);cur=c.id}
   const uc=buildUser(text),hadImg=att.some(x=>x.mime.indexOf('image/')===0);
@@ -800,12 +824,12 @@ function renderSeg(){
   $('#fsz').innerHTML=[['0.9','Kecil'],['1','Normal'],['1.12','Besar']].map(x=>'<button class="chip'+(cfg.fs===x[0]?' on':'')+'" data-fs="'+x[0]+'">'+x[1]+'</button>').join('');
 }
 
-const MARK='<svg class="mk" viewBox="0 0 96 96" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C8CFF"/><stop offset="100%" stop-color="#5B4FD1"/></linearGradient></defs><rect x="4" y="4" width="88" height="88" rx="22" fill="url(#lg1)"/><path fill="#fff" fill-rule="evenodd" d="M30,22h20a26,26 0 0 1 0,52h-20z M42,33v30h8a15,15 0 0 0 0,-30z"/></svg>';
+const MARK='<img class="mk" src="logo_mark.png" alt="DIVJUN AI">';
 const greet=()=>{const h=new Date().getHours();const q=h<4?[0,1,2]:h<11?[3,4,5]:h<15?[6,7,8]:h<18?[9,10,11]:[0,1,12];const s=["Anda begadang, apa yang bisa saya bantu?","Mau memikirkan apa malam ini?","Malam ini mau bahas apa?","Mau mulai hari dengan apa?","Ada rencana apa pagi ini?","Pagi ini mau bahas apa?","Mau bahas apa siang ini?","Ada yang bisa dibantu?","Siang ini mau ngapain?","Sore ini mau ngapain?","Ada yang bisa dibantu?","Mau bahas apa sore ini?","Ada yang bisa dibantu malam ini?"];return s[q[Math.floor(Math.random()*q.length)]]};
 function rel(t){const d=(Date.now()-t)/1000;if(d<60)return 'Baru saja';if(d<3600)return Math.floor(d/60)+' menit yang lalu';if(d<86400)return Math.floor(d/3600)+' jam yang lalu';const n=Math.floor(d/86400);if(n===1)return 'Kemarin';if(n<7)return n+' hari yang lalu';return new Date(t).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
 const tips=()=>{const t=["Minum air dulu, biar fokus tetap terjaga.","Istirahat 5 menit tiap 25 menit kerja.","Jangan lupa makan tepat waktu.","Mata butuh istirahat dari layar tiap 20 menit.","Tidur cukup 7-8 jam sehari.","Tarik napas dalam, tenangkan pikiran.","Jalan kaki 10 menit bisa segarkan otak.","Kurangi begadang, tubuh butuh istirahat.","Pikiran tenang, jawaban lebih jernih.","Hari ini boleh santai, besok tetap semangat."];return t[Math.floor(Math.random()*t.length)]};
 function titleChat(){if(tab==='chat'){const c=chat();$('#ttl').textContent=c?c.title:''}}
-function updChip(){const e=$('#mchip');if(!e)return;const id=usedM||cfg.model;e.textContent=id?fn(id):'Otomatis';e.title=id||''}
+function updChip(){const e=$('#mchip');if(!e)return;const id=usedM||cfg.model;e.textContent=id?fn(id):'Auto';e.title=id||''}
 function openDrawer(){renderDrawer();document.body.classList.add('dr')}
 function closeDrawer(){document.body.classList.remove('dr')}
 function closeAll(){closeDrawer();$('#menu').classList.remove('open')}
@@ -840,12 +864,12 @@ const bkey=()=>{try{return (A&&A.builtin&&A.builtin(cfg.route))||(window.DIVJUN_
 const SI={prov:sv('<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><path d="M16.5 13v7M13 16.5h7"/>'),key:sv('<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3"/>'),model:sv('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'),moon:sv('<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>'),font:sv('<path d="M4 19l5-14 5 14M6 14h6M17 19v-6M17 15c0-2.5 4-2.5 4 0v4"/>'),sys:sv('<path d="M5 6h14M5 12h14M5 18h9"/>'),temp:sv('<path d="M12 4v10"/><circle cx="12" cy="17" r="3"/>'),hist:sv('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),info:sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),book:sv('<path d="M5 5h10a3 3 0 0 1 3 3v11H8a3 3 0 0 1-3-3z"/>'),shield:sv('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>')};
 const TH={auto:'Sistem',dark:'Gelap',light:'Terang'},FS={'0.9':'Kecil','1':'Normal','1.12':'Besar'};
 function renderSet(){
-  const p=PROV[cfg.route],ks=!cfg.key?'Belum diisi':(cfg.key===bkey()?'Tertanam di aplikasi':'Diisi manual');
+  const p=PROV[cfg.route],ks=realKey()?'Tertanam di aplikasi':'Belum tersedia';
   const r=(k,ic,t,sub,cls)=>'<button class="sr'+(cls||'')+'" data-se="'+k+'">'+ic+'<span><b>'+t+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</span></button>';
   const sw=(k,ic,t,on)=>'<button class="sr" data-se="'+k+'">'+ic+'<span><b>'+t+'</b></span><i class="sw'+(on?' on':'')+'"></i></button>';
-  $('#setp').innerHTML='<div class="sg"><div class="sr top"><span><b>'+p.name+'</b></span><i class="bdg">'+(cfg.key?'Terhubung':'Belum terhubung')+'</i></div></div>'+
-   '<div class="sg">'+r('prov',SI.prov,'Penyedia AI',p.name)+r('key',SI.key,'API key',ks)+r('model',SI.model,'Model AI',usedM?fn(usedM)+' (otomatis)':'Otomatis — terbaik sendiri')+'</div>'+
-   '<div class="sg">'+r('theme',SI.moon,'Mode warna',TH[cfg.theme])+r('fs',SI.font,'Ukuran teks',FS[cfg.fs]||'Normal')+'</div>'+
+  $('#setp').innerHTML='<div class="sg"><div class="sr top"><span><b>'+p.name+'</b></span><i class="bdg">'+(realKey()?'Terhubung':'Belum terhubung')+'</i></div></div>'+
+   '<div class="sg">'+r('model',SI.model,'Model AI',usedM?fn(usedM)+' (otomatis)':'Otomatis — terbaik sendiri')+'</div>'+
+   '<div class="sg">'+r('theme',SI.moon,'Mode warna',(cfg.theme==='auto'?'Otomatis':TH[cfg.theme])+' · '+(themeNow()==='dark'?'Gelap':'Terang'))+r('fs',SI.font,'Ukuran teks',FS[cfg.fs]||'Normal')+'</div>'+
    '<div class="sg">'+r('sys',SI.sys,'Instruksi tambahan',cfg.system?cfg.system.slice(0,40)+(cfg.system.length>40?'...':''):'Tidak ada (identitas DIVJUN AI sudah bawaan)')+r('temp',SI.temp,'Kreativitas jawaban',String(cfg.temp))+'</div>'+
    '<div class="sg">'+sw('hist',SI.hist,'Simpan riwayat obrolan',cfg.hist!==false)+r('exp',IC.share,'Ekspor semua obrolan')+r('clr',IC.trash,'Bersihkan riwayat')+'</div>'+
    '<div class="sg">'+r('perm',SI.shield,'Izin aplikasi',permSummary())+r('docs',SI.book,'Dokumentasi penyedia')+r('about',SI.info,'Tentang DIVJUN AI','Versi '+ver())+'</div>'+
@@ -868,7 +892,8 @@ function renderEdit(){
 function seAct(k){
   if(k==='perm')openPerm();
   else if(k==='model')openSheet();
-  else if(['prov','key','theme','fs','sys','temp'].includes(k))openEdit(k);
+  else if(k==='prov'||k==='key')toast('API key sudah tertanam di aplikasi');
+  else if(['theme','fs','sys','temp'].includes(k))openEdit(k);
   else if(k==='hist'){cfg.hist=cfg.hist===false;save();persist();renderSet();toast(cfg.hist===false?'Riwayat tidak disimpan':'Riwayat disimpan')}
   else if(k==='exp')chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
   else if(k==='clr')ask({title:'Bersihkan riwayat?',body:'Semua percakapan akan dihapus. API key dan pengaturan tetap aman.',ok:'Bersihkan',danger:1}).then(v=>{if(v){chats=[];cur='';persist();render();toast('Riwayat dibersihkan')}});
@@ -896,20 +921,64 @@ function buildUser(text){
 function renderAtt(){$('#atts').innerHTML=att.map((f,i)=>'<div class="th">'+(f.mime.indexOf('image/')===0?'<img alt="" src="data:'+f.mime+';base64,'+f.b64+'">':'<span>'+esc(f.name.slice(0,12))+'</span>')+'<button data-rm="'+i+'" aria-label="Hapus">\u00d7</button></div>').join('')}
 window.__picked=(n,m,d)=>{if(att.length>=4)return toast('Maksimal 4 lampiran');att.push({name:n,mime:m,b64:d});renderAtt();closeSheet()};
 window.__pickErr=m=>toast(m);
-window.__voice=t=>{const i=$('#in');i.value=(i.value?i.value+' ':'')+t;i.dispatchEvent(new Event('input'));i.focus()};
-let vRec=null,vTimer=null,vSec=0;
 function voiceOpen(){const v=$('#voice');v.classList.add('on');$('#vtext').textContent='Silakan bicara...'}
 function voiceClose(){const v=$('#voice');v.classList.remove('on');if(vRec){try{vRec.stop()}catch(e){}vRec=null}if(vTimer){clearInterval(vTimer);vTimer=null}vSec=0}
-function voiceStart(){
-  voiceOpen();
-  if(A&&A.voice){A.voice();return}
-  const R=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!R){$('#vtext').textContent='Suara hanya tersedia di aplikasi';return}
-  vRec=new R();vRec.lang='id-ID';vRec.continuous=true;vRec.interimResults=true;
-  vRec.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;$('#vtext').textContent=t||'Silakan bicara...'};
-  vRec.onerror=()=>{$('#vtext').textContent='Suara tidak bisa dipakai'};
-  try{vRec.start()}catch(e){}
+let vRms=0,vRAF=null,vTimer=null;
+const VB=$('#voice');
+function voicePaint(){
+  const bars=[...VB.querySelectorAll('.vw i')];
+  for(let k=0;k<bars.length;k++){
+    const d=Math.abs(k-(bars.length-1)/2)/(bars.length/2);
+    const env=Math.max(.12,1-d*.7);
+    const h=12+vRms*54*env*(.55+.45*Math.sin(Date.now()/180+k*.9));
+    bars[k].style.height=Math.max(8,Math.min(66,h))+'px';
+    bars[k].style.opacity=(.35+vRms*.65).toFixed(2);
+  }
+  vRAF=requestAnimationFrame(voicePaint);
 }
+function voiceOpen(){
+  VB.classList.add('on');
+  $('#vtext').textContent='Mendengarkan\u2026 Silakan bicara';
+  $('#vsend').disabled=false;
+  vRms=.08;
+  if(!vRAF)vRAF=requestAnimationFrame(voicePaint);
+}
+function voiceClose(){
+  VB.classList.remove('on');
+  if(vRec){try{vRec.stop()}catch(e){}vRec=null}
+  if(A&&A.voiceStop)try{A.voiceStop()}catch(e){}
+  if(vTimer){clearInterval(vTimer);vTimer=null}
+  if(vRAF){cancelAnimationFrame(vRAF);vRAF=null}
+  vRms=0;
+}
+function voiceStart(){
+  if(!A||!A.voice){toast('Suara hanya tersedia di aplikasi');return}
+  voiceOpen();
+  try{A.voice()}catch(e){voiceClose();toast('Suara tidak bisa dipakai')}
+}
+// hasil native (tanpa popup Google)
+window.__voiceText=(txt,final)=>{
+  if(txt)$('#vtext').textContent=txt;
+  $('#in').value=txt;
+  $('#in').dispatchEvent(new Event('input'));
+  if(final){voiceClose();$('#in').focus()}
+};
+window.__voiceRms=v=>{vRms=v};
+window.__voiceEv=ev=>{
+  if(ev==='ready'){$('#vtext').textContent='Mendengarkan\u2026 Silakan bicara'}
+  else if(ev==='quiet'){$('#vtext').textContent='Tidak ada suara terdengar';setTimeout(voiceClose,900)}
+  else if(ev==='denied'){voiceClose();openPerm()}
+  else if(ev==='nostop'){voiceClose();toast('Fitur suara tidak tersedia di HP ini')}
+  else if(ev==='neterror'){voiceClose();toast('Suara butuh koneksi internet')}
+  else if(ev==='end'){voiceClose()}
+};
+function voiceSend(){
+  const t=$('#vtext').textContent;
+  voiceClose();
+  const v=(t&&!/Mendengarkan|Tidak ada suara|Silakan bicara/.test(t))?t:'';
+  if(v){$('#in').value=v;$('#in').focus();toast('Teks diisi \u2014 ketuk kirim')}
+}
+function voice(){voiceStart()}
 function voiceSend(){const t=$('#vtext').textContent;voiceClose();if(t&&t!=='Silakan bicara...'&&t!=='Suara tidak bisa dipakai'){$('#in').value=t;$('#in').focus()}}
 function voice(){voiceStart()}
 window.__voice=t=>{const i=$('#in');i.value=(i.value?i.value+' ':'')+t;i.dispatchEvent(new Event('input'));i.focus()}
@@ -995,7 +1064,8 @@ $('#saveAi').onclick=()=>{cfg.system=$('#sys').value.trim()||cfg.system;cfg.temp
 $('#expAll').onclick=()=>chats.length?doShare(chats.map(fmt).join('\n\n---\n\n')):toast('Belum ada percakapan');
 $('#wipe').onclick=async()=>{if(await ask({title:'Hapus semua data?',body:'Semua percakapan, API key, dan pengaturan akan dihapus dari HP ini.',ok:'Hapus semua',danger:1})){chats=[];cur='';cfg={...cfg,key:'',model:'',fav:[],kk:{},mm:{},ml:{},cs:[]};save();persist();$('#key').value='';$('#mname').value='';fillModels([]);render();toast('Semua data dihapus')}};
 window.__back=()=>{if(modalRes){modalRes(null);return true}if($('#sheet').classList.contains('open')){closeSheet();return true}if(document.body.classList.contains('dr')||$('#menu').classList.contains('open')){closeAll();return true}if(tab!=='chat'){go('chat');return true}return false};
-matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);
+if(darkMQ.addEventListener)darkMQ.addEventListener('change',()=>{if(cfg.theme==='auto')applyTheme()});
+else if(darkMQ.addListener)darkMQ.addListener(()=>{if(cfg.theme==='auto')applyTheme()});
 
 // ===== ONBOARDING =====
 const ONB=[

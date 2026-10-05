@@ -32,25 +32,63 @@ class MainActivity : Activity() {
     lateinit var web: WebView
     var pendingPermId: String = ""
     private val conns = ConcurrentHashMap<String, HttpURLConnection>()
+    private lateinit var voice: Voice
+
+    private fun applyBars(dark: Boolean) {
+        var f = 0
+        if (!dark) {
+            f = android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                f = f or android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            }
+        }
+        window.decorView.systemUiVisibility = f
+        val bg = if (dark) 0xFF1F1E1D.toInt() else 0xFFFAF9F7.toInt()
+        try {
+            window.statusBarColor = bg
+            window.navigationBarColor = bg
+        } catch (e: Exception) {
+        }
+    }
+
+    private fun initVoice() {
+        voice = Voice(this)
+        voice.onText = { txt, final ->
+            runOnUiThread {
+                web.evaluateJavascript(
+                    "window.__voiceText&&window.__voiceText(" + JSONObject.quote(txt) + "," + final + ")",
+                    null
+                )
+            }
+        }
+        voice.onEvent = { ev ->
+            runOnUiThread {
+                web.evaluateJavascript("window.__voiceEv&&window.__voiceEv('" + ev + "')", null)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        if (::voice.isInitialized) voice.stop()
+        super.onDestroy()
+    }
     private val REQ_CAMERA = 101
     private val REQ_GALLERY = 102
     private val REQ_STORAGE = 103
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val night = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
-            android.content.res.Configuration.UI_MODE_NIGHT_YES
-        if (!night) {
-            var f = android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            if (android.os.Build.VERSION.SDK_INT >= 26) f = f or android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            window.decorView.systemUiVisibility = f
-        }
+        applyBars(
+            (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+        )
         web = WebView(this)
         web.setBackgroundColor(resources.getColor(R.color.bg, theme))
         web.settings.javaScriptEnabled = true
         web.settings.domStorageEnabled = true
         web.addJavascriptInterface(Bridge(), "Android")
         setContentView(web)
+        initVoice()
         web.loadUrl("file:///android_asset/index.html")
     }
 
@@ -164,6 +202,11 @@ class MainActivity : Activity() {
             runOnUiThread { web.evaluateJavascript("window.toast&&window.toast(" + JSONObject.quote(msg) + ")", null) }
         }
 
+        /** Ikuti tema dalam-app untuk system bar. */
+        @JavascriptInterface fun setTheme(dark: Boolean) {
+            runOnUiThread { applyBars(dark) }
+        }
+
         @JavascriptInterface fun version(): String =
             packageManager.getPackageInfo(packageName, 0).versionName ?: ""
 
@@ -247,20 +290,22 @@ class MainActivity : Activity() {
             }
         }
 
+        /** Voice native on-device: tanpa dialog Google. */
         @JavascriptInterface fun voice() {
-            runOnUiThread {
-                try {
-                    val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, "id-ID")
-                        putExtra(RecognizerIntent.EXTRA_PROMPT, "Silakan bicara")
-                    }
-                    startActivityForResult(i, 21)
-                } catch (e: Exception) {
-                    pickErr("Perekam suara tidak tersedia di HP ini")
+            if (!voice.isAvailable) {
+                runOnUiThread {
+                    web.evaluateJavascript("window.__voiceEv&&window.__voiceEv('nostop')", null)
                 }
+                return
             }
+            runOnUiThread { voice.start() }
         }
+
+        @JavascriptInterface fun voiceStop() {
+            runOnUiThread { voice.stop() }
+        }
+
+        @JavascriptInterface fun voiceAvailable(): Boolean = voice.isAvailable
 
         @JavascriptInterface fun cancel(id: String) { conns.remove(id)?.disconnect() }
 
