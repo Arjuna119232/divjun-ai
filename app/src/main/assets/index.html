@@ -270,6 +270,7 @@ img.sl{width:76px;height:76px;object-fit:contain;flex:none}
 /* ===== AUTOPILOT STATUS ===== */
 .mstat{display:inline-flex;align-items:center;gap:8px;background:var(--ub);border-radius:999px;padding:7px 13px;font-size:.83em;color:var(--mu);margin-bottom:9px}
 .mstat .dots i{width:6px;height:6px;margin:0;background:var(--lk)}
+.mstat.warn{color:var(--er)}
 #usedm{flex:0 1 auto;min-width:0;max-width:38%;display:flex;align-items:center;gap:5px;background:var(--ub);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:.72em;color:var(--mu);white-space:nowrap;overflow:hidden;pointer-events:none}
 #usedm::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ok);flex:none}
 #usedm span{overflow:hidden;text-overflow:ellipsis}
@@ -690,11 +691,12 @@ function render(){
     if(x.role==='user')return '<div class="u">'+esc(x.content)+(x.img?'\n['+x.img+' lampiran]':'')+'</div>';
     const last=i===m.length-1;
     const st=x.status?'<div class="mstat">'+DOTS+x.status+'</div>':'';
-    return '<div class="a'+(x.err?' err':'')+'" data-i="'+i+'">'+st+(md(x.content)||thk(x))+'</div>'+(busy===null&&x.content?'<div class="acts">'+(x.err?'':'<button class="cp" data-c="'+i+'">Salin</button>')+(last?'<button class="cp" data-r="1">'+(x.err?'Coba lagi':'Ulangi')+'</button>':'')+'</div>':'');
+    const ig=x.imgNote?'<div class="mstat warn">&#9888; Gambar tidak bisa dibaca model ini \u2014 dikirim tanpa gambar</div>':'';
+    return '<div class="a'+(x.err?' err':'')+'" data-i="'+i+'">'+ig+st+(md(x.content)||thk(x))+'</div>'+(busy===null&&x.content?'<div class="acts">'+(x.err?'':'<button class="cp" data-c="'+i+'">Salin</button>')+(last?'<button class="cp" data-r="1">'+(x.err?'Coba lagi':'Ulangi')+'</button>':'')+'</div>':'');
   }).join('');
   box.scrollTop=box.scrollHeight;
 }
-function paint(){const m=msgs(),el=document.querySelector('.a[data-i="'+(m.length-1)+'"]'),box=$('#msgs');if(!el)return render();const x=m[m.length-1],near=box.scrollHeight-box.scrollTop-box.clientHeight<120,st=x.status?'<div class="mstat">'+DOTS+x.status+'</div>':'';el.innerHTML=st+(md(x.content)||thk(x));if(near)box.scrollTop=box.scrollHeight}
+function paint(){const m=msgs(),el=document.querySelector('.a[data-i="'+(m.length-1)+'"]'),box=$('#msgs');if(!el)return render();const x=m[m.length-1],near=box.scrollHeight-box.scrollTop-box.clientHeight<120,st=x.status?'<div class="mstat">'+DOTS+x.status+'</div>':'',ig=x.imgNote?'<div class="mstat warn">&#9888; Gambar tidak bisa dibaca model ini \u2014 dikirim tanpa gambar</div>':'';el.innerHTML=ig+st+(md(x.content)||thk(x));if(near)box.scrollTop=box.scrollHeight}
 const setBtn=()=>{
   const b=$('#send');if(!b)return;
   const hasText=$('#in')&&($('#in').value.trim()||att.length>0);
@@ -722,6 +724,21 @@ function injectCtx(messages,ctx,a){
     m.content=block.trim();
   }
   if(a)paint();
+}
+function stripImages(messages){
+  const i=messages.length-1,m=messages[i];
+  if(!m)return;
+  if(Array.isArray(m.content)){
+    const txt=(m.content.filter(x=>x&&x.type==='text').map(x=>x.text||'').join('\n')||'').trim();
+    m.content='[Pengguna mengirim gambar, tetapi model yang tersedia tidak bisa membaca gambar. Minta pengguna mendeskripsikan isi gambarnya secara singkat, lalu bantu sesuai deskripsi itu.]\n\n'+txt;
+  }else{
+    m.content='[Pengguna mengirim gambar, tetapi model yang tersedia tidak bisa membaca gambar. Minta pengguna mendeskripsikan isi gambarnya.]\n\n'+String(m.content||'');
+  }
+}
+function planFallback(messages,a){
+  a.err=true;a.status='';
+  a.content='Daftar model belum bisa dimuat. Periksa koneksi internet lalu ketuk Coba lagi.';
+  fin();
 }
 const CTX_TAG='[DATA DARI WEB - ini hasil pembacaan internet, pakai untuk menjawab. Jangan bilang tidak bisa akses web.]';
 function stripCtx(messages){
@@ -753,7 +770,7 @@ function send(text){
 }
 
 // ===== AI AUTOPILOT: pilih model sendiri + failover otomatis =====
-const VISION=/gemma.*27b|vision|llava|compound-beta|pixtral|llama-3\.2.*vision|qwen.*vl/i;
+const VISION=/gemma-?3|vision|llava|compound-beta|pixtral|llama-4|qwen.*vl|kimi.*vl|internvl|minicpm|phi-4-multimodal|mistral.*pixtral|omni/i;
 const FAST=/(^|[^0-9])(7b|8b|9b)([^0-9]|$)|small|tiny|mini|allam|gemma2-9b/i;
 const BIG=/(^|[^0-9])(120b|236b|405b|671b|70b)|deepseek-r1/i;
 const BALANCED=/(^|[^0-9])(20b|27b|32b|14b)|gemma-3|qwen3/i;
@@ -802,14 +819,31 @@ function paintUsed(){
 }
 let usedM='';
 
-function runPlan(messages,a,hadImg){
-  const plan=buildPlan(!!hadImg);
+function runPlan(messages,a,hadImg,noImgRetry){
+  let plan=buildPlan(!!hadImg);
+  // Tidak ada model yang bisa baca gambar -> kirim ulang TANPA gambar,
+  // dengan catatan ke model supaya dia minta user mendeskripsikan.
+  if(!plan.length&&hadImg&&!noImgRetry){
+    const fallback=buildPlan(false);
+    if(fallback.length){
+      stripImages(messages);
+      a.imgNote=true;
+      a.status='Model ini tidak bisa baca gambar\u2026';
+      toast('Model yang tersedia tidak bisa membaca gambar \u2014 dikirim tanpa gambar');
+      runPlan(messages,a,false,true);
+      return;
+    }
+  }
+  if(!plan.length&&!hadImg&&!noImgRetry){
+    loadModels(ok=>{if(ok){a.status='';runPlan(messages,a,false,true)}else{planFallback(messages,a)}});
+    return;
+  }
   let idx=0,retried=0;
   const MAXSW=2;
   function attempt(noTools){
     return new Promise(res=>{
       const model=plan[idx];
-      if(!model){a.err=true;a.content=a.content||'Tidak ada model yang bisa dipakai. Cek API key di Pengaturan.';fin();return res(false)}
+      if(!model){a.err=true;a.status='';a.content=a.content||'Tidak ada model yang bisa dipakai dari API key ini. Periksa koneksi lalu ketuk Coba lagi.';fin();return res(false)}
       if(usedM&&usedM!==model&&idx>0){a.status='Beralih ke model lain...'+(idx>1?' (percobaan ke-'+(idx+1)+')':'');paint()}
       markUsed(model);
       let code=0,eb='',buf='',dec=new TextDecoder(),gotFirst=false,tid=null,tModel=model,tNoTools=noTools;
