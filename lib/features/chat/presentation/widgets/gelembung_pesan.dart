@@ -150,7 +150,7 @@ class GelembungPesan extends StatelessWidget {
       h3: t.titleSmall?.copyWith(color: teks),
       listBullet: t.bodyMedium?.copyWith(color: teks),
       code: TextStyle(
-        fontFamily: AppTypography.mono,
+        fontFamily: AppTypography.monoFamily,
         fontSize: 13,
         height: 1.5,
         color: teks,

@@ -1,9 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_colors.dart';
-import 'app_motion.dart';
-import 'app_shadows.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
@@ -207,14 +206,14 @@ abstract final class AppTheme {
         },
       ),
 
-      extensions: <ThemeExtension<dynamic>>[AppTokens(gelap: gelap)],
+      extensions: <ThemeExtension<Object?>>[AppTokens(gelap: gelap)],
     );
   }
 }
 
 /// Token ekstra yang tidak muat di ColorScheme (gelembung chat, shimmer, dll).
 @immutable
-class AppTokens extends ThemeExtension<AppTokens> {
+class AppTokens extends ThemeExtension<Object?> {
   const AppTokens({required this.gelap});
 
   final bool gelap;
@@ -223,7 +222,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
   AppTokens copyWith({bool? gelap}) => AppTokens(gelap: gelap ?? this.gelap);
 
   @override
-  AppTokens lerp(ThemeExtension<AppTokens>? other, double t) =>
+  AppTokens lerp(ThemeExtension<Object?>? other, double t) =>
       t < 0.5 ? this : (other as AppTokens? ?? this);
 }
 

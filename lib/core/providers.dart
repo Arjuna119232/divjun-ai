@@ -149,7 +149,7 @@ class MemoriController extends Notifier<List<EntriMemori>> {
 final NotifierProvider<MemoriController, List<EntriMemori>> memoriProvider =
     NotifierProvider<MemoriController, List<EntriMemori>>(MemoriController.new);
 
-final FutureProvider<List<EntriMemori>> memoriCariProvider =
+final FutureProviderFamily<List<EntriMemori>, String> memoriCariProvider =
     FutureProvider.family<List<EntriMemori>, String>(
   (ref, String kueri) =>
       ref.watch(repoMemoriProvider).cari(kueri, maks: 5),

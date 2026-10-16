@@ -59,7 +59,7 @@ class AgentLoop {
       pesan: riwayat,
     );
 
-    final StringBuilder isi = StringBuilder();
+    final StringBuffer isi = StringBuffer();
     final List<CatatanAlat> catatan = <CatatanAlat>[];
     String galat = '';
     bool mentok = false;

@@ -44,7 +44,9 @@ abstract final class UrlGuard {
     if (v.startsWith('::ffff:192.168.')) return false;
     if (v.startsWith('::ffff:169.254.')) return false;
     if (v.startsWith('::ffff:172.')) {
-      final List<String> bagian = v.removePrefix('::ffff:172.').split('.');
+      const String prefiks = '::ffff:172.';
+      final List<String> bagian =
+          v.substring(prefiks.length).split('.');
       if (bagian.isNotEmpty) {
         final int? kedua = int.tryParse(bagian.first);
         if (kedua != null && kedua >= 16 && kedua <= 31) return false;

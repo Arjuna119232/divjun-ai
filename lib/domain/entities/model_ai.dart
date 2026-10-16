@@ -1,11 +1,7 @@
-import 'dart:convert';
-
 /// Katalog model AI.
 ///
 /// Model diambil dari provider saat runtime (lihat `data/datasources/katalog_model.dart`),
 /// daftar di bawah = bawaan + cadangan kalau fetch gagal / offline.
-library;
-
 enum PenyediaModel { groq, gemini }
 
 class ModelAi {

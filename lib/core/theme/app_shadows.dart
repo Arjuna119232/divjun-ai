@@ -32,7 +32,7 @@ abstract final class AppShadows {
   static List<BoxShadow> none() => const [];
 
   static Color scrim(BuildContext c) =>
-      c.brightness == Brightness.dark
+      Theme.of(c).brightness == Brightness.dark
           ? Colors.black.withValues(alpha: 0.62)
           : AppColors.inkLight.withValues(alpha: 0.38);
 }

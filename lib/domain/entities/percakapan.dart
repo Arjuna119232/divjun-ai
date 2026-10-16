@@ -141,7 +141,7 @@ class Pesan {
 }
 
 class Percakapan {
-  const Percakapan({
+  Percakapan({
     required this.id,
     required this.judul,
     required this.dibuat,

@@ -6,7 +6,7 @@ import 'app_colors.dart';
 /// Font dibundel di repo (bukan google_fonts) supaya offline & konsisten.
 abstract final class AppTypography {
   static const String ui = 'Inter';
-  static const String mono = 'JetBrainsMono';
+  static const String monoFamily = 'JetBrainsMono';
 
   static TextTheme textTheme(Brightness b) {
     final Color dasar = b == Brightness.dark ? AppColors.textDark : AppColors.textLight;
@@ -51,7 +51,7 @@ abstract final class AppTypography {
     Color? color,
   }) =>
       TextStyle(
-        fontFamily: mono,
+        fontFamily: monoFamily,
         fontSize: size,
         fontWeight: weight,
         height: 1.5,

@@ -2,8 +2,6 @@ import 'dart:convert';
 
 /// Model untuk layer data: bentuk request & bentuk response provider.
 /// Entity app (Pesan, dsb) TIDAK ikut ke sini supaya tidak bercampur.
-library;
-
 /// Definisi satu tool yang dikirim ke LLM sebagai native function calling.
 class ToolSpec {
   const ToolSpec({
@@ -96,9 +94,7 @@ class PotonganBalasan {
   final String alasanBerhenti;
   final String galat;
 
-  bool get kosong => teks.isEmpty && alat.isEmpty && !selesai && galat.isEmpty;
-
-  static const PotonganBalasan kosong = PotonganBalasan();
+  bool get tanpaIsi => teks.isEmpty && alat.isEmpty && !selesai && galat.isEmpty;
 }
 
 /// Hasil satu putaran chat (non-streaming atau sudah dirangkum).

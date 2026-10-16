@@ -16,8 +16,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// punya sejarah masalah ABI di Android 16. Data app ini kecil (ribuan baris
 /// JSON), jadi file JSON lebih simple + mudah diaudit. Naikkan ke Isar kalau
 /// histori sudah tumbuh ke ratusan MB.
-library;
-
 class SimpanCepit {
   SimpanCepit._(this._prefs);
 

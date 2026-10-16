@@ -19,7 +19,7 @@ class DivjunApp extends ConsumerWidget {
         return MaterialApp.router(
           title: 'DIVJUN AI',
           debugShowCheckedModeBanner: false,
-          themeMode: setelan.tema.themeMode,
+          themeMode: setelan.themeMode,
           theme: AppTheme.light(setelan.pakaiWarnaDinamis ? terang : null),
           darkTheme: AppTheme.dark(setelan.pakaiWarnaDinamis ? gelap : null),
           routerConfig: appRouter,
@@ -43,14 +43,10 @@ class DivjunApp extends ConsumerWidget {
   }
 }
 
-extension TemaModeX on TemaMode {
-  static ThemeMode dari(TemaMode m) => switch (m) {
+extension SetelanTemaX on SetelanApp {
+  ThemeMode get themeMode => switch (tema) {
         TemaMode.sistem => ThemeMode.system,
         TemaMode.terang => ThemeMode.light,
         TemaMode.gelap => ThemeMode.dark,
       };
-}
-
-extension SetelanTemaX on SetelanApp {
-  ThemeMode get themeMode => TemaModeX.dari(tema);
 }

@@ -163,9 +163,9 @@ class KlienLlm {
       respons = await _dio.post<dynamic>(
         _url(model),
         data: _body(model, pesan, suhu: suhu, alat: alat),
+        cancelToken: batal,
         options: Options(
           headers: _header(model),
-          cancelToken: batal,
           responseType: ResponseType.stream,
         ),
       );

@@ -35,9 +35,11 @@ abstract final class AppColors {
 
   /// Warna bubble: pesan user (kanan) dan jawaban AI (kiri).
   static Color bubbleUser(BuildContext c) =>
-      c.brightness == Brightness.dark ? AppColors.brand : AppColors.brand;
+      Theme.of(c).brightness == Brightness.dark ? AppColors.brand : AppColors.brand;
   static Color bubbleAi(BuildContext c) =>
-      c.brightness == Brightness.dark ? const Color(0xFF1C1C25) : Colors.white;
+      Theme.of(c).brightness == Brightness.dark
+          ? const Color(0xFF1C1C25)
+          : Colors.white;
 
   /// Warna aksen untuk status tool saat agent sedang jalan.
   static const Color tool = Color(0xFF7C4DFF);

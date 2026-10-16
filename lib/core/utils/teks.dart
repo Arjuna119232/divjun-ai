@@ -29,8 +29,10 @@ abstract final class Teks {
     for (final MapEntry<String, String> e in _entitas.entries) {
       s = s.replaceAll(e.key, e.value);
     }
-    s = s.replaceAll(RegExp(r'&#(\d+);'), (Match m) =>
-        String.fromCharCode(int.tryParse(m.group(1) ?? '32') ?? 32));
+    s = s.replaceAllMapped(
+      RegExp(r'&#(\d+);'),
+      (Match m) => String.fromCharCode(int.tryParse(m.group(1) ?? '32') ?? 32),
+    );
     s = s.replaceAll(RegExp(r'[ \t]+'), ' ');
     s = s.replaceAll(RegExp(r'\n\s*\n\s*\n+'), '\n\n');
     return s.trim();
@@ -70,7 +72,7 @@ abstract final class Teks {
 
   static String normalisasi(String s) => s
       .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9\s]', ' '), ' ')
+      .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
 
@@ -80,7 +82,7 @@ abstract final class Teks {
   }
 
   /// Judul pendek dari pesan pertama (untuk daftar riwayat).
-  static String judulPercakapan(String pesan pertama, {int maks = 42}) {
+  static String judulPercakapan(String pesanPertama, {int maks = 42}) {
     final String s = pesanPertama.replaceAll(RegExp(r'\s+'), ' ').trim();
     if (s.isEmpty) return 'Percakapan baru';
     return potong(s, maks);
