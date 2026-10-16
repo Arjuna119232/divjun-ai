@@ -206,14 +206,14 @@ abstract final class AppTheme {
         },
       ),
 
-      extensions: <ThemeExtension<Object?>>[AppTokens(gelap: gelap)],
+      extensions: <ThemeExtension<AppTokens>>[AppTokens(gelap: gelap)],
     );
   }
 }
 
 /// Token ekstra yang tidak muat di ColorScheme (gelembung chat, shimmer, dll).
 @immutable
-class AppTokens extends ThemeExtension<Object?> {
+class AppTokens extends ThemeExtension<AppTokens> {
   const AppTokens({required this.gelap});
 
   final bool gelap;
@@ -222,7 +222,7 @@ class AppTokens extends ThemeExtension<Object?> {
   AppTokens copyWith({bool? gelap}) => AppTokens(gelap: gelap ?? this.gelap);
 
   @override
-  AppTokens lerp(ThemeExtension<Object?>? other, double t) =>
+  AppTokens lerp(ThemeExtension<AppTokens>? other, double t) =>
       t < 0.5 ? this : (other as AppTokens? ?? this);
 }
 

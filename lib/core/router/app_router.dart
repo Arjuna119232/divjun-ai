@@ -11,26 +11,26 @@ import '../../features/settings/presentation/layar_setelan.dart';
 /// `context.go()` untuk perpindahan root (splash -> chat), `context.push()`
 /// untuk halaman turunan (chat -> setelan) supaya tombol back perangkat
 /// selalu benar-benar kembali, bukan langsung menutup app.
-abstract final class AppRouter {
-  static final GoRouter appRouter = GoRouter(
-    initialLocation: '/splash',
-    routes: <RouteBase>[
-      GoRoute(
-        path: '/splash',
-        builder: (BuildContext c, GoRouterState s) => const LayarSplash(),
-      ),
-      GoRoute(
-        path: '/chat',
-        builder: (BuildContext c, GoRouterState s) => const LayarChat(),
-      ),
-      GoRoute(
-        path: '/setelan',
-        builder: (BuildContext c, GoRouterState s) => const LayarSetelan(),
-      ),
-      GoRoute(
-        path: '/memori',
-        builder: (BuildContext c, GoRouterState s) => const LayarMemori(),
-      ),
-    ],
+///
+/// Satu instance global, dipakai `MaterialApp.router` di app.dart.
+final GoRouter appRouter = GoRouter(
+  initialLocation: '/splash',
+  routes: <RouteBase>[
+    GoRoute(
+      path: '/splash',
+      builder: (BuildContext c, GoRouterState s) => const LayarSplash(),
+    ),
+    GoRoute(
+      path: '/chat',
+      builder: (BuildContext c, GoRouterState s) => const LayarChat(),
+    ),
+    GoRoute(
+      path: '/setelan',
+      builder: (BuildContext c, GoRouterState s) => const LayarSetelan(),
+    ),
+    GoRoute(
+      path: '/memori',
+      builder: (BuildContext c, GoRouterState s) => const LayarMemori(),
+    ),
+  ],
   );
-}

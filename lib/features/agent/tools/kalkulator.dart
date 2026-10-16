@@ -87,13 +87,14 @@ class _Token {
 }
 
 class _Lexer {
-  _Lexer(String sumber) : _s = sumber.toLowerCase().replaceAll(' ', '') {
+  _Lexer(String sumber) {
+    _s = sumber.toLowerCase().replaceAll(' ', '');
     // Koma sebagai desimal kalau diikuti angka DAN belum ada titik desimal di
     // token yang sama (kasus "1.234,56").
     _s = _normalisasiDesimal(_s);
   }
 
-  final String _s;
+  late final String _s;
   int _i = 0;
 
   String _normalisasiDesimal(String masuk) {
