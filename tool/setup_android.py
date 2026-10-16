@@ -26,7 +26,10 @@ ANDROID = ROOT / "android"
 PACKAGE = "com.divjun.ai"
 APP_NAME = "DIVJUN AI"
 MIN_SDK = 24
-TARGET_SDK = 35
+# dynamic_color 2.x mewajibkan compileSdk 36 ("7 issues were found when
+# checking AAR metadata" kalau 35). Play Store 2026 juga butuh >= 35.
+COMPILE_SDK = 36
+TARGET_SDK = 36
 BRAND_HEX = "5B5BD6"
 BRAND_NIGHT = "0B0B10"
 # Marker在不同 format: Kotlin pakai `//`, XML pakai `<!-- -->`.
@@ -75,7 +78,11 @@ def patch_build_gradle(versi: str, kode: int) -> None:
         "applicationId",
     )
     set_pola(r"minSdk\s*=\s*[^,\n]+", f"minSdk = {MIN_SDK}", "minSdk")
-    set_pola(r"compileSdk\s*=\s*[^\n]+", f"compileSdk = {TARGET_SDK}", "compileSdk")
+    set_pola(
+        r"compileSdk\s*=\s*[^\n]+",
+        f"compileSdk = {COMPILE_SDK}",
+        "compileSdk",
+    )
     set_pola(r"targetSdk\s*=\s*[^\n]+", f"targetSdk = {TARGET_SDK}", "targetSdk")
     # CATATAN: template Flutter terbaru (3.4x+) TIDAK lagi menulis
     # angka versi di sini - nilainya dibaca dari pubspec.yaml
@@ -222,6 +229,7 @@ def verify(versi: str, kode: int) -> None:
         (f'namespace = "{PACKAGE}"', "namespace"),
         (f'applicationId = "{PACKAGE}"', "applicationId"),
         (f"minSdk = {MIN_SDK}", "minSdk"),
+        (f"compileSdk = {COMPILE_SDK}", "compileSdk"),
         (f"targetSdk = {TARGET_SDK}", "targetSdk"),
         (f"versionCode = {kode}", "versionCode"),
         (f'versionName = "{versi}"', "versionName"),
@@ -280,7 +288,7 @@ def main() -> int:
     mode = "verifikasi" if verify_only else "patch"
     print(
         f"OK ({mode}): {PACKAGE} · v{versi}+{kode} · "
-        f"minSdk {MIN_SDK} · targetSdk {TARGET_SDK}"
+        f"minSdk {MIN_SDK} · compile/target {COMPILE_SDK}/{TARGET_SDK}"
     )
     return 0
 
