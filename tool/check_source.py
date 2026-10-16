@@ -21,6 +21,8 @@ LIB = ROOT / "lib"
 
 MASALAH: list[str] = []
 
+KW_DART_SAFE: set[str] = set()
+
 
 def lapis(titel: str, isi: str) -> None:
     MASALAH.append(f"[{titel}] {isi}")
@@ -398,6 +400,29 @@ def main() -> int:
                     f"{f.relative_to(ROOT)} mengimpor {t} tapi tidak "
                     "memakai simbolnya",
                 )
+
+    # ---------------------------------------------------------------- 5c. UNDEF-PRIVATE
+    # Panggil method/field privat (`_nama(...)`) yang tidak ada di file mana pun
+    # di proyek = undefined_method yang TIDAK ditangkap cek lain.
+    # (Kelas bug ini costing 1 siklus build: rename `_kunci` -> `kunci` tapi 2
+    #  call site masih pakai nama lama.)
+    semua_privat: set[str] = set()
+    for nilai in semua_provides_cache.values():
+        semua_privat |= {n for n in nilai if n.startswith("_")}
+    for f, kode in kode_cache.items():
+        bersih2 = bersihkan(kode)
+        deklarasi_di_file = semua_nama_dalam_file.get(f, set())
+        for m in re.finditer(r"(?<![\w.$])(_[a-z][\w$]*)\s*\(", bersih2):
+            nama = m.group(1)
+            if nama in deklarasi_di_file or nama in semua_privat:
+                continue
+            if nama in KW_DART_SAFE:
+                continue
+            lapis(
+                "UNDEF-PRIVATE",
+                f"{f.relative_to(ROOT)} memanggil {nama}() tapi tidak ada "
+                "deklarasinya",
+            )
 
     # ---------------------------------------------------------------- 6. BRACE
     for f, kode in kode_cache.items():

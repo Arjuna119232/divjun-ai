@@ -89,13 +89,13 @@ class KlienLlm {
   Map<String, String> _header(ModelAi m) {
     if (m.penyedia == PenyediaModel.groq) {
       return {
-        'Authorization': 'Bearer ${_kunci(m)}',
+        'Authorization': 'Bearer ${kunci(m)}',
         'Content-Type': 'application/json',
         'User-Agent': AppConfig.userAgent,
       };
     }
     return {
-      'x-goog-api-key': _kunci(m),
+      'x-goog-api-key': kunci(m),
       'Content-Type': 'application/json',
       'User-Agent': AppConfig.userAgent,
     };
