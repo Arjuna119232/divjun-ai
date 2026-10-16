@@ -113,7 +113,7 @@ def tulis_pubspec(blok: str, jumlah: int) -> None:
     pub = ROOT / "pubspec.yaml"
     teks = pub.read_text(encoding="utf-8") if pub.exists() else ""
     awal, akhir = "    # MULAI-SKILL", "    # SELESAI-SKILL"
-    isi = blok.replace("    - MULAI-SKILL", "").replace("    - SELESAI-SKILL", "").strip("\n")
+    isi = blok.strip("\n")
 
     if awal in teks and akhir in teks:
         awal_i = teks.index(awal)
@@ -184,11 +184,11 @@ def main() -> int:
     # bawahnya TIDAK ikut ke APK - build hijau, APK jadi 75 KB lebih kecil
     # dan tidak ada error. Solusi: deklarasikan SETIAP berkas satu per satu.
     # Blok di bawah ditulis ulang tiap sinkron, di antara dua marker.
-    blok_aset = ["MULAI-SKILL"]
+    blok_aset = ["    # MULAI-SKILL"]
     for s_ in index:
         for f_ in s_["files"]:
             blok_aset.append(f"    - assets/skills/{s_['folder']}/{f_['path']}")
-    blok_aset.append("SELESAI-SKILL")
+    blok_aset.append("    # SELESAI-SKILL")
     tulis_pubspec("\n".join(blok_aset), len(index))
 
     (Tujuan / "index.json").write_text(
