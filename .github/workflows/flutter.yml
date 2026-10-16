@@ -67,8 +67,15 @@ jobs:
           echo "runner melihat: $(find assets/skills -type f | wc -l) berkas skill"
           flutter build bundle --release >/dev/null 2>&1 || true
           echo "build/flutter_assets: $(find build/flutter_assets/assets/skills -type f 2>/dev/null | wc -l) berkas"
-          echo "contoh isi manifest:"
-          ls build/flutter_assets/assets/skills 2>/dev/null | head -5 || echo "(tidak ada folder skills)"
+          # PENJAGA: kalau pustaka skill diam-diam tidak ikut ke APK, build
+          # harus gagal di sini (bukan lolos hijau dengan APK 75 KB lebih kecil).
+          ADAKAH=$(find assets/skills -type f | wc -l)
+          JADI=$(find build/flutter_assets/assets/skills -type f 2>/dev/null | wc -l)
+          echo "dibandingkan: $ADAKAH -> $JADI"
+          if [ "$JADI" -lt $(( ADAKAH * 9 / 10 )) ]; then
+            echo "GAGAL: pustaka skill tidak lengkap di bundel ($JADI dari $ADAKAH)"
+            exit 1
+          fi
 
       - name: Cek statis (blocking)
         run: python3 tool/check_source.py
