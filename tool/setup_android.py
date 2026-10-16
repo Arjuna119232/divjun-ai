@@ -93,10 +93,17 @@ def patch_build_gradle(versi: str, kode: int) -> None:
     )
 
     if MARK_KOTLIN not in s:
-        blok = f'''
-{MARK_KOTLIN}
-    // --- signing: pakai android/key.properties kalau ada, selain itu debug key ---
-    val keystoreProperties = java.util.Properties()
+        # DUA jebakan Kotlin DSL yang sudah kejadian (build gagal 2x):
+        # 1) `java.util.Properties()` -> identifier `java` di-shadow oleh
+        #    extension Gradle java -> wajib `import java.util.Properties`.
+        #    (import harus DI ATAS blok plugins{}, ituGrammar Kotlin DSL.)
+        # 2) `signingConfigs {}` harus DI DALAM blok android{}, bukan top-level.
+        if not s.lstrip().startswith("import java.util.Properties"):
+            s = "import java.util.Properties\n\n" + s.lstrip("\n")
+
+        blok = f"""{MARK_KOTLIN}
+    // signing: pakai android/key.properties kalau ada, selain itu debug key
+    val keystoreProperties = Properties()
     val keystoreFile = rootProject.file("key.properties")
     val punyaKeystore = keystoreFile.exists()
     if (punyaKeystore) {{
@@ -106,20 +113,24 @@ def patch_build_gradle(versi: str, kode: int) -> None:
     signingConfigs {{
         create("release") {{
             if (punyaKeystore) {{
-                storeFile = file(keystoreProperties.getProperty("storeFile"))
-                storePassword = keystoreProperties.getProperty("storePassword")
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
             }}
         }}
     }}
-'''
-        # sisipkan blok tepat sebelum blok android {{
+"""
         cocok = re.search(r"^android\s*\{", s, re.M)
         if not cocok:
             gagal("blok android { tidak ditemukan di build.gradle.kts")
         else:
-            s = s[: cocok.start()] + blok.lstrip("\n") + "\n" + s[cocok.start() :]
+            s = (
+                s[: cocok.end()]
+                + "\n"
+                + blok
+                + s[cocok.end() :]
+            )
 
     # release memakai signing release hanya kalau keystore tersedia
     pola_release = r"signingConfig\s*=\s*signingConfigs\.getByName\(\"debug\"\)"
