@@ -1,0 +1,226 @@
+import 'dart:async';
+
+import '../../../core/constants/app_config.dart';
+import '../../../core/utils/teks.dart';
+import '../../../data/datasources/klien_llm.dart';
+import '../../../data/models/chat_api.dart';
+import '../../../domain/entities/model_ai.dart';
+import '../../../domain/entities/percakapan.dart';
+import '../../../domain/entities/setelan.dart';
+import '../../../services/memory_service.dart';
+import '../../../services/streaming_service.dart';
+import '../../../services/tool_executor.dart';
+import '../tools/alat.dart';
+import '../tools/daftar_alat.dart';
+
+typedef EmitTeks = void Function(String potongan);
+typedef EmitAlat = void Function(CatatanAlat catatan);
+typedef CekBatal = bool Function();
+
+/// Agent loop: plan -> act -> observe -> repeat.
+///
+/// Satu putaran = satu panggilan LLM. Kalau model meminta tool, tool
+/// dieksekusi, hasilnya ditempel sebagai pesan `tool`, lalu model dipanggil
+/// lagi dengan hasil tersebut. Maks [AppConfig.maksLangkahAgent] putaran,
+/// lalu berhenti dan jujur bilang ke user kalau mentok.
+class AgentLoop {
+  AgentLoop({
+    required StreamingService streaming,
+    required MemoryService memori,
+    required ToolExecutor executor,
+    required DaftarAlat daftar,
+  })  : _streaming = streaming,
+        _memori = memori,
+        _executor = executor,
+        _daftar = daftar;
+
+  final StreamingService _streaming;
+  final MemoryService _memori;
+  final ToolExecutor _executor;
+  final DaftarAlat _daftar;
+
+  Future<Pesan> jalankan({
+    required String idPesan,
+    required ModelAi model,
+    required SetelanApp setelan,
+    required String systemPrompt,
+    required List<Pesan> riwayat,
+    required EmitTeks onTeks,
+    required EmitAlat onAlat,
+    required CekBatal sudahBatal,
+    required KonteksAlat konteks,
+  }) async {
+    _daftar.terapkan(setelan);
+    _executor.langkahBaru();
+
+    final bool agentAktif = setelan.agentAktif && model.dukungAlat;
+    final List<PesanApi> wire = _memori.keWire(
+      systemPrompt: systemPrompt,
+      pesan: riwayat,
+    );
+
+    final StringBuilder isi = StringBuilder();
+    final List<CatatanAlat> catatan = <CatatanAlat>[];
+    String galat = '';
+    bool mentok = false;
+
+    for (int langkah = 1; langkah <= AppConfig.maksLangkahAgent; langkah++) {
+      if (sudahBatal()) break;
+
+      final List<PanggilanAlat> panggil = <PanggilanAlat>[];
+      bool selesai = false;
+
+      await for (final PotonganBalasan potongan in _streaming.kirim(
+        model: model,
+        pesan: wire,
+        suhu: setelan.suhu,
+        alat: agentAktif ? _daftar.specs() : null,
+      )) {
+        if (potongan.galat.isNotEmpty) {
+          galat = potongan.galat;
+          selesai = true;
+          break;
+        }
+        if (potongan.teks.isNotEmpty) {
+          isi.write(potongan.teks);
+          onTeks(potongan.teks);
+        }
+        if (potongan.alat.isNotEmpty) {
+          panggil.addAll(potongan.alat);
+        }
+        if (potongan.selesai) {
+          selesai = true;
+          break;
+        }
+      }
+
+      if (galat.isNotEmpty) break;
+      if (panggil.isEmpty) {
+        // Tidak ada tool call = agent sudah selesai (turn selesai normal).
+        selesai = true;
+      }
+      if (!selesai && !sudahBatal()) break;
+      if (panggil.isEmpty) break;
+
+      // Act: kirim jawaban tool ke model sebagai pesan `tool`.
+      wire.add(PesanApi(peran: 'assistant', isi: '', alat: panggil));
+      for (final PanggilanAlat call in panggil) {
+        if (sudahBatal()) break;
+        final HasilPanggilan hasil =
+            await _executor.jalankan(call, konteks);
+        wire.add(PesanApi.hasilAlat(
+          call.id,
+          call.nama,
+          hasil.teksUntukModel,
+        ));
+        final CatatanAlat c = CatatanAlat(
+          nama: call.nama,
+          argumen: call.argumen,
+          hasil: hasil.hasil.isi,
+          status: hasil.hasil.gagal ? StatusAlat.gagal : StatusAlat.selesai,
+          waktu: DateTime.now(),
+          ringkasan: hasil.hasil.ringkasan,
+        );
+        catatan.add(c);
+        onAlat(c);
+      }
+      if (sudahBatal()) break;
+      // Kalau langkah terakhir masih memicu tool, berarti agent mentok.
+      if (langkah == AppConfig.maksLangkahAgent && panggil.isNotEmpty) {
+        mentok = true;
+      }
+    }
+
+    String teksAkhir = isi.toString().trimRight();
+    if (mentok) {
+      teksAkhir = '${_sisipBaris(teksAkhir)}\n\n_(agent berhenti setelah '
+          '${AppConfig.maksLangkahAgent} langkah)_';
+    }
+    if (teksAkhir.trim().isEmpty && catatan.isNotEmpty) {
+      teksAkhir = catatan
+          .map((CatatanAlat c) => '- ${c.nama}: ${c.hasil}')
+          .join('\n');
+    }
+
+    return Pesan(
+      id: idPesan,
+      peran: Peran.ai,
+      isi: teksAkhir,
+      waktu: DateTime.now(),
+      status: sudahBatal()
+          ? StatusPesan.dibatalkan
+          : (galat.isNotEmpty ? StatusPesan.gagal : StatusPesan.selesai),
+      modelId: model.id,
+      catatanAlat: catatan,
+      pesanGalat: galat,
+    );
+  }
+
+  static String _sisipBaris(String s) => s.trim();
+
+  /// Pilih model secara otomatis berdasarkan isi pesan (mode `auto`).
+  ///
+  /// Heuristik sengaja dibuat simpel dan bisa ditebak user:
+  /// angka/operator -> model tool;-url/kata cari -> model tool;
+  /// teks panjang atau minta kode -> model besar; selain itu -> default.
+  static ModelAi pilihOtomatis({
+    required String pesan,
+    required List<ModelAi> katalog,
+    required ModelAi fallback,
+  }) {
+    if (katalog.isEmpty) return fallback;
+    final List<ModelAi> denganAlat =
+        ModelAi.yangDukungAlat(katalog);
+    final List<ModelAi> pilihan =
+        denganAlat.isEmpty ? katalog : denganAlat;
+    if (pilihan.isEmpty) return fallback;
+
+    final String p = pesan.toLowerCase();
+    final bool adaAngka = RegExp(r'\d').hasMatch(p);
+    final bool adaOperator =
+        RegExp(r'[+\-*/^%]').hasMatch(pesan.replaceAll(RegExp(r'\d'), ''));
+    final bool mintaHitung = adaAngka &&
+        (adaOperator ||
+            p.contains('berapa') ||
+            p.contains('hitung') ||
+            p.contains('kalkulasi') ||
+            p.contains('total') ||
+            p.contains('berapa persen'));
+    final bool mintaWeb = p.contains('http://') ||
+        p.contains('https://') ||
+        p.contains('cari di web') ||
+        p.contains('cek berita') ||
+        p.contains('buka link');
+    final bool mintaKode = p.contains('kode') ||
+        p.contains('code') ||
+        p.contains('flutter') ||
+        p.contains('python') ||
+        p.contains('javascript') ||
+        p.contains('sql') ||
+        p.contains('script');
+
+    // Urutan preferensi: besar dulu (kualitas), turun ke ringan (cepat).
+    ModelAi? cariBertanggi(String pola) {
+      for (final ModelAi m in pilihan) {
+        if (m.id.toLowerCase().contains(pola)) return m;
+      }
+      return null;
+    }
+
+    if (mintaHitung || mintaWeb) {
+      return cariBertanggi('70b') ??
+          cariBertanggi('120b') ??
+          pilihan.first;
+    }
+    if (mintaKode || pesan.length > 700) {
+      return cariBertanggi('70b') ??
+          cariBertanggi('120b') ??
+          pilihan.first;
+    }
+    return fallback;
+  }
+
+  /// Ringkas jawaban panjang (dipakai saat konteks hampir penuh).
+  static String ringkasJawaban(String teks, {int maks = 600}) =>
+      Teks.ringkas(teks, maks);
+}

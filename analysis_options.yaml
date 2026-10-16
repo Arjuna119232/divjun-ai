@@ -1,0 +1,19 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # Ini yang HARI INI bisa bisa 'bolos' bukan error kompilasi tapi bikin app rusak.
+    undefined_identifier: error
+    dead_code: error
+    unused_import: error
+    unused_local_variable: error
+
+linter:
+  rules:
+    - prefer_const_constructors
+    - prefer_final_locals
+    - avoid_print
+    - unnecessary_parenthesis
+    - use_super_parameters
+    - require_trailing_commas
+    - directives_ordering

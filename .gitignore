@@ -1,21 +1,34 @@
-keys.properties
-local.properties
+# Flutter / Dart
+.dart_tool/
+.packages
 build/
-.gradle/
-app/src/main/assets/keys.js
-*.bak
-*.bak-*
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
 
+# Android / iOS di-generate ulang di CI (jangan pernah di-commit)
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+
+# Rahasia - JANGAN PERNAH masuk git
 *.jks
 *.keystore
-*.py
-sheet.txt
+*.p12
+*.pem
+key.properties
+keys.properties
+assets/keys.js
+lib/core/constants/keys.g.dart
 
-# secrets - jangan pernah di-commit
-keystore*.txt
-*.jks
-*.keystore
-keys.js
-logo-base.svg
-splash-base.svg
+# Bawaan OS / editor
+.idea/
+.vscode/
+*.log
+.DS_Store
+
+# Sesi merge paket AI lain
 dev-backups/

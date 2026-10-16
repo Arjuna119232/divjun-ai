@@ -1,32 +1,78 @@
-# DIVJUN AI
+# DIVJUN AI - Native Flutter (Agent AI)
 
-Chatbot AI (Google Gemini dan Groq) + direktori alat AI dalam satu aplikasi Android.
+Rebuild total dari aplikasi WebView (HTML/JS di WebView + Kotlin wrapper) menjadi
+**Flutter native** dengan agent AI yang benar-benar jalan: multi-step tool
+calling, memori, streaming per token.
 
-## Rilis di GitHub
-1. Unggah seluruh isi folder ini (termasuk `.github`) ke repository GitHub.
-2. Buat rilis: `git tag v1.1.0 && git push origin v1.1.0`. APK otomatis terlampir di halaman Releases.
-3. Tanpa pengaturan tambahan, APK ditandatangani kunci debug (tetap bisa dipasang).
+- Package: `com.divjun.ai` · versi `2.0.0+35` (update di atas APK lama 1.15.2)
+- minSdk 24 · targetSdk 35 · Java 17
+- Nama folder `android/` **tidak** ada di repo: di-generate + di-patch otomatis
+  di CI oleh `tool/setup_android.py`.
 
-## Tanda tangan sendiri (disarankan, agar pembaruan bisa menimpa versi lama)
+## Fitur
+
+**Chat**
+- streaming token per token, berhenti kapan saja (tombol stop)
+- jawaban markdown (kode, tabel, list, blockquote, tautan)
+- menu panjang per pesan: salin, edit, jawab ulang, ringkas, hapus
+- riwayat percakapan tersimpan di perangkat, bisa dihapus per chat
+
+**Agent AI (native function calling)**
+- loop `plan -> act -> observe` sampai 6 langkah
+- 5 alat: `kalkulator`, `waktu_sekarang`, `memori`, `buka_url`, `email`
+- anti-duplikasi tool call, batas jumlah tool per langkah, timeout 20 detik
+- tool yang mati/dimatikan tidak pernah dikirim ke model
+
+**Memori**
+- jangka panjang: simpan / cari / hapus per entri / bersihkan semua
+- pencarian lokal (kata kunci + kesegaran), hanya entri relevan yang disuntik
+  ke system prompt
+- jarakak storage: riwayat + memori = file JSON, ditulis atomik
+
+**Keamanan**
+- penjaga SSRF untuk tool web (blokir alamat privat, metadata awan, DNS rebound)
+- memori menolak menyimpan password/token/kunci
+- email tidak pernah terkirim diam-diam: AI membuat draf, user yang menekan kirim
+
+**Antarmuka**
+- Material 3 + dynamic color (Material You) + mode gelap/terang/sistem
+- Inter + JetBrains Mono (dibundel, bukan diunduh saat runtime)
+- splash 900 ms, skeleton shimmer, empty/error state designed
+- bottom sheet dengan drag handle, ripple + haptic, animasi emphasized
+
+## Menjalankan dari Termux (tanpa laptop)
+
+Tidak ada Flutter di HP, jadi semua lewat GitHub Actions:
+
+```bash
+# 1. hanya cek kode (2 menit, tanpa APK)
+gh workflow run flutter.yml --ref flutter-native -f analyze_only=true
+
+# 2. build APK (universal, ditandatangani keystore asli)
+gh workflow run flutter.yml --ref flutter-native -f analyze_only=false -f demo=false
+
+# lihat hasil
+gh run list --limit 1
 ```
-keytool -genkeypair -v -keystore divjun.jks -alias divjun -keyalg RSA -keysize 2048 -validity 10000
-base64 -w0 divjun.jks
-```
-Simpan sebagai Secrets repository: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`. Simpan file `divjun.jks` di tempat aman; jangan diunggah ke repository.
 
-## Gradle Wrapper (gradlew)
-Build di GitHub tidak membutuhkan wrapper (Gradle 8.7 dipasang oleh workflow). Untuk build lokal atau Android Studio, jalankan workflow **Buat Gradle Wrapper** sekali di tab Actions; `gradlew`, `gradlew.bat`, dan folder `gradle/wrapper` akan otomatis ditambahkan ke repository. Setelah itu lakukan `git pull`.
+Cek lokal yang bisa dijalankan di HP (< 1 detik):
 
-## API key tertanam (Groq dan Gemini)
-Jangan tulis key di dalam kode. Simpan sebagai Secrets repository: `GROQ_API_KEY` dan `GEMINI_API_KEY`
-(Settings > Secrets and variables > Actions > New repository secret). Saat build, key otomatis tertanam di APK.
-Untuk build lokal, buat file `keys.properties` (sudah masuk .gitignore) berisi:
+```bash
+python3 tool/check_source.py      # dead-file, import hilang, kurung, non-Latin, aset
+python3 tool/setup_android.py --verify-only
 ```
-GROQ_API_KEY=isi_key_groq
-GEMINI_API_KEY=isi_key_gemini
-```
-Peringatan: key di dalam APK bisa diekstrak oleh siapa pun yang memegang APK-nya. Gunakan repository privat dan jangan bagikan APK ke orang lain.
 
-## Tanda tangan APK (stabil)
-File `app/divjun.jks` dipakai untuk menandatangani APK debug maupun rilis, sehingga setiap build punya tanda tangan yang sama dan bisa dipasang di atas versi lama tanpa uninstall.
-Gunakan repository PRIVAT. Jika ingin kunci sendiri, buat dengan perintah di atas dan isi Secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`; Secrets didahulukan.
+`tool/check_source.py` adalah gerbang blocking yang sama seperti yang dipakai
+di CI, plus `flutter analyze` dan `flutter test`.
+
+## API key
+
+Disuntik saat build lewat `--dart-define`, tidak pernah ada di repo:
+
+```
+--dart-define=GROQ_API_KEY=...
+--dart-define=GEMINI_API_KEY=...
+```
+
+Tanpa key, app tetap jalan dalam mode demo: UI menampilkan status key kosong,
+bukan crash.

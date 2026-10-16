@@ -1,0 +1,67 @@
+name: divjun_ai
+description: "DIVJUN AI - chatbot AI dengan agent AI, tool calling, dan memori, 100% native Flutter."
+publish_to: "none"
+
+# 2.0.0 = versi rebuild Flutter (WebView lama = 1.15.2 / versionCode 34).
+# versionCode 35 > 34 -> APK baru bisa update DI ATAS APK lama (tanda tangan sama).
+version: 2.0.0+35
+
+environment:
+  sdk: ^3.9.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # HTTP + streaming SSE
+  dio: ^5.7.0
+
+  # Navigasi
+  go_router: ^14.6.2
+
+  # Penyimpanan lokal (JSON di SharedPreferences)
+  shared_preferences: ^2.3.2
+  path_provider: ^2.1.5
+
+  # Material You (warna dinamis Android 12+)
+  dynamic_color: ^1.7.0
+
+  # Render markdown jawaban AI
+  flutter_markdown_plus: ^1.0.12
+
+  # Icon set (Lucide) - konsisten, bukan Material Icons
+  lucide_icons_flutter: ^4.0.0
+
+  # Share jawaban ke app lain + buka URL / mailto
+  share_plus: ^12.0.2
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-ExtraBold.ttf
+          weight: 800
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
+          weight: 700

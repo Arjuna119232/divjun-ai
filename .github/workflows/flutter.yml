@@ -1,0 +1,109 @@
+name: Flutter Build
+
+# Jalankan manual supaya tidak ada build yang tidak sengaja tiap push:
+#   gh workflow run flutter.yml --ref flutter-native -f analyze_only=true
+on:
+  workflow_dispatch:
+    inputs:
+      analyze_only:
+        description: "Hanya analyze + test (tanpa APK)"
+        type: boolean
+        default: true
+      demo:
+        description: "Build tanpa API key (mode demo)"
+        type: boolean
+        default: true
+      release:
+        description: "Buat GitHub Release + AAB"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Analyze & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Siapkan android/ (flutter create + patch)
+        run: |
+          flutter create --org com.divjun --project-name ai --platforms=android /tmp/scaffold
+          cp -r /tmp/scaffold/android .
+          python3 tool/setup_android.py
+          # verifikasi kedua: kalau patch tidak masuk diam-diam, build berhenti di sini
+          python3 tool/setup_android.py --verify-only
+
+      - name: Tulis key.properties dari secrets
+        if: ${{ !inputs.demo }}
+        run: |
+          printf "sdk.dir=$ANDROID_HOME\n" > android/key.properties
+          printf "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/divjun.jks
+          printf "storeFile=divjun.jks\n" >> android/key.properties
+          printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\n" >> android/key.properties
+          printf "keyAlias=${{ secrets.KEY_ALIAS }}\n" >> android/key.properties
+          printf "keyPassword=${{ secrets.KEY_PASSWORD }}\n" >> android/key.properties
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: Cek statis (blocking)
+        run: python3 tool/check_source.py
+
+      - name: flutter analyze (blocking)
+        run: flutter analyze --no-fatal-infos
+
+      - name: flutter test
+        run: flutter test --reporter compact
+
+      - name: Ringkasan
+        if: ${{ inputs.analyze_only }}
+        run: echo "ANALYZE-SUDAH-HIJAU (tanpa APK, sesuai permintaan)"
+
+      - name: Build APK
+        if: ${{ !inputs.analyze_only }}
+        run: |
+          if [ "${{ inputs.demo }}" = "true" ]; then
+            flutter build apk --release \
+              --dart-define=APP_VERSION=ci-demo \
+              --dart-define=GROQ_API_KEY= \
+              --dart-define=GEMINI_API_KEY=
+          else
+            flutter build apk --release \
+              --dart-define=APP_VERSION=${{ github.run_number }} \
+              --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} \
+              --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !inputs.analyze_only }}
+        with:
+          name: divjun-flutter-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+
+      - name: Build AAB (opsional)
+        if: ${{ inputs.release }}
+        run: flutter build appbundle --release
+
+      - name: GitHub Release
+        if: ${{ inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+          draft: true
+          generate_release_notes: true
