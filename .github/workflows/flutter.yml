@@ -49,8 +49,11 @@ jobs:
       - name: Tulis key.properties dari secrets
         if: ${{ !inputs.demo }}
         run: |
+          # PENTING: keystore harus di android/app/ karena `file(...)` di
+          # app/build.gradle.kts relatif ke folder modul app (bukan root android/).
           printf "sdk.dir=$ANDROID_HOME\n" > android/key.properties
-          printf "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/divjun.jks
+          printf "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/divjun.jks
+          test -s android/app/divjun.jks || { echo "keystore kosong/tidak ada"; exit 1; }
           printf "storeFile=divjun.jks\n" >> android/key.properties
           printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\n" >> android/key.properties
           printf "keyAlias=${{ secrets.KEY_ALIAS }}\n" >> android/key.properties
