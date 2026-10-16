@@ -257,17 +257,23 @@ class LayarSetelan extends ConsumerWidget {
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Status API'),
+                leading: const Icon(LucideIcons.plug),
+                title: const Text('Koneksi AI'),
                 subtitle: Text(
-                  AppEnv.punyaGroq
-                      ? 'Groq: aktif'
-                      : AppEnv.punyaGemini
-                          ? 'Hanya Gemini: aktif'
-                          : 'Belum ada API key (mode demo)',
+                  ref.watch(kunciGroqAktifProvider).trim().isNotEmpty ||
+                          ref.watch(kunciGeminiAktifProvider).trim().isNotEmpty
+                      ? 'Uji koneksi, ganti kunci API, lihat model yang hidup.'
+                      : 'Belum ada kunci API. Tekan untuk memasukkan kunci '
+                          'gratis (tanpa kartu kredit).',
                   style: TextStyle(
-                    color: AppEnv.punyaApiKey ? null : context.cs.error,
+                    color: (ref.watch(kunciGroqAktifProvider).trim().isEmpty &&
+                            ref.watch(kunciGeminiAktifProvider).trim().isEmpty)
+                        ? context.cs.error
+                        : null,
                   ),
                 ),
+                trailing: const Icon(LucideIcons.chevronRight, size: 18),
+                onTap: () => context.push('/koneksi'),
               ),
             ],
           ),

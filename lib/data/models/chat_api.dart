@@ -3,6 +3,17 @@ import 'dart:convert';
 /// Model untuk layer data: bentuk request & bentuk response provider.
 /// Entity app (Pesan, dsb) TIDAK ikut ke sini supaya tidak bercampur.
 /// Definisi satu tool yang dikirim ke LLM sebagai native function calling.
+/// Klasifikasi galat supaya UI dan agent loop bereaksi berbeda.
+abstract final class KodeGalat {
+  static const int GalatKosong = 0;
+  static const int modelTidakAda = 1; // 404 / model butuh paket berbayar
+  static const int kuotaHabis = 2; // 429
+  static const int kunciDitolak = 3; // 401 / 403 auth
+  static const int jaringan = 4; // timeout / tidak bisa konek
+  static const int server = 5; // 5xx
+  static const int lain = 9;
+}
+
 class ToolSpec {
   const ToolSpec({
     required this.nama,
@@ -86,6 +97,7 @@ class PotonganBalasan {
     this.selesai = false,
     this.alasanBerhenti = '',
     this.galat = '',
+    this.kodeGalat = GalatKosong,
   });
 
   final String teks;
@@ -93,6 +105,9 @@ class PotonganBalasan {
   final bool selesai;
   final String alasanBerhenti;
   final String galat;
+
+  /// Lihat [KodeGalat] - dipakai agent loop untuk deciding auto-fallback.
+  final int kodeGalat;
 
   bool get tanpaIsi => teks.isEmpty && alat.isEmpty && !selesai && galat.isEmpty;
 }

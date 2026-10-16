@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/constants/app_env.dart';
 import '../data/datasources/klien_llm.dart';
 import '../data/datasources/penyimpan_lokal.dart';
 import '../data/repositories/repositori_memori.dart';
@@ -37,8 +38,22 @@ final Provider<RepositoriMemori> repoMemoriProvider =
         RepositoriMemori(ref.watch(simpanBerkasProvider)));
 
 final Provider<KlienLlm> klienLlmProvider = Provider<KlienLlm>(
-  (ref) => KlienLlm(),
+  (ref) {
+    final SetelanApp s = ref.watch(setelanProvider);
+    return KlienLlm(kunciGroq: s.kunciGroq, kunciGemini: s.kunciGemini);
+  },
 );
+
+/// Kunci yang benar-benar dipakai (lokal menimpa yang dibundel).
+final Provider<String> kunciGroqAktifProvider = Provider<String>((ref) {
+  final String lokal = ref.watch(setelanProvider).kunciGroq.trim();
+  return lokal.isNotEmpty ? lokal : AppEnv.groqApiKey;
+});
+
+final Provider<String> kunciGeminiAktifProvider = Provider<String>((ref) {
+  final String lokal = ref.watch(setelanProvider).kunciGemini.trim();
+  return lokal.isNotEmpty ? lokal : AppEnv.geminiApiKey;
+});
 
 final Provider<StreamingService> streamingServiceProvider =
     Provider<StreamingService>((ref) => StreamingService(
@@ -93,6 +108,10 @@ class SetelanController extends Notifier<SetelanApp> {
   Future<void> setPakaiSkill(bool v) =>
       ubah(state.salin(pakaiSkillPanduan: v));
 
+  Future<void> setKunciGroq(String v) => ubah(state.salin(kunciGroq: v.trim()));
+
+  Future<void> setKunciGemini(String v) => ubah(state.salin(kunciGemini: v.trim()));
+
   Future<void> setPromptTambahan(String v) =>
       ubah(state.salin(promptSistemTambahan: v));
 }
@@ -109,15 +128,35 @@ final FutureProvider<List<ModelAi>> katalogModelProvider =
   return ref.watch(klienLlmProvider).daftarModel();
 });
 
+/// Refresh paksa katalog (tombol di halaman Koneksi).
+final Provider<void> segarkanKatalogProvider = Provider<void>((ref) {
+  ref.watch(katalogModelProvider.notifier);
+  ref.invalidate(katalogModelProvider);
+});
+
+/// Uji koneksi per model (halaman Koneksi).
+final FutureProviderFamily<UjiKoneksi, String> ujiKoneksiProvider =
+    FutureProvider.family<UjiKoneksi, String>((ref, id) async {
+  final List<ModelAi> katalog =
+      await ref.watch(katalogModelProvider.future);
+  final ModelAi m = ModelAi.cari(id, katalog) ??
+      ModelAi.cari(id) ??
+      ModelAi.defaultGratis(katalog);
+  return ref.watch(klienLlmProvider).uji(m);
+});
+
 /// Model yang sedang dipakai: mengikuti setelan, jatuh ke bawaan bila id
 /// tidak ada (mis. user downgrade / provider berubah).
 final Provider<ModelAi> modelProvider = Provider<ModelAi>((ref) {
   final SetelanApp s = ref.watch(setelanProvider);
   final AsyncValue<List<ModelAi>> katalog = ref.watch(katalogModelProvider);
   final List<ModelAi> daftar = katalog.valueOrNull ?? ModelAi.bawaan;
-  return ModelAi.cari(s.modelId, daftar) ??
-      ModelAi.cari(s.modelId) ??
-      daftar.first;
+  final ModelAi? terpilih = ModelAi.cari(s.modelId, daftar) ??
+      ModelAi.cari(s.modelId);
+  if (terpilih != null) return terpilih;
+  // Model yang tersimpan tidak ada lagi (mis.Llama 3.3 yang jadi Enterprise)
+  // -> jangan sampai semua jawaban gagal.
+  return ModelAi.defaultGratis(daftar);
 });
 
 // ---------------------------------------------------------------- memori

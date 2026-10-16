@@ -52,7 +52,7 @@ class PesanApi {
 /// Semua kegagalan network diterjemahkan ke pesan Bahasa Indonesia yang
 /// bisa ditampilkan user apa adanya (tidak ada TypeError senyap).
 class KlienLlm {
-  KlienLlm({Dio? dio}) : _dio = dio ?? Dio() {
+  KlienLlm({Dio? dio, this.kunciGroq, this.kunciGemini}) : _dio = dio ?? Dio() {
     _dio.options
       ..connectTimeout = const Duration(seconds: 20)
       ..receiveTimeout = const Duration(seconds: 120)
@@ -62,14 +62,21 @@ class KlienLlm {
 
   final Dio _dio;
 
+  /// Kunci dari pengaturan (menimpa kunci yang dibundel saat build).
+  final String? kunciGroq;
+  final String? kunciGemini;
+
   static const String _hostGroq = 'api.groq.com';
   static const String _hostGemini = 'generativelanguage.googleapis.com';
 
-  bool _punya(ModelAi m) =>
-      m.penyedia == PenyediaModel.groq ? AppEnv.punyaGroq : AppEnv.punyaGemini;
+  String kunci(ModelAi m) {
+    final String lokal =
+        m.penyedia == PenyediaModel.groq ? (kunciGroq ?? '') : (kunciGemini ?? '');
+    if (lokal.trim().isNotEmpty) return lokal.trim();
+    return m.penyedia == PenyediaModel.groq ? AppEnv.groqApiKey : AppEnv.geminiApiKey;
+  }
 
-  String _kunci(ModelAi m) =>
-      m.penyedia == PenyediaModel.groq ? AppEnv.groqApiKey : AppEnv.geminiApiKey;
+  bool punyaKunci(ModelAi m) => kunci(m).trim().isNotEmpty;
 
   String _url(ModelAi m) {
     if (m.penyedia == PenyediaModel.groq) {
@@ -150,10 +157,12 @@ class KlienLlm {
     List<ToolSpec>? alat,
     CancelToken? batal,
   }) async* {
-    if (!_punya(model)) {
+    if (!punyaKunci(model)) {
       yield PotonganBalasan(
         galat: 'API key untuk ${model.penyedia.name} belum diisi. '
-            'Isi di pengaturan atau build ulang dengan --dart-define.',
+            'Isi di Pengaturan > Koneksi, atau build ulang dengan '
+            '--dart-define=GROQ_API_KEY=...',
+        kodeGalat: KodeGalat.kunciDitolak,
       );
       return;
     }
@@ -170,10 +179,16 @@ class KlienLlm {
         ),
       );
     } on DioException catch (e) {
-      yield PotonganBalasan(galat: _petakanGalat(e));
+      yield PotonganBalasan(
+        galat: _petakanGalat(e),
+        kodeGalat: _kodeGalat(e),
+      );
       return;
     } catch (e) {
-      yield PotonganBalasan(galat: 'Gagal menghubungi server: $e');
+      yield PotonganBalasan(
+        galat: 'Gagal menghubungi server: $e',
+        kodeGalat: KodeGalat.lain,
+      );
       return;
     }
 
@@ -201,10 +216,16 @@ class KlienLlm {
       }
     } on DioException catch (e) {
       if (batal?.isCancelled ?? false) return;
-      yield PotonganBalasan(galat: _petakanGalat(e));
+      yield PotonganBalasan(
+        galat: _petakanGalat(e),
+        kodeGalat: _kodeGalat(e),
+      );
       return;
     } catch (e) {
-      yield PotonganBalasan(galat: 'Stream terputus: $e');
+      yield PotonganBalasan(
+        galat: 'Stream terputus: $e',
+        kodeGalat: KodeGalat.jaringan,
+      );
       return;
     }
 
@@ -245,7 +266,34 @@ class KlienLlm {
   }
 
   /// Ambil daftar model langsung dari provider (katalog Settings).
-  Future<List<ModelAi>> daftarModel() async {
+  ///
+  /// Cache 10 menit supaya tidak memanggil provider tiap buka app; paksa
+  /// diperbaiki dari halaman Koneksi.
+  static DateTime? _cacheWaktu;
+  static List<ModelAi>? _cache;
+
+  Future<List<ModelAi>> daftarModel({
+    PenyediaModel? penyedia,
+    bool paksa = false,
+  }) async {
+    if (!paksa &&
+        _cache != null &&
+        _cacheWaktu != null &&
+        DateTime.now().difference(_cacheWaktu!).inMinutes < 10) {
+      final List<ModelAi> semua = _cache!;
+      return penyedia == null
+          ? semua
+          : semua.where((ModelAi m) => m.penyedia == penyedia).toList();
+    }
+    final List<ModelAi> hasil = await _daftarModelPohon();
+    _cache = hasil;
+    _cacheWaktu = DateTime.now();
+    return penyedia == null
+        ? hasil
+        : hasil.where((ModelAi m) => m.penyedia == penyedia).toList();
+  }
+
+  Future<List<ModelAi>> _daftarModelPohon() async {
     final List<ModelAi> hasil = <ModelAi>[];
 
     if (AppEnv.punyaGroq) {
@@ -284,8 +332,36 @@ class KlienLlm {
     }
 
     if (hasil.isEmpty) hasil.addAll(ModelAi.bawaan);
-    hasil.sort((ModelAi a, ModelAi b) => a.label.compareTo(b.label));
-    return hasil;
+
+    // Tandai model dari katalog live yang ternyata hanya paket berbayar,
+    // supaya tidak pernah dipilih otomatis.
+    final List<ModelAi> digabung = <ModelAi>[];
+    final Set<String> seen = <String>{};
+    for (final ModelAi m in hasil) {
+      if (!seen.add(m.id)) continue;
+      final ModelAi? bawa = ModelAi.cari(m.id);
+      digabung.add(
+        ModelAi(
+          id: m.id,
+          label: bawa?.label ?? m.label,
+          penyedia: m.penyedia,
+          dukungAlat: bawa?.dukungAlat ?? m.dukungAlat,
+          lihatGambar: bawa?.lihatGambar ?? m.lihatGambar,
+          konteks: m.konteks,
+          perluBayar: bawa?.perluBayar ?? false,
+        ),
+      );
+    }
+    for (final ModelAi m in ModelAi.bawaan) {
+      if (!AppEnv.punyaApiKey && m.penyedia == PenyediaModel.gemini) continue;
+      if (!seen.add(m.id)) continue;
+      digabung.add(m);
+    }
+    digabung.sort((ModelAi a, ModelAi b) {
+      if (a.perluBayar != b.perluBayar) return a.perluBayar ? 1 : -1;
+      return a.label.compareTo(b.label);
+    });
+    return digabung;
   }
 
   /// Model yang TIDAK mendukung tool calling akan disembunyikan dari agent.
@@ -309,17 +385,103 @@ class KlienLlm {
         .join(' ');
   }
 
+  static int _kodeGalat(DioException e) {
+    final int kode = e.response?.statusCode ?? 0;
+    if (kode == 401) return KodeGalat.kunciDitolak;
+    if (kode == 403) return KodeGalat.kunciDitolak;
+    if (kode == 404) return KodeGalat.modelTidakAda;
+    if (kode == 429) return KodeGalat.kuotaHabis;
+    if (kode >= 500) return KodeGalat.server;
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.connectionError) {
+      return KodeGalat.jaringan;
+    }
+    return KodeGalat.lain;
+  }
+
+  /// Hasil uji koneksi singkat (dipakai halaman Koneksi).
+  Future<UjiKoneksi> uji(ModelAi m) async {
+    final DateTime mulai = DateTime.now();
+    if (!punyaKunci(m)) {
+      return UjiKoneksi(
+        model: m.id,
+        berhasil: false,
+        pesan: 'Kunci API ${m.penyedia.name} belum diisi.',
+        ms: 0,
+      );
+    }
+    try {
+      final List<ModelAi> daftar = await daftarModel(penyedia: m.penyedia);
+      if (daftar.isEmpty) {
+        return UjiKoneksi(
+          model: m.id,
+          berhasil: false,
+          pesan: 'Kunci diterima tapi daftar model kosong.',
+          ms: DateTime.now().difference(mulai).inMilliseconds,
+        );
+      }
+    } catch (_) {
+      // daftar model gagal bukan berarti chat gagal; lanjut uji chat.
+    }
+    try {
+      final HasilBalasan hasil = await sekali(
+        model: m,
+        pesan: <PesanApi>[
+          const PesanApi(peran: 'user', isi: 'Balas dengan satu kata: OK'),
+        ],
+        suhu: 0.2,
+      );
+      final int ms = DateTime.now().difference(mulai).inMilliseconds;
+      if (hasil.gagal) {
+        return UjiKoneksi(
+          model: m.id,
+          berhasil: false,
+          pesan: hasil.galat,
+          ms: ms,
+          jumlahModel: null,
+        );
+      }
+      return UjiKoneksi(
+        model: m.id,
+        berhasil: true,
+        pesan: hasil.teks.trim().isEmpty
+            ? 'Terhubung, tapi jawaban kosong.'
+            : hasil.teks.trim(),
+        ms: ms,
+      );
+    } catch (e) {
+      return UjiKoneksi(
+        model: m.id,
+        berhasil: false,
+        pesan: '$e',
+        ms: DateTime.now().difference(mulai).inMilliseconds,
+      );
+    }
+  }
+
   static String _petakanGalat(DioException e) {
     final int kode = e.response?.statusCode ?? 0;
     final String isi = _isiGalat(e.response?.data);
     if (kode == 401) {
-      return 'API key ditolak. Cek lagi key-nya di pengaturan. $isi';
+      return 'API key ditolak. Cek lagi key-nya di Pengaturan > Koneksi. $isi';
+    }
+    if (kode == 403) {
+      final String t = isi.toLowerCase();
+      if (t.contains('plan') || t.contains('billing') || t.contains('upgrade') ||
+          t.contains('paid')) {
+        return 'Model ini butuh paket berbayar di provider. Pilih model lain '
+            'atau isi kunci berbayar. $isi';
+      }
+      return 'Akses ditolak provider. $isi';
     }
     if (kode == 429) {
-      return 'Kuota model habis sebentar. Tunggu sebentar atau ganti model. $isi';
+      return 'Kuota/limit provider habis sebentar. App akan coba model lain '
+          'otomatis. $isi';
     }
     if (kode == 404) {
-      return 'Model tidak ditemukan di provider. Pilih model lain. $isi';
+      return 'Model tidak ada / tidak tersedia untuk kunci ini. App akan coba '
+          'model lain otomatis. $isi';
     }
     if (kode >= 500) {
       return 'Server provider sedang gangguan (HTTP $kode). Coba lagi. $isi';
@@ -471,4 +633,21 @@ class _PenguraiSse {
     if (teks.isEmpty) return const <_IrisanSse>[];
     return <_IrisanSse>[_IrisanSse(teks: teks.toString())];
   }
+}
+
+/// Hasil uji koneksi untuk halaman Koneksi.
+class UjiKoneksi {
+  const UjiKoneksi({
+    required this.model,
+    required this.berhasil,
+    required this.pesan,
+    required this.ms,
+    this.jumlahModel,
+  });
+
+  final String model;
+  final bool berhasil;
+  final String pesan;
+  final int ms;
+  final int? jumlahModel;
 }

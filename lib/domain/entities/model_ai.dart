@@ -1,7 +1,13 @@
 /// Katalog model AI.
 ///
-/// Model diambil dari provider saat runtime (lihat `data/datasources/katalog_model.dart`),
-/// daftar di bawah = bawaan + cadangan kalau fetch gagal / offline.
+/// PENTING (hasil audit 17 Okt 2026 terhadap docs resmi Groq): beberapa model
+/// yang dulu gratis sekarang **khusus paket Enterprise** - misalnya
+/// `llama-3.3-70b-versatile` dan `llama-3.1-8b-instant` (keduanya "ContactSales").
+/// Kalau katalog bawaan menunjuk model seperti itu, SEMUA permintaan dari kunci
+/// gratis akan ditolak dan userума "semua model gagal". Jadi model Enterprise
+/// ditandai [perluBayar] dan TIDAK dipakai sebagai default / pilihan otomatis.
+library;
+
 enum PenyediaModel { groq, gemini }
 
 class ModelAi {
@@ -12,6 +18,7 @@ class ModelAi {
     this.dukungAlat = false,
     this.lihatGambar = false,
     this.konteks = 8192,
+    this.perluBayar = false,
   });
 
   final String id;
@@ -21,7 +28,13 @@ class ModelAi {
   final bool lihatGambar;
   final int konteks;
 
+  /// True = hanya tersedia di paket berbayar (Enterprise) di provider aslinya.
+  final bool perluBayar;
+
   String get labelLengkap => '$label · ${penyedia.name}';
+
+  /// Aman dipakai kunci gratis.
+  bool get untukGratis => !perluBayar;
 
   @override
   bool operator ==(Object o) => o is ModelAi && o.id == id;
@@ -29,42 +42,47 @@ class ModelAi {
   @override
   int get hashCode => id.hashCode;
 
-  static const List<ModelAi> bawaan = [
+  static const List<ModelAi> bawaan = <ModelAi>[
+    // --- Groq: yang dipakai kunci gratis (docs Groq, Okt 2026) ---
     ModelAi(
-      id: 'llama-3.3-70b-versatile',
-      label: 'Llama 3.3 70B',
+      id: 'openai/gpt-oss-20b',
+      label: 'GPT-OSS 20B',
       penyedia: PenyediaModel.groq,
       dukungAlat: true,
-      konteks: 128000,
+      konteks: 131072,
     ),
     ModelAi(
       id: 'openai/gpt-oss-120b',
       label: 'GPT-OSS 120B',
       penyedia: PenyediaModel.groq,
       dukungAlat: true,
-      konteks: 128000,
+      konteks: 131072,
     ),
     ModelAi(
-      id: 'openai/gpt-oss-20b',
-      label: 'GPT-OSS 20B',
+      id: 'qwen/qwen3.8-27b',
+      label: 'Qwen3.8 27B',
       penyedia: PenyediaModel.groq,
       dukungAlat: true,
-      konteks: 128000,
+      konteks: 131072,
+    ),
+    // --- Groq: Enterprise, disembunyikan dari pilihan otomatis ---
+    ModelAi(
+      id: 'llama-3.3-70b-versatile',
+      label: 'Llama 3.3 70B (Enterprise)',
+      penyedia: PenyediaModel.groq,
+      dukungAlat: true,
+      konteks: 131072,
+      perluBayar: true,
     ),
     ModelAi(
       id: 'llama-3.1-8b-instant',
-      label: 'Llama 3.1 8B',
+      label: 'Llama 3.1 8B (Enterprise)',
       penyedia: PenyediaModel.groq,
       dukungAlat: true,
-      konteks: 128000,
+      konteks: 131072,
+      perluBayar: true,
     ),
-    ModelAi(
-      id: 'qwen/qwen3-32b',
-      label: 'Qwen3 32B',
-      penyedia: PenyediaModel.groq,
-      dukungAlat: true,
-      konteks: 32768,
-    ),
+    // --- Gemini (butuh kunci gratis dari AI Studio) ---
     ModelAi(
       id: 'gemini-2.5-flash',
       label: 'Gemini 2.5 Flash',
@@ -85,6 +103,12 @@ class ModelAi {
   static List<ModelAi> yangDukungAlat([List<ModelAi>? semua]) =>
       (semua ?? bawaan).where((ModelAi m) => m.dukungAlat).toList();
 
+  /// Dipakai untuk otomatis memilih: tool calling dulu, baru kunci gratis.
+  static List<ModelAi> layakOtomatis([List<ModelAi>? semua]) =>
+      (semua ?? bawaan)
+          .where((ModelAi m) => m.dukungAlat && m.untukGratis)
+          .toList();
+
   static ModelAi? cari(String id, [List<ModelAi>? semua]) {
     for (final ModelAi m in semua ?? bawaan) {
       if (m.id == id) return m;
@@ -92,9 +116,23 @@ class ModelAi {
     return null;
   }
 
-  static ModelAi defaultGroq = bawaan.first;
+  /// Default untuk kunci gratis: paling ringan dulu (respons cepat).
+  static ModelAi defaultGratis([List<ModelAi>? semua]) {
+    final List<ModelAi> layak = layakOtomatis(semua);
+    if (layak.isEmpty) return bawaan.first;
+    for (final ModelAi m in layak) {
+      if (m.id == 'openai/gpt-oss-20b') return m;
+    }
+    return layak.first;
+  }
 
-  /// Model stok dari daftar bawaan - dipakai saat app dibuka supaya user
-  /// bisa mencicipi kemampuan model yang berbeda.
-  static ModelAi stokDari(int seed) => bawaan[seed.abs() % bawaan.length];
+  /// Urutan cadangan ketika model/model sebelumnya ditolak provider.
+  static List<ModelAi> cadangan(ModelAi sekarang, [List<ModelAi>? semua]) {
+    final List<ModelAi> layak = layakOtomatis(semua);
+    final List<ModelAi> urut = <ModelAi>[];
+    for (final ModelAi m in layak) {
+      if (m.id != sekarang.id) urut.add(m);
+    }
+    return urut;
+  }
 }

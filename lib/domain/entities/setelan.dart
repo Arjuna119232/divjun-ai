@@ -7,7 +7,7 @@ enum ModeAgent { chatting, auto, selalu }
 /// Pengaturan aplikasi. Disimpan lokal, dibaca di mana saja lewat Riverpod.
 class SetelanApp {
   const SetelanApp({
-    this.modelId = 'llama-3.3-70b-versatile',
+    this.modelId = 'openai/gpt-oss-120b',
     this.tema = TemaMode.sistem,
     this.pakaiWarnaDinamis = true,
     this.modeAgent = ModeAgent.auto,
@@ -20,6 +20,8 @@ class SetelanApp {
     this.pakaiSkillPanduan = true,
     this.namaPengguna = '',
     this.promptSistemTambahan = '',
+    this.kunciGroq = '',
+    this.kunciGemini = '',
   });
 
   final String modelId;
@@ -35,6 +37,11 @@ class SetelanApp {
   final bool pakaiSkillPanduan;
   final String namaPengguna;
   final String promptSistemTambahan;
+
+  /// Kunci API yang diisi user di aplikasi (menimpa kunci yang dibundel).
+  /// Dikosongkan = pakai kunci bawaan saat build.
+  final String kunciGroq;
+  final String kunciGemini;
 
   bool get agentAktif => modeAgent != ModeAgent.chatting;
 
@@ -52,6 +59,8 @@ class SetelanApp {
     bool? pakaiSkillPanduan,
     String? namaPengguna,
     String? promptSistemTambahan,
+    String? kunciGroq,
+    String? kunciGemini,
   }) =>
       SetelanApp(
         modelId: modelId ?? this.modelId,
@@ -68,6 +77,8 @@ class SetelanApp {
         namaPengguna: namaPengguna ?? this.namaPengguna,
         promptSistemTambahan:
             promptSistemTambahan ?? this.promptSistemTambahan,
+        kunciGroq: kunciGroq ?? this.kunciGroq,
+        kunciGemini: kunciGemini ?? this.kunciGemini,
       );
 
   Map<String, dynamic> keJson() => {
@@ -84,10 +95,12 @@ class SetelanApp {
         'pakaiSkillPanduan': pakaiSkillPanduan,
         'namaPengguna': namaPengguna,
         'promptSistemTambahan': promptSistemTambahan,
+        'kunciGroq': kunciGroq,
+        'kunciGemini': kunciGemini,
       };
 
   static SetelanApp dariJson(Map<String, dynamic> j) => SetelanApp(
-        modelId: j['modelId'] as String? ?? 'llama-3.3-70b-versatile',
+        modelId: j['modelId'] as String? ?? 'openai/gpt-oss-120b',
         tema: TemaMode.values.firstWhere(
           (TemaMode t) => t.name == j['tema'],
           orElse: () => TemaMode.sistem,
@@ -106,6 +119,8 @@ class SetelanApp {
         pakaiSkillPanduan: j['pakaiSkillPanduan'] as bool? ?? true,
         namaPengguna: j['namaPengguna'] as String? ?? '',
         promptSistemTambahan: j['promptSistemTambahan'] as String? ?? '',
+        kunciGroq: j['kunciGroq'] as String? ?? '',
+        kunciGemini: j['kunciGemini'] as String? ?? '',
       );
 
   static String keJsonTeks(SetelanApp s) => jsonEncode(s.keJson());
