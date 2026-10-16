@@ -84,7 +84,6 @@ class AgentLoop {
       modelAktif,
       ...ModelAi.cadangan(modelAktif),
     ];
-    bool belumCobaSemua = true;
 
     for (int langkah = 1; langkah <= AppConfig.maksLangkahAgent; langkah++) {
       if (sudahBatal()) break;
@@ -118,20 +117,22 @@ class AgentLoop {
       }
 
       if (galat.isNotEmpty) {
-        // Auto-fallback: model ditolak / kuota habis -> coba kandidat lain.
+        // Auto-fallback: model ditolak / kuota habis -> coba kandidat lain
+        // SEKALI dalam langkah yang sama (jangan mengulang tanpa batas).
         final bool perluCobaLagi = kodeGalat == KodeGalat.modelTidakAda ||
             kodeGalat == KodeGalat.kuotaHabis ||
             kodeGalat == KodeGalat.kunciDitolak;
-        if (perluCobaLagi && belumCobaSemua && !sudahBatal()) {
+        if (perluCobaLagi && !sudahBatal() && percobaan.length <= 3) {
           final ModelAi? berikutnya = _berikutnya(percobaan, katalog);
-          if (berikutnya != null && belumCobaSemua) {
+          if (berikutnya != null) {
             percobaan.add(berikutnya);
             modelAktif = berikutnya;
             catatFallback.add(
               'Model sebelumnya ditolak provider; diganti ke '
               '${modelAktif.label}.',
             );
-            wire.removeLast(); // buang percakapan tool yang tidak jadi
+            // PENTING: jangan sentuh `wire` di sini - daftar percakapan tetap
+            // utuh, hanya model yang ditukar.
             galat = '';
             kodeGalat = KodeGalat.GalatKosong;
             continue;
@@ -173,10 +174,6 @@ class AgentLoop {
       if (langkah == AppConfig.maksLangkahAgent && panggil.isNotEmpty) {
         mentok = true;
       }
-    }
-
-    if (percobaan.length > 1 || catatFallback.isNotEmpty) {
-      belumCobaSemua = false; // sudahoba semua kandidat dalam satu langkah
     }
 
     String teksAkhir = isi.toString().trimRight();

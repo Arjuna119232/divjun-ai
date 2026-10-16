@@ -67,7 +67,7 @@ jobs:
           echo "runner melihat: $(find assets/skills -type f | wc -l) berkas skill"
           if ! flutter build bundle --release >"$RUNNER_TEMP/bundle.log" 2>&1; then
             echo "flutter build bundle GAGAL:"
-            tail -20 "$RUNNER_TEMP/bundle.log"
+            tail -60 "$RUNNER_TEMP/bundle.log"
             exit 1
           fi
           echo "build/flutter_assets: $(find build/flutter_assets/assets/skills -type f 2>/dev/null | wc -l) berkas"
