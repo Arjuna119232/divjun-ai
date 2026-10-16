@@ -97,7 +97,7 @@ class PotonganBalasan {
     this.selesai = false,
     this.alasanBerhenti = '',
     this.galat = '',
-    this.kodeGalat = GalatKosong,
+    this.kodeGalat = KodeGalat.GalatKosong,
   });
 
   final String teks;

@@ -175,7 +175,7 @@ def deklarasi_ekspor(path: Path, kode_mentah: str) -> tuple[set[str], set[str]]:
     # member: static (method maupun field) + method abstrak
     for m in re.finditer(
         r"^\s+static\s+(?:const\s+|final\s+|late\s+final\s+)?"
-        r"(?:[\w<>,?\s\.]+\s+)?([a-z_$][\w$]*)\s*(?:<[^>]*>)?\s*(?:\(|=)",
+        r"(?:[\w<>,?\s\.]+\s+)?([A-Za-z_$][\w$]*)\s*(?:<[^>]*>)?\s*(?:\(|=)",
         bersih,
         re.M,
     ):
@@ -425,6 +425,79 @@ def main() -> int:
                 "UNDEF-PRIVATE",
                 f"{f.relative_to(ROOT)} memanggil {nama}() tapi tidak ada "
                 "deklarasinya",
+            )
+
+    # ---------------------------------------------------------------- 5d. SCOPE
+    # Nama STATIC milik class A yang dipakai di dalam class B tanpa
+    # prefiks -> compile error "Undefined name". Contoh nyata:
+    # `this.kodeGalat = GalatKosong` padahal aslinya `KodeGalat.GalatKosong`.
+    # Cek MISSING-IMPORT tidak menangkapnya karena nama itu ada di file sama.
+    for f, kode in kode_cache.items():
+        tanpa_kom = COMMENT_RE.sub("", kode)
+        kelas_stack: list[tuple[str, int]] = []
+        statik: dict[str, set[str]] = {}
+        laporan: list[tuple[str, str, str]] = []
+        depth = 0
+
+        for baris in bersihkan(tanpa_kom).split("\n"):
+            deklarasi_kelas = re.match(
+                r"^\s*(?:abstract\s+|sealed\s+|base\s+|final\s+|interface\s+"
+                r"|mixin\s+)*(?:class|enum|mixin)\s+([A-Za-z_$][\w$]*)",
+                baris,
+            )
+            # Catat SAAT deklarasi: kedalaman saat itu = awal body class
+            # (class top-level mulai dari depth 0, jadi syarat `depth >= 1`
+            #  membuat class top-level tidak pernah tercatat).
+            if deklarasi_kelas:
+                kelas_stack.append((deklarasi_kelas.group(1), depth))
+                statik.setdefault(deklarasi_kelas.group(1), set())
+
+            kelas_sekarang = kelas_stack[-1][0] if kelas_stack else ""
+            statik.setdefault(kelas_sekarang, set())
+
+            m_static = re.match(
+                r"^\s+static\s+(?:const\s+|final\s+|late\s+final\s+)?"
+                r"(?:[\w<>,?\s\.]+\s+)?([A-Za-z_$][\w$]*)\s*(?:\(|=|;)",
+                baris,
+            )
+            if m_static and kelas_sekarang and not m_static.group(1).startswith("_"):
+                statik[kelas_sekarang].add(m_static.group(1))
+            elif (
+                m_static
+                and kelas_sekarang
+                and m_static.group(1).startswith("_")
+            ):
+                statik.setdefault("_privat", set()).add(m_static.group(1))
+
+            semua_nama_statik: dict[str, set[str]] = {
+                k: v for k, v in statik.items() if v
+            }
+            if semua_nama_statik and baris.strip():
+                for nama_kelas, anggota in semua_nama_statik.items():
+                    if nama_kelas in ("_privat", kelas_sekarang):
+                        continue
+                    if baris.lstrip().startswith("static "):
+                        continue
+                    for nama in sorted(anggota):
+                        if re.search(rf"(?<![\w.$]){re.escape(nama)}\b", baris):
+                            laporan.append((kelas_sekarang, nama_kelas, nama))
+
+            depth += baris.count("{") - baris.count("}")
+            while kelas_stack and depth <= kelas_stack[-1][1]:
+                kelas_stack.pop()
+            if depth < 0:
+                depth = 0
+
+        sudah: set[tuple[str, str, str]] = set()
+        for di, dari, nama in laporan:
+            if (di, dari, nama) in sudah:
+                continue
+            sudah.add((di, dari, nama))
+            lapis(
+                "SCOPE",
+                f"{f.relative_to(ROOT)} memakai '{nama}' di dalam class "
+                f"'{di or 'top-level'}' padahal itu static member class "
+                f"'{dari}' - tulis {dari}.{nama}",
             )
 
     # ---------------------------------------------------------------- 6. BRACE

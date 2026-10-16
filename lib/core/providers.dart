@@ -128,12 +128,6 @@ final FutureProvider<List<ModelAi>> katalogModelProvider =
   return ref.watch(klienLlmProvider).daftarModel();
 });
 
-/// Refresh paksa katalog (tombol di halaman Koneksi).
-final Provider<void> segarkanKatalogProvider = Provider<void>((ref) {
-  ref.watch(katalogModelProvider.notifier);
-  ref.invalidate(katalogModelProvider);
-});
-
 /// Uji koneksi per model (halaman Koneksi).
 final FutureProviderFamily<UjiKoneksi, String> ujiKoneksiProvider =
     FutureProvider.family<UjiKoneksi, String>((ref, id) async {
