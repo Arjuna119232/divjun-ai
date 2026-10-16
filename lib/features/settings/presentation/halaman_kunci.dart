@@ -5,7 +5,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../domain/entities/setelan.dart';
 
 /// Isi / ganti kunci API langsung di aplikasi.
 ///

@@ -21,7 +21,6 @@ class HalamanKoneksi extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final SetelanApp setelan = ref.watch(setelanProvider);
-    final SetelanController c = ref.read(setelanProvider.notifier);
     final AsyncValue<List<ModelAi>> katalog = ref.watch(katalogModelProvider);
     final String kunciGroq = ref.watch(kunciGroqAktifProvider);
     final String kunciGemini = ref.watch(kunciGeminiAktifProvider);
