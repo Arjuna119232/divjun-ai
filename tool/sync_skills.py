@@ -108,6 +108,28 @@ def deskripsiCadangan(isi: str) -> str:
     return ""
 
 
+def tulis_pubspec(blok: str, jumlah: int) -> None:
+    """Tulis blok deklarasi aset skill di pubspec.yaml (idempotent)."""
+    pub = ROOT / "pubspec.yaml"
+    teks = pub.read_text(encoding="utf-8") if pub.exists() else ""
+    awal, akhir = "    # MULAI-SKILL", "    # SELESAI-SKILL"
+    isi = blok.replace("    - MULAI-SKILL", "").replace("    - SELESAI-SKILL", "").strip("\n")
+
+    if awal in teks and akhir in teks:
+        awal_i = teks.index(awal)
+        akhir_i = teks.index(akhir) + len(akhir)
+        teks = teks[:awal_i] + isi + teks[akhir_i:]
+    else:
+        # sisipkan setelah baris `assets:` pertama
+        if "  assets:" not in teks:
+            print("GAGAL: blok `assets:` tidak ada di pubspec.yaml")
+            return
+        i = teks.index("  assets:") + len("  assets:")
+        teks = teks[:i] + "\n" + isi + teks[i:]
+    pub.write_text(teks, encoding="utf-8")
+    print(f"    pubspec: {jumlah} skill dideklarasikan per-file")
+
+
 def main() -> int:
     if not SUMBER.exists():
         print(f"GAGAL: folder skill tidak ditemukan: {SUMBER}")
@@ -155,6 +177,19 @@ def main() -> int:
 
     # urutkan daftar supaya yang ada deskripsinya tampil lebih dulu
     index.sort(key=lambda x: (not x["deskripsi"], x["nama"].lower()))
+
+    # ---------------------------------------------------------------
+    # Flutter 3.47 (probe CI 17 Okt 2026): entri direktori `assets/skills/`
+    # hanya menyalin file DI LEVEL ATAS (index.json saja), 2.732 berkas di
+    # bawahnya TIDAK ikut ke APK - build hijau, APK jadi 75 KB lebih kecil
+    # dan tidak ada error. Solusi: deklarasikan SETIAP berkas satu per satu.
+    # Blok di bawah ditulis ulang tiap sinkron, di antara dua marker.
+    blok_aset = ["MULAI-SKILL"]
+    for s_ in index:
+        for f_ in s_["files"]:
+            blok_aset.append(f"    - assets/skills/{s_['folder']}/{f_['path']}")
+    blok_aset.append("SELESAI-SKILL")
+    tulis_pubspec("\n".join(blok_aset), len(index))
 
     (Tujuan / "index.json").write_text(
         json.dumps({"jumlah": len(index), "skills": index}, ensure_ascii=False, indent=1),
