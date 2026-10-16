@@ -34,6 +34,16 @@ calling, memori, streaming per token.
 - memori menolak menyimpan password/token/kunci
 - email tidak pernah terkirim diam-diam: AI membuat draf, user yang menekan kirim
 
+**Pustaka skill bawaan**
+- 96 skill ikut **terpasang di dalam APK** (2.732 berkas, ~11 MB) -> bisa dibuka
+  dan dibaca offline lewat tombol buku di app bar, atau lewat
+  Pengaturan > Skill bawaan.
+- Skill yang cocok dengan pertanyaan ikut disuntik ke instructions AI sebagai
+  prosedur kerja (toggle "AI memakai skill sebagai panduan").
+- Sinkron ulang pustaka: `python3 tool/sync_skills.py` (menyalin skill dari
+  `~/.config/zyvo/skills` + membuat `assets/skills/index.json`, menolak
+  kebocoran token/kunci privat).
+
 **Antarmuka**
 - Material 3 + dynamic color (Material You) + mode gelap/terang/sistem
 - Inter + JetBrains Mono (dibundel, bukan diunduh saat runtime)
