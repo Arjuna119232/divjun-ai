@@ -87,34 +87,32 @@ class _Token {
 }
 
 class _Lexer {
-  _Lexer(String sumber) {
-    _s = sumber.toLowerCase().replaceAll(' ', '');
-    // Koma sebagai desimal kalau diikuti angka DAN belum ada titik desimal di
-    // token yang sama (kasus "1.234,56").
-    _s = _normalisasiDesimal(_s);
-  }
+  _Lexer(String sumber) : _s = _normalisasiDari(sumber);
 
-  late final String _s;
-  int _i = 0;
-
-  String _normalisasiDesimal(String masuk) {
+  /// Huruf kecil + buang spasi + koma desimal jadi titik (kasus "1.234,56").
+  ///
+  /// PENTING: harus satu ekspresi. Kalau ditulis dua kali ke `late final`,
+  /// Dart melempar "already been initialized" dan SELURUH hasil hitungan jadi
+  /// null -_gejala: semua test kalkulator gagal sekaligus.
+  static String _normalisasiDari(String sumber) {
+    final String dasar = sumber.toLowerCase().replaceAll(' ', '');
     final StringBuffer b = StringBuffer();
-    for (int i = 0; i < masuk.length; i++) {
-      final String c = masuk[i];
+    for (int i = 0; i < dasar.length; i++) {
+      final String c = dasar[i];
       if (c != ',') {
         b.write(c);
         continue;
       }
-      final bool angkaSebelum = i > 0 && _angka(masuk[i - 1]);
-      final bool angkaSesudah = i + 1 < masuk.length && _angka(masuk[i + 1]);
-      if (angkaSebelum && angkaSesudah) {
-        b.write('.');
-      } else {
-        b.write(',');
-      }
+      final bool angkaSebelum = i > 0 && _angka(dasar[i - 1]);
+      final bool angkaSesudah = i + 1 < dasar.length && _angka(dasar[i + 1]);
+      b.write(angkaSebelum && angkaSesudah ? '.' : ',');
     }
     return b.toString();
   }
+
+  final String _s;
+  int _i = 0;
+
 
   static bool _angka(String c) {
     final int? v = int.tryParse(c);

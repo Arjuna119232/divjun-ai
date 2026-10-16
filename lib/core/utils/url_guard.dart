@@ -64,7 +64,7 @@ abstract final class UrlGuard {
     if (host.isEmpty) return false;
     if (_hostDilarang.contains(host)) return false;
     if (host.endsWith('.local') || host.endsWith('.internal')) return false;
-    if (_ipPublik(host)) return false;
+    if (!_ipPublik(host)) return false;
     final bool http = u.scheme == 'http';
     if (!_izin(u.port, defaultPort: http ? 80 : 443)) return false;
     return true;
