@@ -126,8 +126,27 @@ def tulis_pubspec(blok: str, jumlah: int) -> None:
             return
         i = teks.index("  assets:") + len("  assets:")
         teks = teks[:i] + "\n" + isi + teks[i:]
+    # PENJAGA: tepat satu pasang marker + semua baris blok harus berawalan
+    # "    - assets/skills/". Duplikat blok pernah membuat YAML rusak
+    # ("Error on line 5519, column 5: Expected ':'") dan build hijau tapi APK rusak.
+    if teks.count("    # MULAI-SKILL") != 1 or teks.count("    # SELESAI-SKILL") != 1:
+        print("GAGAL: pubspec punya lebih dari satu blok MULAI/SELESAI-SKILL")
+        return
+    baris = teks.split("\n")
+    i = baris.index("    # MULAI-SKILL")
+    j = baris.index("    # SELESAI-SKILL")
+    salah = [
+        l for l in baris[i + 1 : j]
+        if l.strip() and not l.startswith("    - assets/skills/")
+    ]
+    if salah:
+        print(f"GAGAL: {len(salah)} baris di dalam blok aset tidak berawalan path")
+        for l in salah[:3]:
+            print("  - " + l)
+        return
+
     pub.write_text(teks, encoding="utf-8")
-    print(f"    pubspec: {jumlah} skill dideklarasikan per-file")
+    print(f"    pubspec: {jumlah} skill dideklarasikan per-file ({j - i - 1} berkas)")
 
 
 def main() -> int:
