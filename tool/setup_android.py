@@ -29,7 +29,10 @@ MIN_SDK = 24
 TARGET_SDK = 35
 BRAND_HEX = "5B5BD6"
 BRAND_NIGHT = "0B0B10"
-MARK = "# DIVJUN-SETUP"
+# Marker在不同 format: Kotlin pakai `//`, XML pakai `<!-- -->`.
+# (Salah satu sempat bikin Gradle gagal: "Line 7: # DIVJUN-SETUP Expecting an element")
+MARK_KOTLIN = "// DIVJUN-SETUP"
+MARK_XML = "<!-- DIVJUN-SETUP -->"
 
 MASALAH: list[str] = []
 
@@ -89,9 +92,9 @@ def patch_build_gradle(versi: str, kode: int) -> None:
         "versionName",
     )
 
-    if MARK not in s:
+    if MARK_KOTLIN not in s:
         blok = f'''
-{MARK}
+{MARK_KOTLIN}
     // --- signing: pakai android/key.properties kalau ada, selain itu debug key ---
     val keystoreProperties = java.util.Properties()
     val keystoreFile = rootProject.file("key.properties")
@@ -120,7 +123,7 @@ def patch_build_gradle(versi: str, kode: int) -> None:
 
     # release memakai signing release hanya kalau keystore tersedia
     pola_release = r"signingConfig\s*=\s*signingConfigs\.getByName\(\"debug\"\)"
-    if MARK in s and re.search(pola_release, s):
+    if MARK_KOTLIN in s and re.search(pola_release, s):
         s = re.sub(
             pola_release,
             'signingConfig = if (punyaKeystore) '
@@ -175,7 +178,7 @@ def patch_warna_launch() -> None:
         d.mkdir(parents=True, exist_ok=True)
         (d / "colors.xml").write_text(
             '<?xml version="1.0" encoding="utf-8"?>\n'
-            f"{MARK}\n"
+            f"{MARK_XML}\n"
             "<resources>\n"
             f'    <color name="launch_bg">#{hexnya}</color>\n'
             "</resources>\n",
@@ -212,7 +215,7 @@ def verify(versi: str, kode: int) -> None:
         (f"versionCode = {kode}", "versionCode"),
         (f'versionName = "{versi}"', "versionName"),
         ('signingConfigs.getByName("release")', "signing release"),
-        (MARK, "blok signing"),
+        (MARK_KOTLIN, "blok signing"),
     ]
     for pola, label in cek:
         if pola not in s:
@@ -224,10 +227,17 @@ def verify(versi: str, kode: int) -> None:
         gagal("label aplikasi bukan " + APP_NAME)
     if "android.permission.INTERNET" not in m:
         gagal("izin INTERNET tidak ada di manifest")
+    import xml.etree.ElementTree as ET
+
     for nilai in ("values", "values-night"):
         c = ANDROID / "app" / "src" / "main" / "res" / nilai / "colors.xml"
         if not c.exists():
             gagal(f"{nilai}/colors.xml tidak ada")
+            continue
+        try:
+            ET.parse(c)
+        except Exception as e:
+            gagal(f"{nilai}/colors.xml bukan XML valid: {e}")
 
 
 def main() -> int:
