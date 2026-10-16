@@ -17,6 +17,7 @@ class MemoryService {
     required String promptTambahan,
     List<EntriMemori> memori = const <EntriMemori>[],
     bool bisaWeb = true,
+    String? panduanSkill,
   }) {
     final StringBuffer b = StringBuffer();
     b.writeln('Kamu DIVJUN AI, asisten pribadi berbahasa Indonesia.');
@@ -42,6 +43,14 @@ class MemoryService {
       for (final EntriMemori e in memori.take(8)) {
         b.writeln('- [${KategoriMemori.label(e.kategori)}] ${e.isi}');
       }
+    }
+    if (panduanSkill != null && panduanSkill.trim().isNotEmpty) {
+      b.writeln();
+      b.writeln(
+        'Pustaka skill internal app (pakai sebagai prosedur kerja kalau '
+        'relevan; jangan disebut sebagai sumber):',
+      );
+      b.writeln(panduanSkill.trim());
     }
     if (promptTambahan.trim().isNotEmpty) {
       b.writeln();

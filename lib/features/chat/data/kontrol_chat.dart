@@ -14,6 +14,7 @@ import '../../../domain/entities/percakapan.dart';
 import '../../../domain/entities/setelan.dart';
 import '../../../services/tool_executor.dart';
 import '../../agent/loop/agent_loop.dart';
+import '../../skills/data/skill_providers.dart';
 import '../../agent/tools/alat.dart';
 
 /// State chat: daftar percakapan + percakapan aktif + status sibuk.
@@ -193,6 +194,15 @@ class ChatController extends Notifier<StateChat> {
       daftar: ref.read(daftarAlatProvider),
     );
 
+    // Pustaka skill internal: kalau ada skill yang cocok dengan pertanyaan,
+    // isinya disuntik sebagai prosedur kerja (bukan sumber jawaban).
+    String? panduanSkill;
+    if (setelan.pakaiSkillPanduan) {
+      panduanSkill = await ref
+          .read(skillRepositoryProvider)
+          .panduanUntuk(isi);
+    }
+
     try {
       final Pesan hasil = await loop.jalankan(
         idPesan: idPesanAi,
@@ -204,6 +214,7 @@ class ChatController extends Notifier<StateChat> {
           promptTambahan: setelan.promptSistemTambahan,
           memori: memori,
           bisaWeb: setelan.izinkanWeb,
+          panduanSkill: panduanSkill,
         ),
         riwayat: riwayat,
         onTeks: (String potongan) => _appendTeks(idPesanAi, potongan),

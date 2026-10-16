@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/waktu.dart';
+import '../../../../shared/widgets/tampilan_markdown.dart';
 import '../../../../domain/entities/percakapan.dart';
 
 /// Satu bubble pesan: user (kanan, warna brand) atau AI (kiri, netral).
@@ -129,11 +129,7 @@ class GelembungPesan extends StatelessWidget {
       );
     }
 
-    return MarkdownBody(
-      data: pesan.isi,
-      selectable: true,
-      styleSheet: _gaya(context, teks),
-    );
+    return TampilanMarkdown(teks: pesan.isi);
   }
 
   static String _modelRingkas(String id) {
@@ -141,44 +137,6 @@ class GelembungPesan extends StatelessWidget {
     return p.replaceAll('-', ' ');
   }
 
-  static MarkdownStyleSheet _gaya(BuildContext context, Color teks) {
-    final TextTheme t = context.teks;
-    return MarkdownStyleSheet(
-      p: t.bodyMedium?.copyWith(color: teks, height: 1.5),
-      h1: t.titleLarge?.copyWith(color: teks),
-      h2: t.titleMedium?.copyWith(color: teks),
-      h3: t.titleSmall?.copyWith(color: teks),
-      listBullet: t.bodyMedium?.copyWith(color: teks),
-      code: TextStyle(
-        fontFamily: AppTypography.monoFamily,
-        fontSize: 13,
-        height: 1.5,
-        color: teks,
-      ),
-      codeblockDecoration: BoxDecoration(
-        color: context.cs.surfaceContainerHigh,
-        borderRadius: AppRadius.br12,
-        border: Border.all(color: context.cs.outlineVariant),
-      ),
-      codeblockPadding: const EdgeInsets.all(AppSpacing.md),
-      blockquoteDecoration: BoxDecoration(
-        color: context.cs.surfaceContainer,
-        borderRadius: AppRadius.br8,
-        border: Border(left: BorderSide(color: context.cs.primary, width: 3)),
-      ),
-      blockquotePadding: const EdgeInsets.all(AppSpacing.md),
-      horizontalRuleDecoration: BoxDecoration(
-        border: Border(top: BorderSide(color: context.cs.outlineVariant)),
-      ),
-      a: t.bodyMedium?.copyWith(
-        color: context.cs.primary,
-        decoration: TextDecoration.underline,
-      ),
-      tableBorder: TableBorder.all(color: context.cs.outlineVariant, width: 1),
-      tableHead: t.labelMedium?.copyWith(color: teks),
-      tableBody: t.bodySmall?.copyWith(color: teks),
-    );
-  }
 
   Future<void> _tampilkanMenu(BuildContext context) async {
     final List<_ItemMenu> item = <_ItemMenu>[

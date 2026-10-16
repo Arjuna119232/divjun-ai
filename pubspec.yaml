@@ -48,6 +48,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  assets:
+    # Pustaka skill bawaan (96 skill) -> bisa dibuka & dibaca di dalam app,
+    # dan dipakai agent sebagai panduan menjawab. Dibiarkan sebagai asset apa
+    # adanya supaya tidak ada yang terpotong.
+    - assets/skills/
+
   fonts:
     - family: Inter
       fonts:

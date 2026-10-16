@@ -90,6 +90,9 @@ class SetelanController extends Notifier<SetelanApp> {
 
   Future<void> setAutoRingkas(bool v) => ubah(state.salin(autoRingkas: v));
 
+  Future<void> setPakaiSkill(bool v) =>
+      ubah(state.salin(pakaiSkillPanduan: v));
+
   Future<void> setPromptTambahan(String v) =>
       ubah(state.salin(promptSistemTambahan: v));
 }

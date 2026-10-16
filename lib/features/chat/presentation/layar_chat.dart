@@ -122,6 +122,11 @@ class _LayarChatState extends ConsumerState<LayarChat> {
         ),
         actions: <Widget>[
           IconButton(
+            tooltip: 'Pustaka skill',
+            icon: const Icon(LucideIcons.bookOpen, size: 22),
+            onPressed: () => context.push('/skills'),
+          ),
+          IconButton(
             tooltip: 'Memori',
             icon: const Icon(LucideIcons.brain, size: 22),
             onPressed: () => context.push('/memori'),

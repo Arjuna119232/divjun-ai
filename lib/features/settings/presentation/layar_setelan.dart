@@ -8,6 +8,7 @@ import '../../../core/constants/app_config.dart';
 import '../../../core/constants/app_env.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../skills/data/skill_providers.dart';
 import '../../../domain/entities/model_ai.dart';
 import '../../../domain/entities/setelan.dart';
 
@@ -18,6 +19,7 @@ class LayarSetelan extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final SetelanApp s = ref.watch(setelanProvider);
     final ModelAi model = ref.watch(modelProvider);
+    final int jumlahSkill = ref.watch(jumlahSkillProvider);
     final SetelanController c = ref.read(setelanProvider.notifier);
 
     return Scaffold(
@@ -142,6 +144,33 @@ class LayarSetelan extends ConsumerWidget {
                 subtitle: const Text('Lihat, hapus, atau bersihkan semua entri.'),
                 trailing: const Icon(LucideIcons.chevronRight, size: 18),
                 onTap: () => context.push('/memori'),
+              ),
+            ],
+          ),
+          _Bagian(
+            judul: 'Pustaka skill',
+            ikon: LucideIcons.bookOpen,
+            anak: <Widget>[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Skill bawaan'),
+                subtitle: Text(
+                  '${jumlahSkill} skill tersimpan di dalam app '
+                  '(offline, tidak butuh internet).',
+                ),
+                trailing: const Icon(LucideIcons.chevronRight, size: 18),
+                onTap: () => context.push('/skills'),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: s.pakaiSkillPanduan,
+                title: const Text('AI memakai skill sebagai panduan'),
+                subtitle: const Text(
+                  'Skill yang cocok dengan pertanyaan ikut disuntik ke '
+                  'instructions, jadi jawaban AI mengikuti prosedur kerja '
+                  'yang sudah teruji.',
+                ),
+                onChanged: ref.read(setelanProvider.notifier).setPakaiSkill,
               ),
             ],
           ),

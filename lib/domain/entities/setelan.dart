@@ -17,6 +17,7 @@ class SetelanApp {
     this.izinkanEmail = true,
     this.izinkanKalkulator = true,
     this.autoRingkas = true,
+    this.pakaiSkillPanduan = true,
     this.namaPengguna = '',
     this.promptSistemTambahan = '',
   });
@@ -31,6 +32,7 @@ class SetelanApp {
   final bool izinkanEmail;
   final bool izinkanKalkulator;
   final bool autoRingkas;
+  final bool pakaiSkillPanduan;
   final String namaPengguna;
   final String promptSistemTambahan;
 
@@ -47,6 +49,7 @@ class SetelanApp {
     bool? izinkanEmail,
     bool? izinkanKalkulator,
     bool? autoRingkas,
+    bool? pakaiSkillPanduan,
     String? namaPengguna,
     String? promptSistemTambahan,
   }) =>
@@ -61,6 +64,7 @@ class SetelanApp {
         izinkanEmail: izinkanEmail ?? this.izinkanEmail,
         izinkanKalkulator: izinkanKalkulator ?? this.izinkanKalkulator,
         autoRingkas: autoRingkas ?? this.autoRingkas,
+        pakaiSkillPanduan: pakaiSkillPanduan ?? this.pakaiSkillPanduan,
         namaPengguna: namaPengguna ?? this.namaPengguna,
         promptSistemTambahan:
             promptSistemTambahan ?? this.promptSistemTambahan,
@@ -77,6 +81,7 @@ class SetelanApp {
         'izinkanEmail': izinkanEmail,
         'izinkanKalkulator': izinkanKalkulator,
         'autoRingkas': autoRingkas,
+        'pakaiSkillPanduan': pakaiSkillPanduan,
         'namaPengguna': namaPengguna,
         'promptSistemTambahan': promptSistemTambahan,
       };
@@ -98,6 +103,7 @@ class SetelanApp {
         izinkanEmail: j['izinkanEmail'] as bool? ?? true,
         izinkanKalkulator: j['izinkanKalkulator'] as bool? ?? true,
         autoRingkas: j['autoRingkas'] as bool? ?? true,
+        pakaiSkillPanduan: j['pakaiSkillPanduan'] as bool? ?? true,
         namaPengguna: j['namaPengguna'] as String? ?? '',
         promptSistemTambahan: j['promptSistemTambahan'] as String? ?? '',
       );

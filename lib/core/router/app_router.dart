@@ -5,6 +5,7 @@ import '../../features/chat/presentation/layar_chat.dart';
 import '../../features/home/presentation/layar_splash.dart';
 import '../../features/memory/presentation/layar_memori.dart';
 import '../../features/settings/presentation/layar_setelan.dart';
+import '../../features/skills/presentation/layar_skill.dart';
 
 /// Routing app.
 ///
@@ -29,8 +30,12 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext c, GoRouterState s) => const LayarSetelan(),
     ),
     GoRoute(
+      path: '/skills',
+      builder: (BuildContext c, GoRouterState s) => const LayarSkill(),
+    ),
+    GoRoute(
       path: '/memori',
       builder: (BuildContext c, GoRouterState s) => const LayarMemori(),
     ),
   ],
-  );
+);
