@@ -271,7 +271,8 @@ class AgentLoop {
           cariBertanggi('gpt-oss-20b') ??
           pilihan.first;
     }
-    return fallback;
+    // Pertanyaan pendek & biasa -> model paling ringan (respons cepat).
+    return cariBertanggi('gpt-oss-20b') ?? fallback;
   }
 
   /// Ringkas jawaban panjang (dipakai saat konteks hampir penuh).
