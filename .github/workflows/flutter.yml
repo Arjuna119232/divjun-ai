@@ -65,7 +65,11 @@ jobs:
       - name: Probe bundling aset skill
         run: |
           echo "runner melihat: $(find assets/skills -type f | wc -l) berkas skill"
-          flutter build bundle --release >/dev/null 2>&1 || true
+          if ! flutter build bundle --release >"$RUNNER_TEMP/bundle.log" 2>&1; then
+            echo "flutter build bundle GAGAL:"
+            tail -20 "$RUNNER_TEMP/bundle.log"
+            exit 1
+          fi
           echo "build/flutter_assets: $(find build/flutter_assets/assets/skills -type f 2>/dev/null | wc -l) berkas"
           # PENJAGA: kalau pustaka skill diam-diam tidak ikut ke APK, build
           # harus gagal di sini (bukan lolos hijau dengan APK 75 KB lebih kecil).
