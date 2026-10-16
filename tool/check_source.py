@@ -126,54 +126,65 @@ def kurung_seimbang(kode: str) -> list[str]:
 
 
 def deklarasi_ekspor(path: Path, kode_mentah: str) -> tuple[set[str], set[str]]:
-    """Kembalikan (nama yang dideklarasi, nama yang di-export).
+    """Kembalikan (nama yang dideklarasi file ini, nama yang di-export).
 
-    CATATAN JEBRAKAN: `import 'x.dart'` itu STRING. Kalau regex dijalankan di
-    kode yang string-nya sudah dihapus, import jadi `import ''` dan SETIAP file
-    dilaporkan DEAD-FILE. Jadi deklarasi & import SELALU dibaca dari kode mentah.
+    CATATAN JEBRAKAN #1: `import 'x.dart'` itu STRING. Kalau regex dijalankan
+    di kode yang string-nya sudah dihapus, import jadi `import ''` dan SETIAP
+    file dilaporkan DEAD-FILE. Import SELALU dibaca dari kode mentah.
+
+    CATATAN JEBRAKAN #2: variabel LOKAL di dalam method (mis. `final b = ...`)
+    harus TIDAK ikut terhitung. Karena itu hanya deklarasi di kolom 0
+    (top-level) dan member ber-prefix `static`/abstract yang diambil.
     """
-    kode = kode_mentah
-    bersih = bersihkan(kode_mentah, buang_komentar=False)
     nama: set[str] = set()
-    for m in re.finditer(
-        r"^\s*(?:abstract\s+|sealed\s+|base\s+|final\s+|interface\s+|mixin\s+)*"
-        r"(?:class|enum|mixin|extension|typedef)\s+([A-Za-z_$][\w$]*)",
-        bersih,
-        re.M,
-    ):
-        nama.add(m.group(1))
-    # top-level variable/function/getter
-    for m in re.finditer(
-        r"^(?:const|final|late\s+final)\s+[\w<>,?\s\.]+?\s([a-z_$][\w$]*)\s*[=;]",
-        bersih,
-        re.M,
-    ):
-        nama.add(m.group(1))
-    for m in re.finditer(
-        r"^(?:const|final|late\s+final)?\s*(?:[\w<>,?\s\.]+\s+)?"
-        r"([a-z_$][\w$]*)\s*(?:<[^>]*>)?\s*\([^;]*\)\s*(?:async\s*)?[{=]",
-        bersih,
-        re.M,
-    ):
-        nama.add(m.group(1))
-    # variabel lokal (final/var/late) - dipakai sebagai callable pun sah
-    for m in re.finditer(
-        r"\b(?:const|final|var|late\s+final|late)\s+"
-        r"[\w<>,?\s\.]*?([a-z_$][\w$]*)\s*=",
-        bersih,
-        re.M,
-    ):
-        nama.add(m.group(1))
-    # method abstrak di dalam class (akhiri titik koma, bukan '{')
-    for m in re.finditer(
-        r"^\s{2,}(?:[\w<>,?\s\.]+\s+)?([a-z_$][\w$]*)\s*\([^;{}]*\)\s*;",
-        bersih,
-        re.M,
-    ):
-        nama.add(m.group(1))
     ekspor: set[str] = set()
-    for m in re.finditer(r"^export\s+'([^']+)'", kode, re.M):
+
+    for m in re.finditer(r"^export\s+'([^']+)'", kode_mentah, re.M):
         ekspor.add(m.group(1))
+
+    bersih = bersihkan(kode_mentah, buang_komentar=False)
+
+    # tipe di level apa pun (kelas, enum, mixin, extension, typedef)
+    for m in re.finditer(
+        r"^\s*(?:@\w+\s+)*(?:abstract\s+|sealed\s+|base\s+|final\s+"
+        r"|interface\s+|mixin\s+)*(?:class|enum|mixin|extension|typedef)\s+"
+        r"([A-Za-z_$][\w$]*)",
+        bersih,
+        re.M,
+    ):
+        nama.add(m.group(1))
+
+    # top-level: fungsi (bisa signature multi-baris) dan variabel
+    for m in re.finditer(
+        r"^(?:const\s+|final\s+|late\s+final\s+)?(?:[\w<>,?\s\.]+\s+)?"
+        r"([a-z_$][\w$]*)\s*(?:<[^>]*>)?\s*\([^;{}]*\)\s*(?:async\s*)?[{=]",
+        bersih,
+        re.M,
+    ):
+        nama.add(m.group(1))
+    for m in re.finditer(
+        r"^(?:const|final|late\s+final|var)\s+[\w<>,?\s\.]+?\s+"
+        r"([a-z_$][\w$]*)\s*[=;]",
+        bersih,
+        re.M,
+    ):
+        nama.add(m.group(1))
+
+    # member: static (method maupun field) + method abstrak
+    for m in re.finditer(
+        r"^\s+static\s+(?:const\s+|final\s+|late\s+final\s+)?"
+        r"(?:[\w<>,?\s\.]+\s+)?([a-z_$][\w$]*)\s*(?:<[^>]*>)?\s*(?:\(|=)",
+        bersih,
+        re.M,
+    ):
+        nama.add(m.group(1))
+    for m in re.finditer(
+        r"^\s+(?:[\w<>,?\s\.]+\s+)?([a-z_$][\w$]*)\s*\([^;{}]*\)\s*;",
+        bersih,
+        re.M,
+    ):
+        nama.add(m.group(1))
+
     return nama, ekspor
 
 
@@ -223,6 +234,35 @@ def main() -> int:
 
     semua_provides_cache = {f: semua_provides(f) for f in files}
 
+    # Semua identifier yang muncul di file (termasuk method & variabel lokal),
+    # dipakai supaya cek MISSING-IMPORT tidak salah menuduh file yang
+    # memakai simbol milik file-nya sendiri.
+    # Nama yang benar-benar DIJELASKAN di file (bukan sekadar dipakai):
+    # top-level + static + method class + variabel lokal.
+    # PENTING: jangan pakai "semua identifier yang muncul" - kalau begitu
+    # `PesanApi` yang cuma dipakai file tapi import-nya hilang ikut
+    # dianggap tersedia dan MISSING-IMPORT jadi buta.
+    semua_nama_dalam_file: dict[Path, set[str]] = {}
+    for _f, _kode in kode_cache.items():
+        _b = bersihkan(_kode, buang_komentar=False)
+        _n = set(provides.get(_f, set()))
+        for _m in re.finditer(
+            # parameter boleh memuat `{...}` (named parameter), jadi tidak
+            # bisa pakai `[^;{}]*` - itu membuat method dengan named
+            # parameter tidak terdeteksi.
+            r"^\s+(?:[\w<>,?\s\.]+\s+)?([a-z_$][\w$]*)\s*\([^;]*?\)\s*"
+            r"(?:async\s*)?\{",
+            _b,
+            re.M,
+        ):
+            _n.add(_m.group(1))
+        for _m in re.finditer(
+            r"\b(?:final|var|late)\s+[\w<>,?\s\.]+?\s+([a-z_$][\w$]*)\s*=",
+            _b,
+        ):
+            _n.add(_m.group(1))
+        semua_nama_dalam_file[_f] = _n
+
     # ---------------------------------------------------------------- 1. DEAD-FILE
     entry = LIB / "main.dart"
     hidup: set[Path] = set()
@@ -251,8 +291,14 @@ def main() -> int:
     for f, kode in kode_cache.items():
         bersih = bersihkan(kode)
         bersih = re.sub(r"LucideIcons\.\w+", "", bersih)
-        # Nama yang dideklarasi di file ini sendiri selalu tersedia.
-        provide = semua_provides_cache.get(f, set()) | provides.get(f, set())
+        # Nama yang dideklarasi di file ini sendiri selalu tersedia: top-level,
+        # static, DAN method/variabel lokal (mis. `final simpan = ctx.simpanMemori;`
+        # lalu `simpan(...)`). Tanpa inicek jadi Reporting false positive.
+        provide = (
+            semua_provides_cache.get(f, set())
+            | provides.get(f, set())
+            | semua_nama_dalam_file.get(f, set())
+        )
         provide_global: set[str] = set()
         for t in imports_of.get(f, []):
             rp = rel_path(t, f)
