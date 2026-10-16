@@ -12,6 +12,8 @@ void main() {
       expect(Kalkulator.hitung('(80 + 20) / 4 * 1.5'), 37.5);
       expect(Kalkulator.hitung('2 + 3 * 4'), 14);
       expect(Kalkulator.hitung('2 ^ 3 ^ 2'), 512); // asosiasi ke kanan
+      expect(Kalkulator.hitung('100 / 4 / 5'), 5); // asosiasi ke kiri
+      expect(Kalkulator.hitung('2 + -1'), 1); // unary di tengah
     });
 
     test('fungsi dan konstanta', () {
@@ -26,7 +28,9 @@ void main() {
     test('persen dan unary minus', () {
       expect(Kalkulator.hitung('20% * 1500000'), 300000);
       expect(Kalkulator.hitung('-5 + 3'), -2);
+      // unary minus terikat lebih lemah dari pangkat: -(2^2) = -4
       expect(Kalkulator.hitung('-2 ^ 2'), -4);
+      expect(Kalkulator.hitung('-2 * 3'), -6);
     });
 
     test('koma desimal dan titik sebagai desimal', () {
@@ -41,7 +45,8 @@ void main() {
       expect(Kalkulator.hitung('(1 + 2'), isNull);
       expect(Kalkulator.hitung('1 + 2)'), isNull);
       expect(Kalkulator.hitung('sqrt(-1)'), isNull);
-      expect(Kalkulator.hitung('1 000 000'), isNull); // spasi ditolak
+      // spasi = pemisah ribuan gaya Indonesia, jadi TIDAK error
+      expect(Kalkulator.hitung('1 000 000'), 1000000);
     });
   });
 

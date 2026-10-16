@@ -201,16 +201,8 @@ class _Parser {
     }
   }
 
-  double ekspresi() {
-    double nilai = ekspresiTambah();
-    while (_bisa('^')) {
-      _makan('^');
-      // pangkat associates ke kanan
-      final double pangkat = ekspresiTambah();
-      nilai = math.pow(nilai, pangkat).toDouble();
-    }
-    return nilai;
-  }
+  /// Titik masuk: penjumlahan.
+  double ekspresi() => ekspresiTambah();
 
   double ekspresiTambah() {
     double nilai = ekspresiKali();
@@ -239,6 +231,8 @@ class _Parser {
     return nilai;
   }
 
+  /// Unary minus terikat LEBIH LEMAH dari pangkat, jadi -2^2 = -(2^2) = -4
+  /// (ikut konvensi matematika), bukan (-2)^2 = 4.
   double ekspresiUnary() {
     if (_bisa('-')) {
       _makan('-');
@@ -248,7 +242,17 @@ class _Parser {
       _makan('+');
       return ekspresiUnary();
     }
-    return ekspresiPersen();
+    return ekspresiPangkat();
+  }
+
+  /// Pangkat asosiasi ke KANAN: 2^3^2 = 2^(3^2) = 512.
+  double ekspresiPangkat() {
+    final double nilai = ekspresiPersen();
+    if (_bisa('^')) {
+      _makan('^');
+      return math.pow(nilai, ekspresiPangkat()).toDouble();
+    }
+    return nilai;
   }
 
   double ekspresiPersen() {
