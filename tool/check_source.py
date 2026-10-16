@@ -410,9 +410,12 @@ def main() -> int:
     for nilai in semua_provides_cache.values():
         semua_privat |= {n for n in nilai if n.startswith("_")}
     for f, kode in kode_cache.items():
-        bersih2 = bersihkan(kode)
+        # JEBRAKAN: panggil privat sering muncul DI DALAM string interpolasi
+        # ('Bearer ${kunci(m)}'), jadi string TIDAK boleh dihapus di sini -
+        # hanya komentar. Kalau string di-strip, cek ini jadi buta.
+        tanpa_komentar = COMMENT_RE.sub("", kode)
         deklarasi_di_file = semua_nama_dalam_file.get(f, set())
-        for m in re.finditer(r"(?<![\w.$])(_[a-z][\w$]*)\s*\(", bersih2):
+        for m in re.finditer(r"(?<![\w.$])(_[a-z][\w$]*)\s*\(", tanpa_komentar):
             nama = m.group(1)
             if nama in deklarasi_di_file or nama in semua_privat:
                 continue
