@@ -68,7 +68,7 @@ class AlatMemori extends Alat {
             ringkasan: 'Ditolak: resembles a secret',
           );
         }
-        final EntriMemori? simpan = ctx.simpanMemori;
+        final SimpanMemori? simpan = ctx.simpanMemori;
         if (simpan == null) {
           return HasilAlat.salah(
             'Penyimpanan memori tidak tersedia.',
@@ -77,7 +77,7 @@ class AlatMemori extends Alat {
         }
         final EntriMemori e = await simpan(
           isi: isi,
-          kategori: (args['kategori'] as String? ?? KategoriMemori.umum),
+          kategori: args['kategori'] as String? ?? KategoriMemori.umum,
         );
         return HasilAlat.ok(
           'Tersimpan di memori (${KategoriMemori.label(e.kategori)}): ${e.isi}',

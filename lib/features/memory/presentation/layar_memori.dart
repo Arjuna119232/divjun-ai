@@ -5,7 +5,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/teks.dart';
 import '../../../core/utils/waktu.dart';
 import '../../../domain/entities/memori.dart';
 import '../../chat/presentation/widgets/lembar_riwayat.dart';

@@ -24,12 +24,12 @@ class _LayarSplashState extends State<LayarSplash>
     duration: AppMotion.lambat,
   )..forward();
 
-  Timer? _t_timer;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _t_timer = Timer(const Duration(milliseconds: 900), () {
+    _timer = Timer(const Duration(milliseconds: 900), () {
       if (!mounted) return;
       context.go('/chat');
     });
@@ -37,7 +37,7 @@ class _LayarSplashState extends State<LayarSplash>
 
   @override
   void dispose() {
-    _t_timer?.cancel();
+    _timer?.cancel();
     _c.dispose();
     super.dispose();
   }

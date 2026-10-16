@@ -20,7 +20,7 @@ class StatusKosong extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraint batas) {
+      builder: (BuildContext context, BoxConstraints batas) {
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(

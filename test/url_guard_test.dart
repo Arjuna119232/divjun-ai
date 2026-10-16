@@ -8,7 +8,7 @@ void main() {
       expect(UrlGuard.boleh('http://127.0.0.1'), isFalse);
       expect(UrlGuard.boleh('http://localhost:8080'), isFalse);
       expect(UrlGuard.boleh('https://169.254.169.254/latest/meta-data/'), isFalse);
-      expect(UrlGuard.oleh('http://192.168.1.1'), isFalse);
+      expect(UrlGuard.boleh('http://192.168.1.1'), isFalse);
       expect(UrlGuard.boleh('http://10.0.0.5'), isFalse);
       expect(UrlGuard.boleh('http://172.16.0.1'), isFalse);
       expect(UrlGuard.boleh('http://[::1]/'), isFalse);

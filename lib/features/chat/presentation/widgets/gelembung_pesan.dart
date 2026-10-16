@@ -149,7 +149,12 @@ class GelembungPesan extends StatelessWidget {
       h2: t.titleMedium?.copyWith(color: teks),
       h3: t.titleSmall?.copyWith(color: teks),
       listBullet: t.bodyMedium?.copyWith(color: teks),
-      code: AppTypography.mono(size: 13, color: teks),
+      code: TextStyle(
+        fontFamily: AppTypography.mono,
+        fontSize: 13,
+        height: 1.5,
+        color: teks,
+      ),
       codeblockDecoration: BoxDecoration(
         color: context.cs.surfaceContainerHigh,
         borderRadius: AppRadius.br12,

@@ -317,6 +317,42 @@ def main() -> int:
                     "lucide_icons_flutter",
                 )
 
+    # ---------------------------------------------------------------- 5b. UNUSED-IMPORT
+    # Import relatif yang tidak menyumbang satu pun simbol = tidak terpakai.
+    # (Import package/dart: tidak disentuh, tidak bisa dicek tanpa analyzer.)
+    for f, kode in kode_cache.items():
+        bersih = bersihkan(kode)
+        bersih = re.sub(r"LucideIcons\.\w+", "", bersih)
+        dipakai = set(re.findall(r"(?<![\w.$])([A-Za-z_$][\w$]*)\b", bersih))
+        # JEBRAKAN: `Id.pendek()` di dalam string interpolasi ('${Id.pendek()}')
+        # HILANG setelah string di-strip. Jadi nama yang akses lewat titik
+        # (`X.`) ikut diambil dari kode mentah.
+        dipakai |= set(re.findall(r"\b([A-Za-z_$][\w$]*)\s*\.", kode_cache[f]))
+        # getter extension milik file tujuan
+        getter_ext = set(
+            re.findall(r"context\s*\.\s*(\w+)", bersih)
+        )
+        for t in imports_of.get(f, []):
+            if t.startswith("dart:") or t.startswith("package:"):
+                continue
+            rp = rel_path(t, f)
+            if not rp or rp not in kode_cache:
+                continue
+            simbol = semua_provides_cache.get(rp, set())
+            if not simbol:
+                continue  # file tanpa simbol top-level (mis. hanya extension const)
+            # import yang sekaligus di-export = dipakai (barrel file)
+            juga_diekspor = any(
+                rel_path(e, f) == rp for e in exports_of.get(f, [])
+            )
+            kena = bool((simbol & (dipakai | getter_ext))) or juga_diekspor
+            if not kena:
+                lapis(
+                    "UNUSED-IMPORT",
+                    f"{f.relative_to(ROOT)} mengimpor {t} tapi tidak "
+                    "memakai simbolnya",
+                )
+
     # ---------------------------------------------------------------- 6. BRACE
     for f, kode in kode_cache.items():
         for pesan in kurung_seimbang(kode):

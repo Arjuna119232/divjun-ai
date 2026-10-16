@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../core/constants/app_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/waktu.dart';
@@ -247,7 +246,7 @@ class _LayarChatState extends ConsumerState<LayarChat> {
   }
 
   Future<void> _edit(Pesan p) async {
-    final String? baru = await LayarSetelan.tampilkanEditor(
+    final String? baru = await tampilkanEditor(
       context,
       judul: 'Edit pesan',
       awal: p.isi,
@@ -258,7 +257,7 @@ class _LayarChatState extends ConsumerState<LayarChat> {
   }
 
   Future<void> _pilihModel(ModelAi sekarang) async {
-    final List<ModelAi>? pilihan = await LayarSetelan.tampilkanPemilihModel(
+    final List<ModelAi>? pilihan = await tampilkanPemilihModel(
       context,
       sekarang: sekarang,
     );

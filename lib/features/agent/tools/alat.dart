@@ -26,6 +26,15 @@ class HasilAlat {
       HasilAlat(isi: isi, ringkasan: ringkasan, gagal: true);
 }
 
+/// Fungsi penyimpanan memori yang dipanggil tool ke repository.
+typedef SimpanMemori = Future<EntriMemori> Function({
+  required String isi,
+  String kategori,
+});
+
+/// Fungsi pencarian memori.
+typedef BacaMemori = Future<List<EntriMemori>> Function(String kueri);
+
 /// Konteks yang boleh dipakai sebuah tool.
 ///
 /// purposefully sempit: tool tidak boleh menyentuh UI, hanya data + izin.
@@ -38,9 +47,8 @@ class KonteksAlat {
   });
 
   final SetelanApp setelan;
-  final Future<EntriMemori> Function({required String isi, String kategori})?
-      simpanMemori;
-  final Future<List<EntriMemori>> Function(String kueri) bacaMemori;
+  final SimpanMemori? simpanMemori;
+  final BacaMemori bacaMemori;
   final bool Function() sudahBatal;
 
   bool get bolehWeb => setelan.izinkanWeb;
