@@ -19,12 +19,16 @@ abstract final class Teks {
   /// Ubah HTML halaman web jadi teks polos yang enak dibaca model.
   static String htmlKeTeks(String html) {
     String s = html;
-    s = s.replaceAll(RegExp(r'(?is)<(script|style|noscript|svg|head)[^>]*>.*?</\1>'),
+    s = s.replaceAll(RegExp(
+        r'<(script|style|noscript|svg|head)[^>]*>.*?</\1>',
+        caseSensitive: false,
+        dotAll: true,
+      ),
         ' ');
-    s = s.replaceAll(RegExp(r'(?s)<!--.*?-->'), ' ');
-    s = s.replaceAll(RegExp(r'(?i)<br\s*/?>'), '\n');
-    s = s.replaceAll(RegExp(r'(?i)</(p|div|li|h[1-6]|tr|section)>'), '\n');
-    s = s.replaceAll(RegExp(r'(?i)<li[^>]*>'), '- ');
+    s = s.replaceAll(RegExp(r'<!--.*?-->', dotAll: true), ' ');
+    s = s.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n');
+    s = s.replaceAll(RegExp(r'</(p|div|li|h[1-6]|tr|section)>', caseSensitive: false), '\n');
+    s = s.replaceAll(RegExp(r'<li[^>]*>', caseSensitive: false), '- ');
     s = s.replaceAll(RegExp(r'<[^>]+>'), ' ');
     for (final MapEntry<String, String> e in _entitas.entries) {
       s = s.replaceAll(e.key, e.value);
@@ -41,10 +45,18 @@ abstract final class Teks {
   /// Judul halaman dari <title> atau og:title.
   static String judulHalaman(String html) {
     final RegExpMatch? t =
-        RegExp(r'(?is)<title[^>]*>(.*?)</title>').firstMatch(html);
+        RegExp(
+            r'<title[^>]*>(.*?)</title>',
+            caseSensitive: false,
+            dotAll: true,
+          ).firstMatch(html);
     final String isi = t?.group(1)?.trim() ?? '';
     if (isi.isEmpty) {
-      final RegExpMatch? og = RegExp(r'(?is)<meta[^>]+property="og:title"[^>]+content="([^"]+)"')
+      final RegExpMatch? og = RegExp(
+          r'<meta[^>]+property="og:title"[^>]+content="([^"]+)"',
+          caseSensitive: false,
+          dotAll: true,
+        )
           .firstMatch(html);
       return og?.group(1)?.trim() ?? '';
     }
