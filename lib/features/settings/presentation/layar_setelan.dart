@@ -9,6 +9,7 @@ import '../../../core/constants/app_env.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../skills/data/skill_providers.dart';
+import '../../skills/domain/skill.dart';
 import '../../../domain/entities/model_ai.dart';
 import '../../../domain/entities/setelan.dart';
 
@@ -20,6 +21,8 @@ class LayarSetelan extends ConsumerWidget {
     final SetelanApp s = ref.watch(setelanProvider);
     final ModelAi model = ref.watch(modelProvider);
     final int jumlahSkill = ref.watch(jumlahSkillProvider);
+    final IndeksSkill idxSkill =
+        ref.watch(indeksSkillProvider).valueOrNull ?? IndeksSkill.kosong;
     final SetelanController c = ref.read(setelanProvider.notifier);
 
     return Scaffold(
@@ -241,6 +244,15 @@ class LayarSetelan extends ConsumerWidget {
                 title: const Text('Versi'),
                 subtitle: Text(
                   '${AppConfig.appName} ${AppConfig.versi} · build ${AppEnv.appVersion}',
+                ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Pustaka skill di dalam app'),
+                subtitle: Text(
+                  '$jumlahSkill skill · ${idxSkill.totalBerkas} berkas · '
+                  '${(idxSkill.totalUkuran / 1024 / 1024).toStringAsFixed(1)} MB '
+                  '· offline, ikut terpasang di APK',
                 ),
               ),
               ListTile(

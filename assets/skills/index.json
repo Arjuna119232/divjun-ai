@@ -1464,12 +1464,12 @@
    "nama": "rebuild-webview-app-ke-flutter-agent-ai",
    "deskripsi": "Cara rebuild aplikasi Android WebView (HTML/JS + Kotlin) menjadi Flutter native dengan agent AI dari HP/Termux tanpa Flutter lokal - termasuk pola checker statis Dart, gerbang CI, dan jebakan template Flutter terbaru. Gunakan saat user minta \"rebuild app ke Flutter\", \"pindah dari WebView ke native\", atau membangun app Flutter + AI agent dari brief yang premisnya mungkin salah.",
    "folder": "rebuild-webview-app-ke-flutter-agent-ai",
-   "size": 6587,
+   "size": 7942,
    "jumlahFile": 1,
    "files": [
     {
      "path": "SKILL.md",
-     "size": 6587
+     "size": 7942
     }
    ]
   },
@@ -1975,8 +1975,8 @@
    "nama": "webdev",
    "deskripsi": "Build professional, distinctive websites/web apps and deploy them LIVE on GitHub Pages — PLAN/PRD first, then art direction, A-Z self-verify, no generic AI look. Zero load on the user's phone. Use when the user asks to create/build/make a website, landing page, portfolio, web app, web page, \"website banao\", \"site banao\", \"web banau\", \"ei topic e ekta site\", HTML/CSS/JS page, online store/menu/business page — ANY web-building request triggers this skill.",
    "folder": "webdev",
-   "size": 6265177,
-   "jumlahFile": 2434,
+   "size": 6988705,
+   "jumlahFile": 2465,
    "files": [
     {
      "path": "SKILL.md",
@@ -1995,8 +1995,132 @@
      "size": 9581
     },
     {
+     "path": "assets/fonts/archivo-black/archivo-black-latin-400-normal.woff2",
+     "size": 18604
+    },
+    {
+     "path": "assets/fonts/bebas-neue/bebas-neue-latin-400-normal.woff2",
+     "size": 13768
+    },
+    {
      "path": "assets/fonts/fonts.css",
      "size": 7080
+    },
+    {
+     "path": "assets/fonts/fraunces/fraunces-latin-400-normal.woff2",
+     "size": 17968
+    },
+    {
+     "path": "assets/fonts/fraunces/fraunces-latin-700-normal.woff2",
+     "size": 18212
+    },
+    {
+     "path": "assets/fonts/hind-siliguri/hind-siliguri-bengali-400-normal.woff2",
+     "size": 71076
+    },
+    {
+     "path": "assets/fonts/hind-siliguri/hind-siliguri-bengali-600-normal.woff2",
+     "size": 74784
+    },
+    {
+     "path": "assets/fonts/hind-siliguri/hind-siliguri-latin-400-normal.woff2",
+     "size": 14472
+    },
+    {
+     "path": "assets/fonts/inter/inter-latin-400-normal.woff2",
+     "size": 23664
+    },
+    {
+     "path": "assets/fonts/inter/inter-latin-600-normal.woff2",
+     "size": 24452
+    },
+    {
+     "path": "assets/fonts/inter/inter-latin-700-normal.woff2",
+     "size": 24356
+    },
+    {
+     "path": "assets/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2",
+     "size": 21168
+    },
+    {
+     "path": "assets/fonts/jetbrains-mono/jetbrains-mono-latin-500-normal.woff2",
+     "size": 21832
+    },
+    {
+     "path": "assets/fonts/jetbrains-mono/jetbrains-mono-latin-700-normal.woff2",
+     "size": 21908
+    },
+    {
+     "path": "assets/fonts/montserrat/montserrat-latin-400-normal.woff2",
+     "size": 18780
+    },
+    {
+     "path": "assets/fonts/montserrat/montserrat-latin-700-normal.woff2",
+     "size": 18824
+    },
+    {
+     "path": "assets/fonts/noto-sans-bengali/noto-sans-bengali-bengali-400-normal.woff2",
+     "size": 44352
+    },
+    {
+     "path": "assets/fonts/noto-sans-bengali/noto-sans-bengali-bengali-700-normal.woff2",
+     "size": 47788
+    },
+    {
+     "path": "assets/fonts/noto-sans-bengali/noto-sans-bengali-latin-400-normal.woff2",
+     "size": 10352
+    },
+    {
+     "path": "assets/fonts/nunito/nunito-latin-400-normal.woff2",
+     "size": 16316
+    },
+    {
+     "path": "assets/fonts/nunito/nunito-latin-700-normal.woff2",
+     "size": 16228
+    },
+    {
+     "path": "assets/fonts/nunito-sans/nunito-sans-latin-400-normal.woff2",
+     "size": 13892
+    },
+    {
+     "path": "assets/fonts/nunito-sans/nunito-sans-latin-600-normal.woff2",
+     "size": 14008
+    },
+    {
+     "path": "assets/fonts/playfair-display/playfair-display-latin-400-normal.woff2",
+     "size": 21856
+    },
+    {
+     "path": "assets/fonts/playfair-display/playfair-display-latin-700-normal.woff2",
+     "size": 23224
+    },
+    {
+     "path": "assets/fonts/source-sans-3/source-sans-3-latin-400-normal.woff2",
+     "size": 15696
+    },
+    {
+     "path": "assets/fonts/source-sans-3/source-sans-3-latin-600-normal.woff2",
+     "size": 15668
+    },
+    {
+     "path": "assets/fonts/space-grotesk/space-grotesk-latin-400-normal.woff2",
+     "size": 13388
+    },
+    {
+     "path": "assets/fonts/space-grotesk/space-grotesk-latin-500-normal.woff2",
+     "size": 13312
+    },
+    {
+     "path": "assets/fonts/space-grotesk/space-grotesk-latin-700-normal.woff2",
+     "size": 12840
+    },
+    {
+     "path": "assets/fonts/work-sans/work-sans-latin-400-normal.woff2",
+     "size": 19900
+    },
+    {
+     "path": "assets/fonts/work-sans/work-sans-latin-500-normal.woff2",
+     "size": 20840
     },
     {
      "path": "assets/icons/brands/adidas.svg",

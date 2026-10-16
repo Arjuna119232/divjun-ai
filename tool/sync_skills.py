@@ -29,9 +29,13 @@ ROOT = Path(__file__).resolve().parent.parent
 Tujuan = ROOT / "assets" / "skills"
 SUMBER = Path(os.environ.get("ZYVO_SKILLS_DIR", Path.home() / ".config/zyvo/skills"))
 
+# KEPUTUSAN USER 17 Okt 2026: "ga pa ukurannya besar yang penting sempurna,
+# terbaik, dan modern" -> TIDAK ADA lagi batas ukuran, dan aset biner pun ikut.
+# Yang dibuang hanya sampah yang jelas tidak berguna (repo node, cache python,
+# log) - bukan isi skill.
 SKIP_DIR = {".git", "node_modules", ".dart_tool", "__pycache__", ".venv", "venv"}
-SKIP_SUFFIX = {".log", ".pyc", ".png", ".jpg", ".jpeg", ".gif", ".woff", ".woff2", ".ttf"}
-MAX_UKURAN = 1_000_000
+SKIP_SUFFIX = {".log", ".pyc"}
+MAX_UKURAN = None  # None = tidak ada batas
 
 # Pola rahasia yang TIDAK BOLEH ikut ke APK.
 RAHASIA = [
@@ -81,7 +85,7 @@ def salin_skill(src: Path, dst: Path) -> tuple[list[dict], int]:
         if f.suffix.lower() in SKIP_SUFFIX:
             continue
         ukuran = f.stat().st_size
-        if ukuran > MAX_UKURAN:
+        if MAX_UKURAN is not None and ukuran > MAX_UKURAN:
             continue
         target = dst / rel
         target.parent.mkdir(parents=True, exist_ok=True)

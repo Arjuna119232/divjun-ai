@@ -115,3 +115,31 @@ packages/flutter_tools/templates/app/android-kotlin.tmpl/...`) sebelum CI.
 - APK Flutter pertama di repo = `flutter create` menulis 35 file; pastikan
   `gitignore` sudah menutup `android/` SEBELUM commit pertama.
 - Untuk update di atas APK lama: package id + keystore HARUS sama.
+
+## 9. JEBRAKAN BUNDLE ASSET FLUTTER (bukti 17 Okt 2026, 3 build hilang)
+
+Entri direktori `- assets/skills/` di pubspec **TIDAI direkursi** oleh
+flutter_tools 3.47: hanya berkas di level atas yang ikut. Gejalanya SENYAP:
+build hijau, APK justru **lebih kecil 75 KB**, dan 2.732 file tidak ada di
+dalam APK. Tidak ada error sama sekali.
+
+Cara memastikan (tambahkan ke workflow sebagai penjaga):
+```yaml
+- run: |
+    flutter build bundle --release >/dev/null 2>&1 || true
+    ADAKAH=$(find assets/skills -type f | wc -l)
+    JADI=$(find build/flutter_assets/assets/skills -type f 2>/dev/null | wc -l)
+    [ "$JADI" -lt $(( ADAKAH * 9 / 10 )) ] && { echo "GAGAL: aset tidak lengkap"; exit 1; }
+```
+Solusi yang dipakai: **deklarasikan per-file** (2.732 baris di pubspec,
+dihasilkan otomatis oleh skrip sinkron, di antara marker
+`    # MULAI-SKILL` / `    # SELESAI-SKILL`) + penjaga "tepat satu pasang
+marker". Dua jebakan kedua saat menulis blok YAML itu:
+1. marker harus berawalan `    # ` - tanpa itu YAML error
+   ("Error on line N: Expected ':'");
+2. skrip yang gagal menyisipkan blok kedua kali -> blok DUPLIKAT di pubspec,
+   build hijau tapi YAML rusak. Penjaga: `count(marker) == 1`.
+
+Pelajaran umum: **volume APK yang tidak sesuai harapan itu gejalanya, bukan
+kebetulan.** APK yang lebih kecil = ada yang hilang; cek isinya sebelum
+bilang selesai.

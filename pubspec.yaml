@@ -4,7 +4,7 @@ publish_to: "none"
 
 # 2.0.0 = versi rebuild Flutter (WebView lama = 1.15.2 / versionCode 34).
 # versionCode 35 > 34 -> APK baru bisa update DI ATAS APK lama (tanda tangan sama).
-version: 2.0.0+35
+version: 2.0.1+36
 
 environment:
   sdk: ^3.9.0
@@ -344,7 +344,38 @@ flutter:
     - assets/skills/webdev/assets/effects/animate.css
     - assets/skills/webdev/assets/effects/hover.css
     - assets/skills/webdev/assets/effects/spinners.css
+    - assets/skills/webdev/assets/fonts/archivo-black/archivo-black-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/bebas-neue/bebas-neue-latin-400-normal.woff2
     - assets/skills/webdev/assets/fonts/fonts.css
+    - assets/skills/webdev/assets/fonts/fraunces/fraunces-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/fraunces/fraunces-latin-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/hind-siliguri/hind-siliguri-bengali-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/hind-siliguri/hind-siliguri-bengali-600-normal.woff2
+    - assets/skills/webdev/assets/fonts/hind-siliguri/hind-siliguri-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/inter/inter-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/inter/inter-latin-600-normal.woff2
+    - assets/skills/webdev/assets/fonts/inter/inter-latin-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/jetbrains-mono/jetbrains-mono-latin-500-normal.woff2
+    - assets/skills/webdev/assets/fonts/jetbrains-mono/jetbrains-mono-latin-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/montserrat/montserrat-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/montserrat/montserrat-latin-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/noto-sans-bengali/noto-sans-bengali-bengali-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/noto-sans-bengali/noto-sans-bengali-bengali-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/noto-sans-bengali/noto-sans-bengali-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/nunito/nunito-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/nunito/nunito-latin-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/nunito-sans/nunito-sans-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/nunito-sans/nunito-sans-latin-600-normal.woff2
+    - assets/skills/webdev/assets/fonts/playfair-display/playfair-display-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/playfair-display/playfair-display-latin-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/source-sans-3/source-sans-3-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/source-sans-3/source-sans-3-latin-600-normal.woff2
+    - assets/skills/webdev/assets/fonts/space-grotesk/space-grotesk-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/space-grotesk/space-grotesk-latin-500-normal.woff2
+    - assets/skills/webdev/assets/fonts/space-grotesk/space-grotesk-latin-700-normal.woff2
+    - assets/skills/webdev/assets/fonts/work-sans/work-sans-latin-400-normal.woff2
+    - assets/skills/webdev/assets/fonts/work-sans/work-sans-latin-500-normal.woff2
     - assets/skills/webdev/assets/icons/brands/adidas.svg
     - assets/skills/webdev/assets/icons/brands/airbnb.svg
     - assets/skills/webdev/assets/icons/brands/android.svg

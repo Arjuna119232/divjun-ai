@@ -75,11 +75,24 @@ class _LayarSkillState extends ConsumerState<LayarSkill> {
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                      child: Text(
-                        '${daftar.length} skill · '
-                        '${idx.totalBerkas} berkas · '
-                        '${(idx.totalUkuran / 1024 / 1024).toStringAsFixed(1)} MB',
-                        style: context.teks.labelSmall,
+                      child: Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xs,
+                        children: <Widget>[
+                          _StatChip(
+                            ikon: LucideIcons.bookOpen,
+                            teks: '${daftar.length}/${idx.jumlah} skill',
+                          ),
+                          _StatChip(
+                            ikon: LucideIcons.file,
+                            teks: '${idx.totalBerkas} berkas',
+                          ),
+                          _StatChip(
+                            ikon: LucideIcons.database,
+                            teks:
+                                '${(idx.totalUkuran / 1024 / 1024).toStringAsFixed(1)} MB',
+                          ),
+                        ],
                       ),
                     ),
                     if (setelan.pakaiSkillPanduan)
@@ -334,6 +347,36 @@ class _PesanGagal extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Text(pesan, textAlign: TextAlign.center),
+      ),
+    );
+  }
+}
+
+/// Chip statistik kecil untuk header pustaka skill.
+class _StatChip extends StatelessWidget {
+  const _StatChip({required this.ikon, required this.teks});
+
+  final IconData ikon;
+  final String teks;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: context.cs.surfaceContainerHigh,
+        borderRadius: AppRadius.br8,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(ikon, size: 12, color: context.cs.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.xs),
+          Text(teks, style: context.teks.labelSmall),
+        ],
       ),
     );
   }
