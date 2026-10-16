@@ -74,8 +74,20 @@ def patch_build_gradle(versi: str, kode: int) -> None:
     set_pola(r"minSdk\s*=\s*[^,\n]+", f"minSdk = {MIN_SDK}", "minSdk")
     set_pola(r"compileSdk\s*=\s*[^\n]+", f"compileSdk = {TARGET_SDK}", "compileSdk")
     set_pola(r"targetSdk\s*=\s*[^\n]+", f"targetSdk = {TARGET_SDK}", "targetSdk")
-    set_pola(r"versionCode\s*=\s*\d+", f"versionCode = {kode}", "versionCode")
-    set_pola(r'versionName\s*=\s*"[^"]*"', f'versionName = "{versi}"', "versionName")
+    # CATATAN: template Flutter terbaru (3.4x+) TIDAK lagi menulis
+    # angka versi di sini - nilainya dibaca dari pubspec.yaml
+    # (versionCode = flutter.versionCode). Kita biarkan begitu, tapi dipaksa
+    # eksplisit supaya tidak diam-diam ikut berubah.
+    set_pola(
+        r"versionCode\s*=\s*[^\n]+",
+        f"versionCode = {kode}",
+        "versionCode",
+    )
+    set_pola(
+        r'versionName\s*=\s*[^\n]+',
+        f'versionName = "{versi}"',
+        "versionName",
+    )
 
     if MARK not in s:
         blok = f'''
@@ -107,17 +119,18 @@ def patch_build_gradle(versi: str, kode: int) -> None:
             s = s[: cocok.start()] + blok.lstrip("\n") + "\n" + s[cocok.start() :]
 
     # release memakai signing release hanya kalau keystore tersedia
-    pola_release = r"release\s*\{(\s*)signingConfig\s*=\s*[^\n]+"
-    if re.search(pola_release, s):
+    pola_release = r"signingConfig\s*=\s*signingConfigs\.getByName\(\"debug\"\)"
+    if MARK in s and re.search(pola_release, s):
         s = re.sub(
             pola_release,
-            r"release {\1signingConfig = if (punyaKeystore) "
-            r"signingConfigs.getByName(\"release\") else signingConfigs.getByName(\"debug\")",
+            'signingConfig = if (punyaKeystore) '
+            'signingConfigs.getByName("release") '
+            'else signingConfigs.getByName("debug")',
             s,
             count=1,
         )
-    else:
-        gagal("blok buildTypes.release tidak ditemukan")
+    elif "signingConfigs.getByName(\"release\")" not in s:
+        gagal("signingConfig release tidak ditemukan di build.gradle.kts")
 
     f.write_text(s, encoding="utf-8")
 
@@ -131,14 +144,20 @@ def patch_manifest() -> None:
 
     s = re.sub(r'android:label="[^"]*"', f'android:label="{APP_NAME}"', s, count=1)
 
-    izin_baru = (
-        '    <uses-permission android:name="android.permission.INTERNET"/>\n'
-        '    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n'
-    )
-    if "android.permission.INTERNET" not in s:
-        s = s.replace("    <application", izin_baru + "    <application", 1)
-    else:
-        gagal("izin INTERNET sudah ada - cek ulang tidak dobel")
+    # Idempoten: sisipkan hanya izin yang belum ada.
+    daftar_izin = [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+    ]
+    hilang = [z for z in daftar_izin if z not in s]
+    if hilang:
+        blok = "".join(
+            f'    <uses-permission android:name="{z}"/>\n' for z in hilang
+        )
+        if "<application" not in s:
+            gagal("tag <application> tidak ada di manifest")
+        else:
+            s = s.replace("    <application", blok + "    <application", 1)
 
     f.write_text(s, encoding="utf-8")
 
@@ -146,31 +165,37 @@ def patch_manifest() -> None:
 def patch_warna_launch() -> None:
     """Latar splash = warna brand (terang) dan hampir hitam (gelap).
 
-    Tanpa ini: layar putih menyala 1-2 detik sebelum frame Flutter pertama.
+    Tanpa ini layar putih menyala 1-2 detik sebelum frame Flutter pertama.
+    Cukup satu drawable yang menunjuk `@color/launch_bg`, karena Android
+    memilih nilai warna sesuai mode terang/gelap secara otomatis.
     """
+    res = ANDROID / "app" / "src" / "main" / "res"
     for nilai, hexnya in (("values", BRAND_HEX), ("values-night", BRAND_NIGHT)):
-        d = ANDROID / "app" / "src" / "main" / "res" / nilai
+        d = res / nilai
         d.mkdir(parents=True, exist_ok=True)
-        colors = d / "colors.xml"
-        isi = (
+        (d / "colors.xml").write_text(
             '<?xml version="1.0" encoding="utf-8"?>\n'
             f"{MARK}\n"
             "<resources>\n"
             f'    <color name="launch_bg">#{hexnya}</color>\n'
-            "</resources>\n"
+            "</resources>\n",
+            encoding="utf-8",
         )
-        colors.write_text(isi, encoding="utf-8")
 
-        launch = d / "launch_background.xml"
-        if not launch.exists():
-            launch = ANDROID / "app" / "src" / "main" / "res" / "drawable" / (
-                "launch_background.xml"
-            )
-        if launch.exists():
-            t = launch.read_text(encoding="utf-8")
-            t = re.sub(r'android:drawable="[^"]*"', 'android:drawable="@color/launch_bg"', t)
-            t = re.sub(r"<item[^>]*>", '<item>', t, count=1)
-            launch.write_text(t, encoding="utf-8")
+    launch = res / "drawable" / "launch_background.xml"
+    launch_v2 = res / "drawable-v21" / "launch_background.xml"
+    for f in (launch, launch_v2):
+        if not f.exists():
+            continue
+        t = f.read_text(encoding="utf-8")
+        t = re.sub(
+            r'android:drawable="[^"]*"',
+            'android:drawable="@color/launch_bg"',
+            t,
+        )
+        f.write_text(t, encoding="utf-8")
+    if not launch.exists() and not launch_v2.exists():
+        gagal("drawable/launch_background.xml tidak ditemukan")
 
 
 def verify(versi: str, kode: int) -> None:
@@ -186,6 +211,7 @@ def verify(versi: str, kode: int) -> None:
         (f"targetSdk = {TARGET_SDK}", "targetSdk"),
         (f"versionCode = {kode}", "versionCode"),
         (f'versionName = "{versi}"', "versionName"),
+        ('signingConfigs.getByName("release")', "signing release"),
         (MARK, "blok signing"),
     ]
     for pola, label in cek:
