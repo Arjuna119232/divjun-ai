@@ -143,3 +143,91 @@ marker". Dua jebakan kedua saat menulis blok YAML itu:
 Pelajaran umum: **volume APK yang tidak sesuai harapan itu gejalanya, bukan
 kebetulan.** APK yang lebih kecil = ada yang hilang; cek isinya sebelum
 bilang selesai.
+
+## 10. "SEMUA MODEL GAGAL" = katalog model usang (kasus nyata 17 Okt 2026)
+
+User: *"semua model AI di APK tidak merespon apapun"*. Akar masalahnya BUKAN
+kunci API dan BUKAN jaringan - tapi **model default menunjuk model yang sudah
+pindah ke paket berbayar**.
+
+- Groq lewat `docs/models`: `llama-3.3-70b-versatile` dan
+  `llama-3.1-8b-instant` sekarang **Enterprise (ContactSales)**.
+- Kunci gratis ditolak -> tiap request gagal -> user lihat "semua model gagal",
+  padahal beberapa model lain gratis dan hidup.
+
+Cek yang harus dilakukan sebelum menebak:
+1. Baca halaman model resmi provider (`console.groq.com/docs/models`) -
+   cari kolom "Enterprise" / "ContactSales" / harga.
+2. **Jangan pernah hardcode ID model sebagai default.** Ambil katalog live
+   dari `/v1/models` dan tandai model berbayar.
+3. Auto-picker WAJIB menyaring model berbayar, bukan cuma "punya tool calling".
+4. Auto-fallback: 404/403/429 -> coba kandidat berikutnya dalam satu langkah,
+   dan tulis catatan jujur di jawaban ("Model sebelumnya ditolak provider;
+   diganti ke X").
+
+Perkakas yang harus ada di app apa pun yang pakai LLM berbayar:
+- **klasifikasi galat terstruktur** (401/403/404/429/5xx) supaya fallback
+  bisa membedakan "ganti model" vs "ganti kunci" vs "tunggu";
+- **halaman Koneksi**: status kunci + tombol "Tes model" (request nyata,
+  tampilkan ms + jawaban) + segarkan katalog;
+- **kunci API boleh diisi user di aplikasi** (saved lokal, menimpa kunci yang
+  dibundel) supaya kunci kadaluarsa tidak butuh build ulang.
+
+Dan dua kelas bug baru yang menambah 2 siklus build (checker sekarang
+menangkap keduanya dalam <1 detik):
+- **UNDEF-PRIVATE**: rename method privat, call site tertinggal
+  (`_kunci` -> `kunci`). Dicek dengan scan nama yang dipanggil + deklarasi.
+  ⚠️ Panggil privat sering ada DI DALAM string interpolasi - jangan strip
+  string untuk cek ini (cuma buang komentar).
+- **SCOPE**: static member kelas A dipakai di kelas B tanpa prefiks
+  (`GalatKosong` vs `KodeGalat.GalatKosong`). Nama konstanta Dart bisa
+  kapital awal, jadi pola regex WAJIB menerima `[A-Za-z_$]`.
+
+## 11. DIJ: `ResponseType.stream` => `response.data` itu ResponseBody (BUG 17 Okt 2026)
+
+Gejala di HP user: **"type 'ResponseBody' is not a subtype of type
+'Stream<List<int>>'"** - SETIEP jawaban gagal, `flutter analyze` hijau, test
+lama juga hijau. Salah satu baris saja yang bikin seluruh app mati.
+
+```dart
+// SALAH (runtime error, tidak ketahuan analyze)
+final s = (respons.data as Stream<List<int>>).transform(utf8.decoder);
+
+// BENAR
+final ResponseBody? body =
+    respons.data is ResponseBody ? respons.data as ResponseBody : null;
+final Stream<List<int>> byte =
+    body.stream.map<List<int>>((Uint8List b) => b);   // LEBARKAN DULU
+final Stream<String> baris =
+    byte.transform(utf8.decoder).transform(const LineSplitter());
+```
+Tiga jebakan sekaligus di sini:
+1. `.data` bukan Stream, tapi `ResponseBody`.
+2. `ResponseBody.stream` bertipe `Stream<Uint8List>`, sedangkan
+   `utf8.decoder` hanya mau `StreamTransformer<List<int>, String>` (kontravarian)
+   -> harus `.map<List<int>>((b) => b)` dulu.
+3. **Dio 5.11 tidak punya `ResponseBody.bytesToString()`** - pakai
+   `await data.stream.map<List<int>>((b) => b).transform(utf8.decoder).join()`.
+
+Body error juga `ResponseBody` (bukan JSON string) ->`_isiGalat` diam-diam
+gagal parse. Perbaikannya: baca `e.response.data.stream` lalu jalankan lagi
+pemetaan galat dengan teks yang sudah dibaca.
+
+### Uji integrasi yang WAJIB ada (kelas ini tak bisa ditangkap analyze)
+```dart
+class _StubAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(RequestOptions o, Stream<Uint8List>? s, Future<void>? c) async =>
+      ResponseBody.fromString(sseDummy, 200,
+          headers: {Headers.contentTypeHeader: ['text/event-stream']});
+  @override
+  void close({bool force = false}) {}
+}
+// lalu: Dio()..httpClientAdapter = _StubAdapter(...);
+```
+Signatur `fetch` persis begini di Dio 5.11 (lihat `lib/src/adapter.dart`).
+Dengan test ini, akurasi akumulasi tool_call, `[DONE]`, dan klasifikasi galat
+404/403/401 ikut terverifikasi - bukan cuma "build hijau".
+
+Checker lokal punya aturan `DIO-STREAM` untuk menangkap pola cast
+`.data as Stream<...>` (diuji dengan fault injection).

@@ -1,5 +1,5 @@
 {
- "jumlah": 96,
+ "jumlah": 111,
  "skills": [
   {
    "nama": "admob-banner-not-showing",
@@ -11,6 +11,84 @@
     {
      "path": "SKILL.md",
      "size": 4777
+    }
+   ]
+  },
+  {
+   "nama": "agent-eval",
+   "deskripsi": "Head-to-head comparison of coding agents (Claude Code, Aider, Codex, etc.) on custom tasks with pass rate, cost, time, and consistency metrics. Use when choosing between coding agents, or when a change to an agent setup needs measured pass rate, cost, and time rather than an impression. license: MIT metadata: origin: ECC tools: Read, Write, Edit, Bash, Grep, Glob",
+   "folder": "agent-eval",
+   "size": 4696,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 4696
+    }
+   ]
+  },
+  {
+   "nama": "agent-introspection-debugging",
+   "deskripsi": "Structured self-debugging workflow for AI agent failures using capture, diagnosis, contained recovery, and introspection reports. Use when an agent run fails and you need a reproducible diagnosis instead of a retry. metadata: origin: ECC",
+   "folder": "agent-introspection-debugging",
+   "size": 5627,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 5627
+    }
+   ]
+  },
+  {
+   "nama": "agent-security-hardening",
+   "deskripsi": "Security hardening guidance for AI agent frameworks that process untrusted content, invoke tools, write workspace files, manage runtime identifiers, or handle credentials. Use when building or reviewing an agent runtime, autonomous worker, tool gateway, memory service, or multi-tenant agent deployment. Do not use for general web application security or offensive testing. metadata: origin: ECC",
+   "folder": "agent-security-hardening",
+   "size": 10678,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 10678
+    }
+   ]
+  },
+  {
+   "nama": "agentic-engineering",
+   "deskripsi": "Operate as an agentic engineer using eval-first execution, decomposition, and cost-aware model routing. Use when planning or executing engineering work that agents will carry out end to end. metadata: origin: ECC",
+   "folder": "agentic-engineering",
+   "size": 1830,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 1830
+    }
+   ]
+  },
+  {
+   "nama": "ai-regression-testing",
+   "deskripsi": "Regression testing strategies for AI-assisted development. Sandbox-mode API testing without database dependencies, automated bug-check workflows, and patterns to catch AI blind spots where the same model writes and reviews code. Use when adding regression coverage to AI-assisted code, or when the same model both wrote and reviewed a change. metadata: origin: ECC",
+   "folder": "ai-regression-testing",
+   "size": 11659,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 11659
+    }
+   ]
+  },
+  {
+   "nama": "android-clean-architecture",
+   "deskripsi": "Clean Architecture patterns for Android and Kotlin Multiplatform projects — module structure, dependency rules, UseCases, Repositories, and data layer patterns. Use when structuring modules, layers, or data flow in an Android or KMP project. metadata: origin: ECC",
+   "folder": "android-clean-architecture",
+   "size": 8887,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 8887
     }
    ]
   },
@@ -218,15 +296,28 @@
    ]
   },
   {
-   "nama": "audit-ai-plugin-repo-for-zyvo-user",
-   "deskripsi": "Cara mengaudit dan menilai repo plugin/ekstensi AI pihak ketiga (Claude Code plugins, MCP registries, agent-skill bundles) dari Termux — cek apakah formatnya bisa dipakai zyvo/OpenCode, apakah gratis, dan mana yang aman. Gunakan saat user mengirim link repo plugin/MCP/skill lalu tanya \"bagus, gratis, aman buat gue?\" atau \"ini bisa dipakai di zyvo?\". Mencakup: bedakan format plugin vs SKILL.md, buktikan klaim \"gratis\" dari dokumentasi resmi (bukan README), inventaris MCP/hooks yang menjalankan perintah, dan ekstrak skill yang sidecar-free.",
-   "folder": "audit-ai-plugin-repo-for-zyvo-user",
-   "size": 8646,
+   "nama": "architecture-decision-records",
+   "deskripsi": "Capture architectural decisions as numbered ADR markdown files in docs/adr/ with context, alternatives considered, consequences, and an index README. Use when the user says 'record this decision' or 'ADR this', chooses between frameworks or databases, discusses trade-offs, or asks why the codebase is shaped this way. metadata: origin: ECC",
+   "folder": "architecture-decision-records",
+   "size": 7182,
    "jumlahFile": 1,
    "files": [
     {
      "path": "SKILL.md",
-     "size": 8646
+     "size": 7182
+    }
+   ]
+  },
+  {
+   "nama": "audit-ai-plugin-repo-for-zyvo-user",
+   "deskripsi": "Cara mengaudit dan menilai repo plugin/ekstensi AI pihak ketiga (Claude Code plugins, MCP registries, agent-skill bundles) dari Termux — cek apakah formatnya bisa dipakai zyvo/OpenCode, apakah gratis, dan mana yang aman. Gunakan saat user mengirim link repo plugin/MCP/skill lalu tanya \"bagus, gratis, aman buat gue?\" atau \"ini bisa dipakai di zyvo?\". Mencakup: bedakan format plugin vs SKILL.md, buktikan klaim \"gratis\" dari dokumentasi resmi (bukan README), inventaris MCP/hooks yang menjalankan perintah, dan ekstrak skill yang sidecar-free.",
+   "folder": "audit-ai-plugin-repo-for-zyvo-user",
+   "size": 10762,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 10762
     }
    ]
   },
@@ -253,6 +344,19 @@
     {
      "path": "SKILL.md",
      "size": 3687
+    }
+   ]
+  },
+  {
+   "nama": "autonomous-loops",
+   "deskripsi": "\"Patterns and architectures for autonomous Claude Code loops — from simple sequential pipelines to RFC-driven multi-agent DAG systems. Retained for compatibility only: when new autonomous loop guidance is needed, use continuous-agent-loop instead.\" metadata: origin: ECC",
+   "folder": "autonomous-loops",
+   "size": 24851,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 24851
     }
    ]
   },
@@ -335,6 +439,19 @@
    ]
   },
   {
+   "nama": "dart-flutter-patterns",
+   "deskripsi": "Production-ready Dart and Flutter patterns covering null safety, immutable state with Freezed, async composition, widget architecture, state management (BLoC, Riverpod, Provider), GoRouter navigation with auth guards, Dio networking, error handling, and testing. Use when writing or reviewing Dart and Flutter code — state, widgets, navigation, networking, or architecture. metadata: origin: ECC",
+   "folder": "dart-flutter-patterns",
+   "size": 16024,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 16024
+    }
+   ]
+  },
+  {
    "nama": "data-warga-merge-ke-apk-flutter",
    "deskripsi": "Pengguna sering mengirim daftar tempat (warung, pasar, agen gas, depot air)",
    "folder": "data-warga-merge-ke-apk-flutter",
@@ -344,6 +461,19 @@
     {
      "path": "SKILL.md",
      "size": 5916
+    }
+   ]
+  },
+  {
+   "nama": "e2e-testing",
+   "deskripsi": "Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies. Use when writing Playwright tests, structuring page objects, or fixing flaky E2E runs in CI. metadata: origin: ECC",
+   "folder": "e2e-testing",
+   "size": 8170,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 8170
     }
    ]
   },
@@ -396,6 +526,19 @@
     {
      "path": "SKILL.md",
      "size": 4534
+    }
+   ]
+  },
+  {
+   "nama": "flutter-dart-code-review",
+   "deskripsi": "Library-agnostic Flutter/Dart code review checklist covering widget best practices, state management patterns (BLoC, Riverpod, Provider, GetX, MobX, Signals), Dart idioms, performance, accessibility, security, and clean architecture. Use when reviewing Flutter or Dart code, whatever state management library the project uses. metadata: origin: ECC",
+   "folder": "flutter-dart-code-review",
+   "size": 23194,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 23194
     }
    ]
   },
@@ -513,6 +656,32 @@
     {
      "path": "SKILL.md",
      "size": 2812
+    }
+   ]
+  },
+  {
+   "nama": "git-workflow",
+   "deskripsi": "Git workflow patterns including branching strategies, commit conventions, keeping history clean and readable, tidying local commits before merging, merge vs rebase, conflict resolution, and collaborative development best practices for teams of all sizes. Use when choosing a branching strategy, writing commit conventions, cleaning up history before a pull request, deciding merge versus rebase, or resolving conflicts. metadata: origin: ECC",
+   "folder": "git-workflow",
+   "size": 15308,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 15308
+    }
+   ]
+  },
+  {
+   "nama": "github-ops",
+   "deskripsi": "GitHub repository operations, automation, and management. Issue triage, PR management, CI/CD operations, release management, and security monitoring using the gh CLI. Use when the user wants to manage GitHub issues, PRs, CI status, releases, contributors, stale items, or any GitHub operational task beyond simple git commands. metadata: origin: ECC",
+   "folder": "github-ops",
+   "size": 6202,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 6202
     }
    ]
   },
@@ -1396,6 +1565,19 @@
    ]
   },
   {
+   "nama": "pilih-provider-ai-gratis-untuk-apk",
+   "deskripsi": "Cara memilih provider LLM gratis untuk aplikasi Android/iOS (APK) yang butuh streaming + native tool calling - termasuk bukti live bahwa OpenCode/Zen free tier TIDAK bisa dipakai dari app, dan daftar alternatif gratis yang benar-benar punya tool calling. Gunakan saat user tanya \"ganti ke model gratis\", \"provider gratis untuk APK\", \"bisakah pakai OpenCode di aplikasi\", atau memilih LLM untuk app mobile.",
+   "folder": "pilih-provider-ai-gratis-untuk-apk",
+   "size": 4368,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 4368
+    }
+   ]
+  },
+  {
    "nama": "port-repo-zero-dep",
    "deskripsi": "Port a GitHub Node.js repo (Express + Prisma/Postgres + JWT + bcrypt) into a zero-dependency module that runs on a phone (Termux/Android storage). Covers the stdlib replacements, where files may live (chmod on /storage is a lie), how the frontend-only-GET constraint shapes the router, status-code passthrough, and honest framing of what the database actually contains. Use when the user says \"ganti sama repo X\", \"pakai project itu\", or when npm install of a repo would fail on Termux.",
    "folder": "port-repo-zero-dep",
@@ -1464,12 +1646,12 @@
    "nama": "rebuild-webview-app-ke-flutter-agent-ai",
    "deskripsi": "Cara rebuild aplikasi Android WebView (HTML/JS + Kotlin) menjadi Flutter native dengan agent AI dari HP/Termux tanpa Flutter lokal - termasuk pola checker statis Dart, gerbang CI, dan jebakan template Flutter terbaru. Gunakan saat user minta \"rebuild app ke Flutter\", \"pindah dari WebView ke native\", atau membangun app Flutter + AI agent dari brief yang premisnya mungkin salah.",
    "folder": "rebuild-webview-app-ke-flutter-agent-ai",
-   "size": 7942,
+   "size": 12183,
    "jumlahFile": 1,
    "files": [
     {
      "path": "SKILL.md",
-     "size": 7942
+     "size": 12183
     }
    ]
   },
@@ -1714,6 +1896,19 @@
     {
      "path": "SKILL.md",
      "size": 4881
+    }
+   ]
+  },
+  {
+   "nama": "security-review",
+   "deskripsi": "Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensitive features. Provides comprehensive security checklist and patterns. metadata: origin: ECC",
+   "folder": "security-review",
+   "size": 12955,
+   "jumlahFile": 1,
+   "files": [
+    {
+     "path": "SKILL.md",
+     "size": 12955
     }
    ]
   },

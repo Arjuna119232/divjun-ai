@@ -19,7 +19,7 @@ Jangan clone penuh — pakai sparse:
 cd /data/data/com.termux/files/usr/tmp/zyvo && rm -rf <nama>
 # repo kecil: clone biasa
 git clone --depth 1 --quiet https://github.com/<owner>/<repo>.git <nama>
-# repo besar: clone sparse (blokir大小 download)
+# repo besar: clone sparse (hemat download)
 git clone --depth 1 --filter=blob:none --sparse --quiet <url> <nama>
 cd <nama> && git sparse-checkout set skills scripts --skip-checks
 ```
@@ -184,3 +184,40 @@ Carta) = 0 manfaat untuk user pribadi. Sebutkan angkanya, jangan hanya
 Simpan hasil ke vault `04 Sessions/` dengan tanggal, dan tambahkan satu
 blok ringkas ke `AGENTS.md` (4-8 baris) supaya sesi berikutnya tidak
 mengulang riset. alleged Hapus working copy di `$TMPDIR` kalau >50 MB.
+
+## Kasus terverifikasi: `affaan-m/ECC` (17 Okt 2026)
+
+Repo agent-harness (MIT, 282k star): 71 agents, 311 skills, 97 commands,
+7 hooks, 68 scripts, 23 rules, AgentShield.
+
+Perintah audit yang dipakai (semua dari Termux, `gh` sudah login):
+```bash
+gh api repos/OWNER/REPO/contents/skills --jq '.[]|select(.type=="dir")|.name'
+gh api repos/OWNER/REPO/contents/skills/NAMA --jq '[.[]|.name]|join(",")'   # sidecar?
+gh api repos/OWNER/REPO/contents/skills/NAMA/SKILL.md --jq '.content' | base64 -d | head -6
+gh api repos/OWNER/REPO/contents/.mcp.json --jq '.content' | base64 -d
+for d in hooks scripts agents commands rules; do gh api repos/OWNER/REPO/contents/$d --jq 'length'; done
+gh api -X GET search/code -f q='repo:OWNER/REPO "ghp_"' --jq '.total_count'
+```
+Hasil: format `SKILL.md` **100% kompatibel** (frontmatter `name`/`description`/
+`metadata`), skill terpilih single-file. Yang **tidak** bisa dipakai: hooks,
+`.mcp.json`, AgentShield, `scripts/` (milik Claude Code). `npx <pkg> setup`
+JANGAN dijalankan di HP - butuh Node 18+ dan menulis ke `~/.claude`/`~/.cursor`.
+
+⚠️ Token palsu yang sering ketahuan: `ghp_` di dalam **regex** secret-scanner,
+`sk-ant-...` di template docs. Selalu **buka barisnya** sebelum menyimpulkan
+repo bocor rahasia (pelajaran yang sudah kejadian 2x di repo berbeda).
+
+## Dua pertanyaan wajib sebelum menyarankan tool ke user
+
+1. **"Gratis?"** - cek LICENSE via API, bukan README: `gh api repos/O/R/license`.
+   Bedakan OSS gratis vs produk berbayar (mis. ECC MIT gratis, "ECC Pro"
+   $19/seat/bulan hanya untuk private-repo hosted - opsional).
+2. **"Bisa jalan di perangkat user?"** - cek `engines` (npm/PyPI), lalu cari
+   masalah platform: `gh api -X GET search/code -f q='repo:O/R termux'`.
+   Kalau repo punya seksi Termux/Android di TROUBLESHOOTING.md, **baca** - di
+   situ biasanya ada gotcha nyata (di ECC: file hook gagal ter-copy di
+   Android sehingga `plugins/lib/` kosong dan OpenCode gagal start).
+   Dan cek ke mana installer menulis: kalau menulis ke `~/.opencode/` sedangkan
+   tool user pakai `~/.config/<nama>/`, berarti installer itu untuk tool
+   yang berbeda.

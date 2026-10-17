@@ -51,6 +51,12 @@ flutter:
   assets:
     # MULAI-SKILL
     - assets/skills/admob-banner-not-showing/SKILL.md
+    - assets/skills/agent-eval/SKILL.md
+    - assets/skills/agent-introspection-debugging/SKILL.md
+    - assets/skills/agent-security-hardening/SKILL.md
+    - assets/skills/agentic-engineering/SKILL.md
+    - assets/skills/ai-regression-testing/SKILL.md
+    - assets/skills/android-clean-architecture/SKILL.md
     - assets/skills/android-permission-popup-and-double-splash/SKILL.md
     - assets/skills/android-webview-app/SKILL.md
     - assets/skills/android-webview-app/tools/verify-hygiene.js
@@ -86,20 +92,25 @@ flutter:
     - assets/skills/apk-mod/apk-mod/SKILL.md
     - assets/skills/apk-uninstall-file-residue/SKILL.md
     - assets/skills/apktool-termux-rebuild/SKILL.md
+    - assets/skills/architecture-decision-records/SKILL.md
     - assets/skills/audit-ai-plugin-repo-for-zyvo-user/SKILL.md
     - assets/skills/audit-apk-on-work-phone/SKILL.md
     - assets/skills/audit-brief-with-wrong-premises/SKILL.md
+    - assets/skills/autonomous-loops/SKILL.md
     - assets/skills/bug-bounty-scope-triage/SKILL.md
     - assets/skills/bugbounty-recon-scoped-host/SKILL.md
     - assets/skills/build-kunbar-apk-from-termux/SKILL.md
     - assets/skills/build-patched-apk-on-termux/SKILL.md
     - assets/skills/cari-hapus-media-acara-by-tanggal/SKILL.md
     - assets/skills/claude-app-plan-tier-internals/SKILL.md
+    - assets/skills/dart-flutter-patterns/SKILL.md
     - assets/skills/data-warga-merge-ke-apk-flutter/SKILL.md
+    - assets/skills/e2e-testing/SKILL.md
     - assets/skills/evaluating-third-party-ai-gateways/SKILL.md
     - assets/skills/fix-misplaced-geo-data-flutter/SKILL.md
     - assets/skills/flutter-apk-github-actions-termux/SKILL.md
     - assets/skills/flutter-app-icon-png-vs-svg/SKILL.md
+    - assets/skills/flutter-dart-code-review/SKILL.md
     - assets/skills/flutter-feature-vertical-slice/SKILL.md
     - assets/skills/flutter-ios-prepare-without-building/SKILL.md
     - assets/skills/flutter-offline-first-feature-pattern/SKILL.md
@@ -109,6 +120,8 @@ flutter:
     - assets/skills/game-mod/SKILL.md
     - assets/skills/generator-code-drops-tail-helpers/SKILL.md
     - assets/skills/getcontact-integration/SKILL.md
+    - assets/skills/git-workflow/SKILL.md
+    - assets/skills/github-ops/SKILL.md
     - assets/skills/http-method-tampering-auth-bypass/SKILL.md
     - assets/skills/hunt-hidden-flutter-bugs-without-flutter/SKILL.md
     - assets/skills/hyperos-driver-app-tuning/SKILL.md
@@ -250,6 +263,7 @@ flutter:
     - assets/skills/phone-name-lookup-reality/SKILL.md
     - assets/skills/phone-session-capture-termux/SKILL.md
     - assets/skills/phone-signal-fusion/SKILL.md
+    - assets/skills/pilih-provider-ai-gratis-untuk-apk/SKILL.md
     - assets/skills/port-repo-zero-dep/SKILL.md
     - assets/skills/private-apk-distribution-github/SKILL.md
     - assets/skills/proto-endpoint-probe/SKILL.md
@@ -308,6 +322,7 @@ flutter:
     - assets/skills/scientific-writing/scripts/validate_authorship.py
     - assets/skills/scientific-writing/scripts/validate_manifest.py
     - assets/skills/scrape-indonesian-prepaid-price-lists/SKILL.md
+    - assets/skills/security-review/SKILL.md
     - assets/skills/skill-creator/LICENSE.txt
     - assets/skills/skill-creator/SKILL.md
     - assets/skills/skill-creator/agents/analyzer.md
