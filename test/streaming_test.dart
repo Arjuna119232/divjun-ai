@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -23,7 +22,7 @@ void main() {
     dukungAlat: true,
   );
 
-  KlienLlm klienDengan(String? body, {int status = 200}) {
+  KlienLlm klienDengan(String body, {int status = 200}) {
     final Dio dio = Dio()..httpClientAdapter = _StubAdapter(body, status);
     return KlienLlm(dio: dio, kunciGroq: 'gsk_test');
   }
