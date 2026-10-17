@@ -53,10 +53,24 @@ class SimpanCepit {
     }
   }
 
-  String? baca(String kunci) => _prefs?.getString(kunci) ?? _memori[kunci] as String?;
+  String? baca(String kunci) {
+    final String? dariPref = _prefs?.getString(kunci);
+    if (dariPref != null) return dariPref;
+    final Object? v = _memori[kunci];
+    return v is String ? v : null;
+  }
 
-  bool? bacaBool(String kunci) =>
-      _prefs?.getBool(kunci) ?? _memori[kunci] as bool?;
+  bool? bacaBool(String kunci) {
+    final bool? dariPref = _prefs?.getBool(kunci);
+    if (dariPref != null) return dariPref;
+    // Cadangan memori hanya menyimpan String (lihat [tulis]), jadi nilai
+    // boolean dibaca secara toleran - cast buta akan melempar saat app jalan
+    // di mode cadangan.
+    final Object? v = _memori[kunci];
+    if (v is bool) return v;
+    if (v is String) return v == 'true' || v == '1' || v == 'ya';
+    return null;
+  }
 
   Future<void> tulis(String kunci, String nilai) async {
     final SharedPreferences? p = _prefs;
