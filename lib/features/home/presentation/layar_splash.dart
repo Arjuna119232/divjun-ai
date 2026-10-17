@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/boot/diagnostik.dart';
 import '../../../core/constants/app_config.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -25,19 +26,35 @@ class _LayarSplashState extends State<LayarSplash>
   )..forward();
 
   Timer? _timer;
+  Timer? _jaga;
+  String? _galat;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(milliseconds: 900), () {
+    _timer = Timer(const Duration(milliseconds: 900), () => _keBeranda());
+    // Watchdog: kalau 6 detik lalu masih di splash, tombol "Lanjut"
+    // muncul. Ini jaring pengaman untuk laporan "layar ungu nyangkut".
+    _jaga = Timer(const Duration(seconds: 6), () {
       if (!mounted) return;
-      context.go('/chat');
+      setState(() => _galat ??= 'Layar splash belum berhasil pindah ke beranda.');
     });
+  }
+
+  void _keBeranda() {
+    if (!mounted) return;
+    try {
+      context.go('/chat');
+    } catch (e, s) {
+      Diagnostik.catat(e, s, konteks: 'splash.go(/chat)');
+      setState(() => _galat = '$e');
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _jaga?.cancel();
     _c.dispose();
     super.dispose();
   }
@@ -107,28 +124,39 @@ class _LayarSplashState extends State<LayarSplash>
                   ],
                 ),
               ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 56,
-                child: FadeTransition(
-                  opacity: _c,
-                  child: Center(
-                    child: SizedBox(
-                      width: 120,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          minHeight: 3,
-                          backgroundColor: Colors.white.withValues(alpha: 0.22),
-                          valueColor:
-                              const AlwaysStoppedAnimation<Color>(Colors.white),
+              if (_galat == null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 56,
+                  child: FadeTransition(
+                    opacity: _c,
+                    child: Center(
+                      child: SizedBox(
+                        width: 120,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            minHeight: 3,
+                            backgroundColor: Colors.white.withValues(alpha: 0.22),
+                            valueColor:
+                                const AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
                         ),
                       ),
                     ),
                   ),
+                )
+              else
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Diagnostik.panel(
+                      judul: 'DIVJUN tersendat',
+                      onCobaLagi: _keBeranda,
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
         ),
