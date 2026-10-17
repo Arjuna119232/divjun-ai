@@ -427,6 +427,20 @@ def main() -> int:
                 "deklarasinya",
             )
 
+    # ---------------------------------------------------------------- 5c2. DIO-STREAM
+    # `ResponseType.stream` => `response.data` itu ResponseBody, bukan Stream.
+    # Memaksanya `as Stream<...>` = runtime error yang TIDAK ditangkap analyze.
+    for f, kode in kode_cache.items():
+        for m in re.finditer(
+            r"(\w+)\.data\s+as\s+Stream<", COMMENT_RE.sub("", kode)
+        ):
+            lapis(
+                "DIO-STREAM",
+                f"{f.relative_to(ROOT)} memaksa '{m.group(1)}.data' jadi "
+                "Stream. Dengan Dio ResponseType.stream, `.data` adalah "
+                "ResponseBody - pakai `.data.stream`.",
+            )
+
     # ---------------------------------------------------------------- 5d. SCOPE
     # Nama STATIC milik class A yang dipakai di dalam class B tanpa
     # prefiks -> compile error "Undefined name". Contoh nyata:

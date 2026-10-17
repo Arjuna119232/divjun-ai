@@ -180,7 +180,7 @@ class KlienLlm {
       );
     } on DioException catch (e) {
       yield PotonganBalasan(
-        galat: _petakanGalat(e),
+        galat: await _petakanGalatAsync(e),
         kodeGalat: _kodeGalat(e),
       );
       return;
@@ -196,7 +196,23 @@ class KlienLlm {
     final Map<int, _AlatAkumulator> alatAkum = <int, _AlatAkumulator>{};
 
     try {
-      final Stream<String> baris = (respons.data as Stream<List<int>>)
+      // PENTING: dengan `ResponseType.stream`, `response.data` itu objek
+      // ResponseBody - BUKAN Stream. harus lewat `.stream` (Stream<Uint8List>).
+      // Kalau dipaksa `as Stream<List<int>>` -> runtime error
+      // "type 'ResponseBody' is not a subtype of type 'Stream<List<int>>'"
+      // dan SETIAP jawaban gagal (bug 17 Okt 2026).
+      final ResponseBody? body = respons.data is ResponseBody
+          ? respons.data as ResponseBody
+          : null;
+      if (body == null) {
+        yield PotonganBalasan(
+          galat: 'Provider mengirim balasan yang tidak bisa dibaca sebagai '
+              'stream (tipe: ${respons.data.runtimeType}).',
+          kodeGalat: KodeGalat.lain,
+        );
+        return;
+      }
+      final Stream<String> baris = body.stream
           .transform(utf8.decoder)
           .transform(const LineSplitter());
       await for (final String mentah in baris) {
@@ -217,7 +233,7 @@ class KlienLlm {
     } on DioException catch (e) {
       if (batal?.isCancelled ?? false) return;
       yield PotonganBalasan(
-        galat: _petakanGalat(e),
+        galat: await _petakanGalatAsync(e),
         kodeGalat: _kodeGalat(e),
       );
       return;
@@ -384,6 +400,36 @@ class KlienLlm {
         .map((String e) => e[0].toUpperCase() + e.substring(1))
         .join(' ');
   }
+
+  /// Baca body error yang berupa ResponseBody supaya pesan asli provider
+  /// (mis. "model requires a paid plan") ikut ditampilkan ke user.
+  static Future<String> _petakanGalatAsync(DioException e) async {
+    final Object? data = e.response?.data;
+    if (data is ResponseBody) {
+      try {
+        final String isi = await data.stream.transform(utf8.decoder).join();
+        if (isi.trim().isNotEmpty) {
+          return _petakanGalat(_dariBody(isi, e));
+        }
+      } catch (_) {
+        // biarkan pesan kode HTTP saja
+      }
+    }
+    return _petakanGalat(e);
+  }
+
+  /// Bungkus isi teks body error supaya bisa dipetakan lewat [_petakanGalat].
+  static DioException _dariBody(String isi, DioException asli) =>
+      DioException(
+        requestOptions: asli.requestOptions,
+        response: Response<dynamic>(
+          requestOptions: asli.requestOptions,
+          statusCode: asli.response?.statusCode,
+          data: isi,
+        ),
+        type: asal.type,
+        error: asli.error,
+      );
 
   static int _kodeGalat(DioException e) {
     final int kode = e.response?.statusCode ?? 0;
