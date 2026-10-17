@@ -15,6 +15,7 @@ import '../data/kontrol_chat.dart';
 import 'widgets/gelembung_pesan.dart';
 import 'widgets/kolom_tulis.dart';
 import 'widgets/lembar_riwayat.dart';
+import 'widgets/sidebar_obrolan.dart';
 import 'widgets/status_kosong.dart';
 
 class LayarChat extends ConsumerStatefulWidget {
@@ -72,12 +73,13 @@ class _LayarChatState extends ConsumerState<LayarChat> {
     });
 
     return Scaffold(
+      drawer: const SidebarObrolan(),
       appBar: AppBar(
         leadingWidth: 60,
         leading: IconButton(
-          tooltip: 'Riwayat percakapan',
-          icon: const Icon(LucideIcons.panelLeft, size: 22),
-          onPressed: () => LembarRiwayat.tampilkan(context, ref),
+          tooltip: 'Menu dan riwayat percakapan',
+          icon: const Icon(LucideIcons.menu, size: 22),
+          onPressed: () => Scaffold.of(context).openDrawer(),
         ),
         title: InkWell(
           borderRadius: AppRadius.br12,
@@ -122,19 +124,63 @@ class _LayarChatState extends ConsumerState<LayarChat> {
         ),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Pustaka skill',
-            icon: const Icon(LucideIcons.bookOpen, size: 22),
-            onPressed: () => context.push('/skills'),
+            tooltip: 'Riwayat lengkap',
+            icon: const Icon(LucideIcons.history, size: 22),
+            onPressed: () => LembarRiwayat.tampilkan(context, ref),
           ),
-          IconButton(
-            tooltip: 'Memori',
-            icon: const Icon(LucideIcons.brain, size: 22),
-            onPressed: () => context.push('/memori'),
-          ),
-          IconButton(
-            tooltip: 'Pengaturan',
-            icon: const Icon(LucideIcons.settings2, size: 22),
-            onPressed: () => context.push('/setelan'),
+          PopupMenuButton<String>(
+            tooltip: 'Lainnya',
+            icon: const Icon(LucideIcons.moreVertical, size: 22),
+            onSelected: (String v) {
+              switch (v) {
+                case 'skill':
+                  context.push('/skills');
+                case 'memori':
+                  context.push('/memori');
+                case 'setelan':
+                  context.push('/setelan');
+                case 'koneksi':
+                  context.push('/koneksi');
+              }
+            },
+            itemBuilder: (BuildContext c) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'skill',
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(LucideIcons.bookOpen, size: 18),
+                  title: Text('Pustaka skill'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'memori',
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(LucideIcons.brain, size: 18),
+                  title: Text('Memori'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'koneksi',
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(LucideIcons.plug, size: 18),
+                  title: Text('Koneksi AI'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'setelan',
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(LucideIcons.settings2, size: 18),
+                  title: Text('Pengaturan'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: AppSpacing.xs),
         ],
@@ -164,7 +210,10 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                       onRefresh: () => ref.read(chatProvider.notifier).muat(),
                       color: context.cs.primary,
                       backgroundColor: context.cs.surfaceContainer,
-                      child: ListView.builder(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 820),
+                          child: ListView.builder(
                         controller: _scroll,
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.fromLTRB(
@@ -212,10 +261,17 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                                 : null,
                           );
                         },
+                          ),
+                        ),
                       ),
                     ),
             ),
-            KolomTulis(
+            // Kolom konten dibatasi lebar seperti Claude: di tablet atau
+            // mode landscape, baris chat tidak melebar tanpa batas.
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 820),
+                child: KolomTulis(
               sibuk: state.sibuk,
               onKirim: (String t) {
                 HapticFeedback.lightImpact();
@@ -226,6 +282,8 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                 HapticFeedback.mediumImpact();
                 ref.read(chatProvider.notifier).stop();
               },
+                ),
+              ),
             ),
           ],
         ),

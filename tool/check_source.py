@@ -310,13 +310,26 @@ def main() -> int:
         dipakai: set[str] = set()
         for m in re.finditer(r"(?<![\w.$])([A-Z][A-Za-z0-9_]{2,})\b", bersih):
             dipakai.add(m.group(1))
+        # Simbol yang SEDIA dari framework, bukan dari file proyek.
+        # Tanpa ini, `setState` ikut terhitung sebagai "dideklarasi di proyek"
+        # (karena baris `setState(() {});` cocok regex top-level) sehingga file
+        # BARU yang memanggilnya dilaporkan MISSING-IMPORT - false positive.
+        # Fault injection: hapus import `kontrol_chat.dart` di sidebar -> cek
+        # tetap harus melaporkan StateChat (dijaga oleh uji di test_checker.py).
+        KW_FRAMEWORK = {
+            "setState", "initState", "didChangeDependencies",
+            "didUpdateWidget", "deactivate", "dispose", "build", "mounted",
+            "context", "widget", "key", "notifyListeners", "addListener",
+            "removeListener", "toString", "noSuchMethod", "runtimeType",
+            "hashCode", "toStringSafe",
+        }
         KW_DART = {
             "if", "for", "while", "switch", "case", "return", "await",
             "yield", "assert", "catch", "do", "else", "throw", "try",
             "new", "in", "is", "as", "break", "continue", "rethrow",
         }
         for m in re.finditer(r"(?<![\w.$\"'])([a-z_$][\w$]*)\s*\(", bersih):
-            if m.group(1) in KW_DART:
+            if m.group(1) in KW_DART or m.group(1) in KW_FRAMEWORK:
                 continue
             dipakai.add(m.group(1))
         # hanya nama yang benar-benar dideklarasi di proyek yang dicek
