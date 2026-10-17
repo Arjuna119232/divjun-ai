@@ -23,13 +23,17 @@ class _HalamanKunciState extends ConsumerState<HalamanKunci> {
       TextEditingController(text: ref.read(setelanProvider).kunciGroq);
   late final TextEditingController _gemini =
       TextEditingController(text: ref.read(setelanProvider).kunciGemini);
+  late final TextEditingController _openRouter =
+      TextEditingController(text: ref.read(setelanProvider).kunciOpenRouter);
   bool _lihatGroq = false;
   bool _lihatGemini = false;
+  bool _lihatOpenRouter = false;
 
   @override
   void dispose() {
     _groq.dispose();
     _gemini.dispose();
+    _openRouter.dispose();
     super.dispose();
   }
 
@@ -62,6 +66,20 @@ class _HalamanKunciState extends ConsumerState<HalamanKunci> {
             terlihat: _lihatGemini,
             onLihat: () => setState(() => _lihatGemini = !_lihatGemini),
           ),
+          const SizedBox(height: AppSpacing.md),
+          _Field(
+            label: 'OpenRouter',
+            hint: 'sk-or-…',
+            controller: _openRouter,
+            terlihat: _lihatOpenRouter,
+            onLihat: () => setState(() => _lihatOpenRouter = !_lihatOpenRouter),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'OVHcloud dan Pollinations TIDAK butuh kunci sama sekali - app '
+            'tetap bisa menjawab tanpa mengisi apa pun di halaman ini.',
+            style: context.teks.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton.icon(
             onPressed: () async {
@@ -69,6 +87,7 @@ class _HalamanKunciState extends ConsumerState<HalamanKunci> {
               final SetelanController c = ref.read(setelanProvider.notifier);
               await c.setKunciGroq(_groq.text.trim());
               await c.setKunciGemini(_gemini.text.trim());
+              await c.setKunciOpenRouter(_openRouter.text.trim());
               ref.invalidate(katalogModelProvider);
               if (!context.mounted) return;
               Navigator.of(context).pop();
@@ -84,6 +103,7 @@ class _HalamanKunciState extends ConsumerState<HalamanKunci> {
             onPressed: () {
               _groq.clear();
               _gemini.clear();
+              _openRouter.clear();
               setState(() {});
             },
             icon: const Icon(LucideIcons.eraser, size: 18),

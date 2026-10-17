@@ -53,7 +53,12 @@ class PesanApi {
 /// Semua kegagalan network diterjemahkan ke pesan Bahasa Indonesia yang
 /// bisa ditampilkan user apa adanya (tidak ada TypeError senyap).
 class KlienLlm {
-  KlienLlm({Dio? dio, this.kunciGroq, this.kunciGemini}) : _dio = dio ?? Dio() {
+  KlienLlm({
+    Dio? dio,
+    this.kunciGroq,
+    this.kunciGemini,
+    this.kunciOpenRouter,
+  }) : _dio = dio ?? Dio() {
     _dio.options
       ..connectTimeout = const Duration(seconds: 20)
       ..receiveTimeout = const Duration(seconds: 120)
@@ -66,37 +71,58 @@ class KlienLlm {
   /// Kunci dari pengaturan (menimpa kunci yang dibundel saat build).
   final String? kunciGroq;
   final String? kunciGemini;
+  final String? kunciOpenRouter;
 
   static const String _hostGroq = 'api.groq.com';
   static const String _hostGemini = 'generativelanguage.googleapis.com';
 
+  /// Base URL OpenAI-compatible. OVH + Pollinations sengaja TIDAK pakai kunci:
+  /// tidak ada rahasia yang bisa diekstrak dari APK (diverifikasi 18 Okt 2026).
+  static const String _baseOvh = 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1';
+  static const String _basePollinations = 'https://text.pollinations.ai/openai';
+  static const String _baseOpenRouter = 'https://openrouter.ai/api/v1';
+
   String kunci(ModelAi m) {
-    final String lokal =
-        m.penyedia == PenyediaModel.groq ? (kunciGroq ?? '') : (kunciGemini ?? '');
+    final String lokal = switch (m.penyedia) {
+      PenyediaModel.groq => kunciGroq ?? '',
+      PenyediaModel.gemini => kunciGemini ?? '',
+      PenyediaModel.openrouter => kunciOpenRouter ?? '',
+      _ => '',
+    };
     if (lokal.trim().isNotEmpty) return lokal.trim();
-    return m.penyedia == PenyediaModel.groq ? AppEnv.groqApiKey : AppEnv.geminiApiKey;
+    return switch (m.penyedia) {
+      PenyediaModel.groq => AppEnv.groqApiKey,
+      PenyediaModel.gemini => AppEnv.geminiApiKey,
+      _ => '',
+    };
   }
 
-  bool punyaKunci(ModelAi m) => kunci(m).trim().isNotEmpty;
+  /// Provider tanpa kunci selalu "terhubung"; provider berkunci wajib punya
+  /// kunci yang terisi.
+  bool punyaKunci(ModelAi m) => m.perluKunci ? kunci(m).trim().isNotEmpty : true;
 
-  String _url(ModelAi m) {
-    if (m.penyedia == PenyediaModel.groq) {
-      return 'https://$_hostGroq/openai/v1/chat/completions';
-    }
-    return 'https://$_hostGemini/v1beta/models/${m.id}'
-        ':streamGenerateContent?alt=sse';
-  }
+  String _url(ModelAi m) => switch (m.penyedia) {
+        PenyediaModel.ovh => '$_baseOvh/chat/completions',
+        PenyediaModel.pollinations => '$_basePollinations/chat/completions',
+        PenyediaModel.openrouter => '$_baseOpenRouter/chat/completions',
+        PenyediaModel.groq => 'https://$_hostGroq/openai/v1/chat/completions',
+        PenyediaModel.gemini => 'https://$_hostGemini/v1beta/models/${m.id}'
+            ':streamGenerateContent?alt=sse',
+      };
 
   Map<String, String> _header(ModelAi m) {
-    if (m.penyedia == PenyediaModel.groq) {
+    if (m.penyedia == PenyediaModel.gemini) {
       return {
-        'Authorization': 'Bearer ${kunci(m)}',
+        'x-goog-api-key': kunci(m),
         'Content-Type': 'application/json',
         'User-Agent': AppConfig.userAgent,
       };
     }
+    // Header Authorization HANYA dikirim kalau ada kunci; provider tanpa
+    // kunci menolak header kosong ("Bearer " tanpa token).
+    final String k = kunci(m).trim();
     return {
-      'x-goog-api-key': kunci(m),
+      if (k.isNotEmpty) 'Authorization': 'Bearer $k',
       'Content-Type': 'application/json',
       'User-Agent': AppConfig.userAgent,
     };
@@ -109,7 +135,7 @@ class KlienLlm {
     List<ToolSpec>? alat,
     bool streaming = true,
   }) {
-    if (m.penyedia == PenyediaModel.groq) {
+    if (m.penyedia != PenyediaModel.gemini) {
       return {
         'model': m.id,
         'messages': pesan.map((PesanApi p) => p.keJson()).toList(),
@@ -348,6 +374,77 @@ class KlienLlm {
       }
     }
 
+    // OVHcloud: katalog publik, TANPA kunci -> selalu bisa diambil.
+    try {
+      final Response<dynamic> r = await _dio.get<Map<String, dynamic>>(
+        '$_baseOvh/models',
+        options: Options(responseType: ResponseType.json),
+      );
+      final List<dynamic> data =
+          (r.data?['data'] as List<dynamic>?) ?? <dynamic>[];
+      const Set<String> bukanChat = <String>{
+        'bge-m3', 'bge-multilingual-gemma2', 'stable-diffusion-xl-base-v10',
+        'whisper-large-v3', 'whisper-large-v3-turbo',
+      };
+      for (final dynamic m in data) {
+        if (m is! Map<String, dynamic>) continue;
+        final String id = m['id'] as String? ?? '';
+        if (id.isEmpty) continue;
+        final String idB = id.toLowerCase();
+        if (bukanChat.contains(idB)) continue;
+        if (idB.startsWith('nvr-tts') || idB.startsWith('qwen3guard')) continue;
+        hasil.add(ModelAi(
+          id: id,
+          label: _pretty(id),
+          penyedia: PenyediaModel.ovh,
+          dukungAlat: true,
+          konteks: 131072,
+        ));
+      }
+    } catch (_) {
+      // tanpa internet: pakai katalog bawaan
+    }
+
+    // OpenRouter: butuh kunci.
+    if (AppEnv.punyaOpenRouter || (kunciOpenRouter ?? '').trim().isNotEmpty) {
+      try {
+        final Response<dynamic> r = await _dio.get<Map<String, dynamic>>(
+          '$_baseOpenRouter/models',
+          options: Options(
+            headers: <String, String>{'Authorization': 'Bearer ${kunciOpenRouter ?? AppEnv.openRouterApiKey}'},
+            responseType: ResponseType.json,
+          ),
+        );
+        final List<dynamic> data =
+            (r.data?['data'] as List<dynamic>?) ?? <dynamic>[];
+        for (final dynamic m in data) {
+          if (m is! Map<String, dynamic>) continue;
+          final String id = m['id'] as String? ?? '';
+          if (!id.endsWith(':free')) continue;
+          final List<dynamic> params =
+              (m['supported_parameters'] as List<dynamic>?) ?? <dynamic>[];
+          final bool tools =
+              params.contains('tools') || params.contains('tool_choice');
+          hasil.add(ModelAi(
+            id: id,
+            label: _pretty(id.split(':').first),
+            penyedia: PenyediaModel.openrouter,
+            dukungAlat: tools,
+            konteks: (m['context_length'] as num?)?.toInt() ?? 8192,
+          ));
+        }
+      } catch (_) {
+        // diam: pakai katalog bawaan
+      }
+    }
+
+    for (final ModelAi m in ModelAi.bawaan) {
+      if (m.penyedia == PenyediaModel.ovh ||
+          m.penyedia == PenyediaModel.pollinations) {
+        hasil.add(m);
+      }
+    }
+
     if (AppEnv.punyaGemini) {
       for (final ModelAi m in ModelAi.bawaan) {
         if (m.penyedia == PenyediaModel.gemini) hasil.add(m);
@@ -372,6 +469,7 @@ class KlienLlm {
           lihatGambar: bawa?.lihatGambar ?? m.lihatGambar,
           konteks: m.konteks,
           perluBayar: bawa?.perluBayar ?? false,
+          dukungGambarMasuk: bawa?.dukungGambarMasuk ?? false,
         ),
       );
     }
@@ -380,8 +478,11 @@ class KlienLlm {
       if (!seen.add(m.id)) continue;
       digabung.add(m);
     }
+    // Urutan pakai: provider tanpa kunci dulu, lalu model berbayar terakhir.
     digabung.sort((ModelAi a, ModelAi b) {
       if (a.perluBayar != b.perluBayar) return a.perluBayar ? 1 : -1;
+      final int p = a.penyedia.prioritas.compareTo(b.penyedia.prioritas);
+      if (p != 0) return p;
       return a.label.compareTo(b.label);
     });
     return digabung;
@@ -626,15 +727,20 @@ class _PenguraiSse {
     try {
       final Object? dec = jsonDecode(isi);
       if (dec is! Map<String, dynamic>) return const <_IrisanSse>[];
-      return penyedia == PenyediaModel.groq
-          ? _uraiGroq(dec)
-          : _uraiGemini(dec);
+      return penyedia == PenyediaModel.gemini
+          ? _uraiGemini(dec)
+          : _uraiOpenAi(dec);
     } catch (_) {
       return const <_IrisanSse>[];
     }
   }
 
-  List<_IrisanSse> _uraiGroq(Map<String, dynamic> j) {
+  /// Format OpenAI: dipakai Groq, OVH, Pollinations, dan OpenRouter.
+  ///
+  /// PENTING: beberapa provider (OVH, Pollinations) kirim penalaran di
+  /// `delta.reasoning`, bukan `reasoning_content`. Kalau hanya salah satu
+  /// dibaca, layar jadi kosong padahal server jalan.
+  List<_IrisanSse> _uraiOpenAi(Map<String, dynamic> j) {
     final List<dynamic> pilihan =
         (j['choices'] as List<dynamic>?) ?? <dynamic>[];
     if (pilihan.isEmpty) return const <_IrisanSse>[];
@@ -643,11 +749,13 @@ class _PenguraiSse {
     final Object? delta = c['delta'] ?? c['message'];
     if (delta is! Map<String, dynamic>) return const <_IrisanSse>[];
 
-    final String teks = delta['content'] is String
-        ? delta['content'] as String
-        : (delta['reasoning_content'] is String
-            ? delta['reasoning_content'] as String
-            : '');
+    String teks = delta['content'] is String ? delta['content'] as String : '';
+    if (teks.isEmpty && delta['reasoning'] is String) {
+      teks = delta['reasoning'] as String;
+    }
+    if (teks.isEmpty && delta['reasoning_content'] is String) {
+      teks = delta['reasoning_content'] as String;
+    }
 
     final Map<int, _IrisanAlat> alat = <int, _IrisanAlat>{};
     final Object? calls = delta['tool_calls'];

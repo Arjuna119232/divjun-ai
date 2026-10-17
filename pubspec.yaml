@@ -4,7 +4,7 @@ publish_to: "none"
 
 # 2.0.0 = versi rebuild Flutter (WebView lama = 1.15.2 / versionCode 34).
 # versionCode 35 > 34 -> APK baru bisa update DI ATAS APK lama (tanda tangan sama).
-version: 2.2.1+40
+version: 2.3.0+41
 
 environment:
   sdk: ^3.9.0

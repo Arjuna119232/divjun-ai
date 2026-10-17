@@ -40,7 +40,11 @@ final Provider<RepositoriMemori> repoMemoriProvider =
 final Provider<KlienLlm> klienLlmProvider = Provider<KlienLlm>(
   (ref) {
     final SetelanApp s = ref.watch(setelanProvider);
-    return KlienLlm(kunciGroq: s.kunciGroq, kunciGemini: s.kunciGemini);
+    return KlienLlm(
+      kunciGroq: s.kunciGroq,
+      kunciGemini: s.kunciGemini,
+      kunciOpenRouter: s.kunciOpenRouter,
+    );
   },
 );
 
@@ -111,6 +115,9 @@ class SetelanController extends Notifier<SetelanApp> {
   Future<void> setKunciGroq(String v) => ubah(state.salin(kunciGroq: v.trim()));
 
   Future<void> setKunciGemini(String v) => ubah(state.salin(kunciGemini: v.trim()));
+
+  Future<void> setKunciOpenRouter(String v) =>
+      ubah(state.salin(kunciOpenRouter: v.trim()));
 
   Future<void> setPromptTambahan(String v) =>
       ubah(state.salin(promptSistemTambahan: v));

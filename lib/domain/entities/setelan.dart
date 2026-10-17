@@ -22,6 +22,7 @@ class SetelanApp {
     this.promptSistemTambahan = '',
     this.kunciGroq = '',
     this.kunciGemini = '',
+    this.kunciOpenRouter = '',
   });
 
   final String modelId;
@@ -43,6 +44,9 @@ class SetelanApp {
   final String kunciGroq;
   final String kunciGemini;
 
+  /// Kunci OpenRouter (opsional - model gratis ':free' tetap butuh kunci).
+  final String kunciOpenRouter;
+
   bool get agentAktif => modeAgent != ModeAgent.chatting;
 
   SetelanApp salin({
@@ -61,6 +65,7 @@ class SetelanApp {
     String? promptSistemTambahan,
     String? kunciGroq,
     String? kunciGemini,
+    String? kunciOpenRouter,
   }) =>
       SetelanApp(
         modelId: modelId ?? this.modelId,
@@ -79,6 +84,7 @@ class SetelanApp {
             promptSistemTambahan ?? this.promptSistemTambahan,
         kunciGroq: kunciGroq ?? this.kunciGroq,
         kunciGemini: kunciGemini ?? this.kunciGemini,
+        kunciOpenRouter: kunciOpenRouter ?? this.kunciOpenRouter,
       );
 
   Map<String, dynamic> keJson() => {
@@ -97,6 +103,7 @@ class SetelanApp {
         'promptSistemTambahan': promptSistemTambahan,
         'kunciGroq': kunciGroq,
         'kunciGemini': kunciGemini,
+        'kunciOpenRouter': kunciOpenRouter,
       };
 
   static SetelanApp dariJson(Map<String, dynamic> j) => SetelanApp(
@@ -121,6 +128,7 @@ class SetelanApp {
         promptSistemTambahan: j['promptSistemTambahan'] as String? ?? '',
         kunciGroq: j['kunciGroq'] as String? ?? '',
         kunciGemini: j['kunciGemini'] as String? ?? '',
+        kunciOpenRouter: j['kunciOpenRouter'] as String? ?? '',
       );
 
   static String keJsonTeks(SetelanApp s) => jsonEncode(s.keJson());

@@ -9,6 +9,8 @@ library;
 abstract final class AppEnv {
   static const String groqApiKey = String.fromEnvironment('GROQ_API_KEY');
   static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
+  static const String openRouterApiKey =
+      String.fromEnvironment('OPENROUTER_API_KEY');
   static const String appVersion = String.fromEnvironment(
     'APP_VERSION',
     defaultValue: '2.0.0',
@@ -16,8 +18,11 @@ abstract final class AppEnv {
 
   static bool get punyaGroq => groqApiKey.trim().isNotEmpty;
   static bool get punyaGemini => geminiApiKey.trim().isNotEmpty;
+  static bool get punyaOpenRouter => openRouterApiKey.trim().isNotEmpty;
   static bool get punyaApiKey => punyaGroq || punyaGemini;
 
-  /// Mode demo = tanpa API key. UI menampilkan banner, bukan crash.
+  /// Mode demo = tidak ada jalur AI sama sekali. OVH + Pollinations jalan
+  /// tanpa kunci, jadi aplikasi tetap punya model gratis walau semua kunci
+  /// kosong - banner "demo" tidak boleh muncul hanya karena kunci kosong.
   static bool get modeDemo => !punyaApiKey;
 }
