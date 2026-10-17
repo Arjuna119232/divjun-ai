@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
@@ -212,7 +213,13 @@ class KlienLlm {
         );
         return;
       }
-      final Stream<String> baris = body.stream
+      // `ResponseBody.stream` bertipe Stream<Uint8List>, sedangkan
+      // `utf8.decoder` hanya menerima StreamTransformer<List<int>, String>
+      // (kontravarian), jadi lebarkan dulu ke List<int>.
+      final Stream<List<int>> byte = body.stream.map<List<int>>(
+        (Uint8List b) => b,
+      );
+      final Stream<String> baris = byte
           .transform(utf8.decoder)
           .transform(const LineSplitter());
       await for (final String mentah in baris) {
@@ -407,7 +414,10 @@ class KlienLlm {
     final Object? data = e.response?.data;
     if (data is ResponseBody) {
       try {
-        final String isi = await data.stream.transform(utf8.decoder).join();
+        final String isi = await data.stream
+            .map<List<int>>((Uint8List b) => b)
+            .transform(utf8.decoder)
+            .join();
         if (isi.trim().isNotEmpty) {
           return _petakanGalat(_dariBody(isi, e));
         }
@@ -427,7 +437,7 @@ class KlienLlm {
           statusCode: asli.response?.statusCode,
           data: isi,
         ),
-        type: asal.type,
+        type: asli.type,
         error: asli.error,
       );
 
