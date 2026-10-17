@@ -24,7 +24,7 @@ class SidebarObrolan extends ConsumerStatefulWidget {
   const SidebarObrolan({super.key});
 
   @override
-  ConsumerStatefulWidget createState() => _SidebarObrolanState();
+  ConsumerState<SidebarObrolan> createState() => _SidebarObrolanState();
 }
 
 class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
