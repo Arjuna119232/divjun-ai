@@ -6,7 +6,7 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
 `main`; `main` masih berisi app WebView lama + pipeline Gradle-nya).
 
 - Lokasi kerja: `$HOME/divjun-flutter` (bukan `/storage` — FUSE + git lambat)
-- Package: `com.divjun.ai` · versi `3.0.2+51` · minSdk 24 · targetSdk 36
+- Package: `com.divjun.ai` · versi `3.1.0+52` · minSdk 24 · targetSdk 36
 - Sertifikat rilis SHA-256 `c3923241b05990b2575e215090f037e09be5d1da5cc715b1ef11ded4cb18feb7`
   (CN=DIVJUN AI). APK dengan sertifikat lain TIDAK bisa update di atas v2.8.0.
 - Status "seukuran Claude AI": tahap 1 (sidebar + kolom 820) ✅ v2.4.0+42 ·
