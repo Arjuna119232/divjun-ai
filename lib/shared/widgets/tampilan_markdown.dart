@@ -12,32 +12,38 @@ class TampilanMarkdown extends StatelessWidget {
     super.key,
     required this.teks,
     this.selectabel = true,
+    this.kecil = false,
   });
 
   final String teks;
   final bool selectabel;
+
+  /// True = gaya lebih kecil (blok "Berpikir", pratinjau skill).
+  final bool kecil;
 
   @override
   Widget build(BuildContext context) {
     return MarkdownBody(
       data: teks,
       selectable: selectabel,
-      styleSheet: gaya(context),
+      styleSheet: gaya(context, kecil: kecil),
     );
   }
 
-  static MarkdownStyleSheet gaya(BuildContext context) {
+  static MarkdownStyleSheet gaya(BuildContext context, {bool kecil = false}) {
     final Color teks = context.cs.onSurface;
     final TextTheme t = context.teks;
+    final TextStyle? paragraf =
+        (kecil ? t.bodySmall : t.bodyMedium)?.copyWith(color: teks, height: 1.5);
     return MarkdownStyleSheet(
-      p: t.bodyMedium?.copyWith(color: teks, height: 1.5),
-      h1: t.titleLarge?.copyWith(color: teks),
-      h2: t.titleMedium?.copyWith(color: teks),
-      h3: t.titleSmall?.copyWith(color: teks),
-      listBullet: t.bodyMedium?.copyWith(color: teks),
+      p: paragraf,
+      h1: (kecil ? t.titleSmall : t.titleLarge)?.copyWith(color: teks),
+      h2: (kecil ? t.bodyMedium : t.titleMedium)?.copyWith(color: teks),
+      h3: (kecil ? t.bodySmall : t.titleSmall)?.copyWith(color: teks),
+      listBullet: paragraf,
       code: TextStyle(
         fontFamily: AppTypography.monoFamily,
-        fontSize: 13,
+        fontSize: kecil ? 12 : 13,
         height: 1.5,
         color: teks,
       ),

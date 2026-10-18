@@ -72,4 +72,17 @@ abstract final class Waktu {
   }
 
   static String iso(DateTime d) => d.toIso8601String();
+
+  /// Durasi dalam Bahasa Indonesia: "840 ms", "2,4 detik", "1 menit 5 detik".
+  static String durasi(int milidetik) {
+    if (milidetik < 1000) return '$milidetik ms';
+    final double detik = milidetik / 1000;
+    if (milidetik < 60000) {
+      final String teks = detik.toStringAsFixed(1).replaceAll('.', ',');
+      return '$teks detik';
+    }
+    final int menit = milidetik ~/ 60000;
+    final int sisaDetik = (milidetik % 60000) ~/ 1000;
+    return '$menit menit $sisaDetik detik';
+  }
 }

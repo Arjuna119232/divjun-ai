@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:divjun_ai/data/datasources/klien_llm.dart';
 import 'package:divjun_ai/data/models/chat_api.dart';
 import 'package:divjun_ai/domain/entities/model_ai.dart';
+import 'package:divjun_ai/domain/entities/percakapan.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Uji integrasi jalur streaming dengan adapter HTTP palsu.
@@ -140,6 +141,106 @@ void main() {
       );
       expect(hasil.galat, isEmpty);
       expect(hasil.teks, 'OK');
+    });
+  });
+
+  // -------------------------------------------------------- blok "Berpikir"
+  //
+  // Kenapates ini wajib: sebelum ada pemisahan, penalaran di-fallback ke
+  // `teks` supaya layar tidak kosong. Akibatnya blok "Berpikir" mustahil
+  // dibuat DAN user baca proses berpikir yang seharusnya disembunyikan.
+  group('penalaran terpisah dari jawaban', () {
+    test('delta.reasoning (OVH/Pollinations) tidak masuk ke teks', () async {
+      final KlienLlm k = klienDengan(
+        'data: {"choices":[{"delta":{"reasoning":"Pertama saya cek"}}]}\n\n'
+        'data: {"choices":[{"delta":{"reasoning":" lalu tulis"}}]}\n\n'
+        'data: {"choices":[{"delta":{"content":"Jawabannya 42"}}]}\n\n'
+        'data: [DONE]\n\n',
+      );
+
+      final List<PotonganBalasan> hasil = await k
+          .stream(
+            model: model,
+            pesan: <PesanApi>[const PesanApi(peran: 'user', isi: '1+1')],
+            suhu: 0.2,
+          )
+          .toList();
+
+      final String penalaran =
+          hasil.map((PotonganBalasan p) => p.penalaran).join();
+      final String teks = hasil.map((PotonganBalasan p) => p.teks).join();
+      expect(penalaran, 'Pertama saya cek lalu tulis');
+      expect(teks, 'Jawabannya 42');
+      expect(teks.contains('saya cek'), isFalse,
+          reason: 'penalaran bocor ke jawaban');
+    });
+
+    test('delta.reasoning_content (Groq) tidak masuk ke teks', () async {
+      final KlienLlm k = klienDengan(
+        'data: {"choices":[{"delta":{"reasoning_content":"Langkah dua"}}]}\n\n'
+        'data: {"choices":[{"delta":{"content":"Selesai"}}]}\n\n'
+        'data: [DONE]\n\n',
+      );
+
+      final List<PotonganBalasan> hasil = await k
+          .stream(
+            model: model,
+            pesan: <PesanApi>[const PesanApi(peran: 'user', isi: 'halo')],
+            suhu: 0.2,
+          )
+          .toList();
+
+      expect(
+        hasil.map((PotonganBalasan p) => p.penalaran).join(),
+        'Langkah dua',
+      );
+      expect(hasil.map((PotonganBalasan p) => p.teks).join(), 'Selesai');
+    });
+
+    test('sekali() memisahkan penalaran dari teks', () async {
+      final KlienLlm k = klienDengan(
+        'data: {"choices":[{"delta":{"reasoning":"Beratap"}}]}\n\n'
+        'data: {"choices":[{"delta":{"content":"Hasil 7"}}]}\n\n'
+        'data: [DONE]\n\n',
+      );
+      final HasilBalasan hasil = await k.sekali(
+        model: model,
+        pesan: <PesanApi>[const PesanApi(peran: 'user', isi: '3+4')],
+        suhu: 0.1,
+      );
+      expect(hasil.penalaran, 'Beratap');
+      expect(hasil.teks, 'Hasil 7');
+    });
+
+    test('tanpa penalaran, field penalaran tetap kosong', () async {
+      final KlienLlm k = klienDengan(
+        'data: {"choices":[{"delta":{"content":"langsung"}}]}\n\n'
+        'data: [DONE]\n\n',
+      );
+      final List<PotonganBalasan> hasil = await k
+          .stream(
+            model: model,
+            pesan: <PesanApi>[const PesanApi(peran: 'user', isi: 'halo')],
+            suhu: 0.2,
+          )
+          .toList();
+      expect(hasil.every((PotonganBalasan p) => p.penalaran.isEmpty), isTrue);
+      expect(hasil.map((PotonganBalasan p) => p.teks).join(), 'langsung');
+    });
+
+    test('penyimpanan pesan menjaga penalaran utuh', () {
+      final Pesan p = Pesan(
+        id: 'm1',
+        peran: Peran.ai,
+        isi: 'Jawaban',
+        waktu: DateTime(2026, 10, 18, 12),
+        penalaran: 'Proses berpikir',
+        penalaranMs: 2400,
+      );
+      final Pesan kembali = Pesan.dariJson(p.keJson());
+      expect(kembali.penalaran, 'Proses berpikir');
+      expect(kembali.penalaranMs, 2400);
+      expect(kembali.punyaPenalaran, isTrue);
     });
   });
 }

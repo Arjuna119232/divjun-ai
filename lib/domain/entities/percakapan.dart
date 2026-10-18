@@ -68,6 +68,8 @@ class Pesan {
     this.catatanAlat = const <CatatanAlat>[],
     this.pesanGalat = '',
     this.percobaan = 0,
+    this.penalaran = '',
+    this.penalaranMs = 0,
   });
 
   final String id;
@@ -82,9 +84,18 @@ class Pesan {
   /// Berapa kali pesan ini dicoba ulang (regenerate / retry).
   final int percobaan;
 
+  /// Isi "berpikir" model (reasoning). Dipisah dari [isi] supaya bisa
+  /// ditampilkan sebagai blok yang bisa dibuka-tutup, dan TIDAK ikut
+  /// dikirim balik ke model sebagai bagian jawaban.
+  final String penalaran;
+
+  /// Berapa milidetik model berpikir. 0 = tidak ada penalaran.
+  final int penalaranMs;
+
   bool get dariPengguna => peran == Peran.pengguna;
   bool get dariAi => peran == Peran.ai;
   bool get sedangMengalir => status == StatusPesan.mengalir;
+  bool get punyaPenalaran => penalaran.trim().isNotEmpty;
 
   Pesan salin({
     String? isi,
@@ -93,6 +104,8 @@ class Pesan {
     String? pesanGalat,
     int? percobaan,
     String? modelId,
+    String? penalaran,
+    int? penalaranMs,
   }) =>
       Pesan(
         id: id,
@@ -104,6 +117,8 @@ class Pesan {
         catatanAlat: catatanAlat ?? this.catatanAlat,
         pesanGalat: pesanGalat ?? this.pesanGalat,
         percobaan: percobaan ?? this.percobaan,
+        penalaran: penalaran ?? this.penalaran,
+        penalaranMs: penalaranMs ?? this.penalaranMs,
       );
 
   Map<String, dynamic> keJson() => {
@@ -116,6 +131,8 @@ class Pesan {
         'catatanAlat': catatanAlat.map((CatatanAlat c) => c.keJson()).toList(),
         'pesanGalat': pesanGalat,
         'percobaan': percobaan,
+        'penalaran': penalaran,
+        'penalaranMs': penalaranMs,
       };
 
   static Pesan dariJson(Map<String, dynamic> j) => Pesan(
@@ -137,6 +154,8 @@ class Pesan {
             .toList(),
         pesanGalat: j['pesanGalat'] as String? ?? '',
         percobaan: (j['percobaan'] as num?)?.toInt() ?? 0,
+        penalaran: j['penalaran'] as String? ?? '',
+        penalaranMs: (j['penalaranMs'] as num?)?.toInt() ?? 0,
       );
 }
 

@@ -65,7 +65,7 @@ class StateChat {
 class ChatController extends Notifier<StateChat> {
   Timer? _throttle;
   bool _batal = false;
-  final Map<String, StringBuffer> _buffer = <String, StringBuffer>{};
+  final Map<String, _Akumulator> _buffer = <String, _Akumulator>{};
 
   RepositoriRiwayat get _repo => ref.read(repoRiwayatProvider);
 
@@ -218,6 +218,7 @@ class ChatController extends Notifier<StateChat> {
         ),
         riwayat: riwayat,
         onTeks: (String potongan) => _appendTeks(idPesanAi, potongan),
+        onPenalaran: (String potongan) => _appendPenalaran(idPesanAi, potongan),
         onAlat: (CatatanAlat c) {
           state = state.salin(langkahAgent: state.langkahAgent + 1);
           _tambahCatatan(idPesanAi, c);
@@ -235,16 +236,27 @@ class ChatController extends Notifier<StateChat> {
       _buffer.remove(idPesanAi);
       _tulisPesanAi(idPesanAi, hasil);
     } catch (e) {
+      // PENTING: ambil isi buffer SEBELUM dihapus. Urutan lama
+      // (remove dulu, baru baca) membuat seluruh teks yang sudah tampil
+      // hilang begitu stream gagal - user cuma lihat bubble kosong.
+      final _Akumulator? sisa = _buffer[idPesanAi];
+      final String teksSisa = sisa?.teks.toString() ?? '';
+      final String penalaranSisa = sisa?.penalaran.toString().trim() ?? '';
+      final int msSisa = sisa == null || penalaranSisa.isEmpty
+          ? 0
+          : DateTime.now().difference(sisa.mulai).inMilliseconds;
       _buffer.remove(idPesanAi);
       _tulisPesanAi(
         idPesanAi,
         Pesan(
           id: idPesanAi,
           peran: Peran.ai,
-          isi: _bufferTeks(idPesanAi),
+          isi: teksSisa,
           waktu: DateTime.now(),
           status: StatusPesan.gagal,
           pesanGalat: 'Gagal memproses: $e',
+          penalaran: penalaranSisa,
+          penalaranMs: msSisa,
         ),
       );
     } finally {
@@ -263,8 +275,6 @@ class ChatController extends Notifier<StateChat> {
     _tandai(status: StatusPesan.dibatalkan);
     state = state.salin(sibuk: false, langkahAgent: 0);
   }
-
-  String _bufferTeks(String idPesan) => _buffer[idPesan]?.toString() ?? '';
 
   /// Riwayat untuk model: semua pesan kecuali pesan AI yang sedang mengalir.
   List<Pesan> _pesanUntukModel(String idPercakapan, String idDilewati) {
@@ -345,7 +355,19 @@ class ChatController extends Notifier<StateChat> {
   /// Token datang sangat cepat; notifikasi Riverpod di-throttle 40 ms supaya
   /// UI tidak rebuild ratusan kali per detik (masih terasa mengalir).
   void _appendTeks(String idPesan, String potongan) {
-    (_buffer[idPesan] ??= StringBuffer()).write(potongan);
+    (_buffer[idPesan] ??= _Akumulator()).teks.write(potongan);
+    _jadwalFlush();
+  }
+
+  /// Penalaran dikirim terpisah dari jawaban; dicatat terpisah juga supaya
+  /// blok "Berpikir" bisa tampil live lalu menyimpan durasinya.
+  void _appendPenalaran(String idPesan, String potongan) {
+    final _Akumulator a = _buffer[idPesan] ??= _Akumulator();
+    a.penalaran.write(potongan);
+    _jadwalFlush();
+  }
+
+  void _jadwalFlush() {
     _throttle ??= Timer(AppMotion.d40, () {
       _throttle = null;
       _flushBuffer();
@@ -354,14 +376,23 @@ class ChatController extends Notifier<StateChat> {
 
   void _flushBuffer() {
     if (_buffer.isEmpty) return;
-    for (final MapEntry<String, StringBuffer> e in _buffer.entries) {
-      final String isi = e.value.toString();
+    for (final MapEntry<String, _Akumulator> e in _buffer.entries) {
+      final _Akumulator a = e.value;
       state = state.salin(
         daftar: state.daftar.map((Percakapan p) => _salin(
               p,
               isi: <Pesan>[
                 for (final Pesan x in p.pesan)
-                  if (x.id == e.key) x.salin(isi: isi) else x,
+                  if (x.id == e.key)
+                    x.salin(
+                      isi: a.teks.toString(),
+                      penalaran: a.penalaran.toString(),
+                      penalaranMs: a.penalaran.isEmpty
+                          ? x.penalaranMs
+                          : DateTime.now().difference(a.mulai).inMilliseconds,
+                    )
+                  else
+                    x,
               ],
             )).toList(),
       );
@@ -517,3 +548,16 @@ class ChatController extends Notifier<StateChat> {
 
 final NotifierProvider<ChatController, StateChat> chatProvider =
     NotifierProvider<ChatController, StateChat>(ChatController.new);
+
+/// Penampung token yang belum dirapikan ke state (throttled 40 ms).
+///
+/// Dua buffer terpisah: jawaban ([teks]) dan isi berpikir ([penalaran]).
+/// Dicampur dalam satu StringBuffer = blok "Berpikir" tidak bisa dipisah
+/// dari jawaban di UI.
+class _Akumulator {
+  _Akumulator() : mulai = DateTime.now();
+
+  final DateTime mulai;
+  final StringBuffer teks = StringBuffer();
+  final StringBuffer penalaran = StringBuffer();
+}

@@ -14,6 +14,7 @@ import '../tools/alat.dart';
 import '../tools/daftar_alat.dart';
 
 typedef EmitTeks = void Function(String potongan);
+typedef EmitPenalaran = void Function(String potongan);
 typedef EmitAlat = void Function(CatatanAlat catatan);
 typedef CekBatal = bool Function();
 
@@ -46,6 +47,7 @@ class AgentLoop {
     required String systemPrompt,
     required List<Pesan> riwayat,
     required EmitTeks onTeks,
+    required EmitPenalaran onPenalaran,
     required EmitAlat onAlat,
     required CekBatal sudahBatal,
     required KonteksAlat konteks,
@@ -64,6 +66,8 @@ class AgentLoop {
     );
 
     final StringBuffer isi = StringBuffer();
+    final StringBuffer penalaran = StringBuffer();
+    int penalaranMs = 0;
     final List<CatatanAlat> catatan = <CatatanAlat>[];
     final List<ModelAi> percobaan = <ModelAi>[modelAktif];
     final List<String> catatFallback = <String>[];
@@ -85,6 +89,10 @@ class AgentLoop {
       ...ModelAi.cadangan(modelAktif),
     ];
 
+    // Mengukur durasi berpikir: dari potongan penalaran pertama sampai
+    // potongan jawaban pertama (atau sampai stream habis).
+    final Stopwatch jamPenalaran = Stopwatch();
+
     for (int langkah = 1; langkah <= AppConfig.maksLangkahAgent; langkah++) {
       if (sudahBatal()) break;
 
@@ -103,7 +111,14 @@ class AgentLoop {
           selesai = true;
           break;
         }
+        if (potongan.penalaran.isNotEmpty) {
+          if (!jamPenalaran.isRunning) jamPenalaran.start();
+          penalaran.write(potongan.penalaran);
+          onPenalaran(potongan.penalaran);
+        }
         if (potongan.teks.isNotEmpty) {
+          // Jawaban mulai = waktu berpikir habis.
+          if (jamPenalaran.isRunning) jamPenalaran.stop();
           isi.write(potongan.teks);
           onTeks(potongan.teks);
         }
@@ -115,6 +130,9 @@ class AgentLoop {
           break;
         }
       }
+      if (jamPenalaran.isRunning) jamPenalaran.stop();
+      penalaranMs += jamPenalaran.elapsedMilliseconds;
+      jamPenalaran.reset();
 
       if (galat.isNotEmpty) {
         // Auto-fallback: model ditolak / kuota habis -> coba kandidat lain
@@ -201,6 +219,8 @@ class AgentLoop {
       modelId: modelAktif.id,
       catatanAlat: catatan,
       pesanGalat: galat,
+      penalaran: penalaran.toString().trim(),
+      penalaranMs: penalaranMs,
     );
   }
 

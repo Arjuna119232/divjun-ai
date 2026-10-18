@@ -90,9 +90,14 @@ class PanggilanAlat {
 }
 
 /// Satu potongan dari stream (delta token atau tool call).
+///
+/// [penalaran] = isi "berpikir" model (reasoning), [teks] = jawaban akhir.
+/// Keduanya DIBEDAKAN sejak layer ini: kalau dicampur, blok "Berpikir" di UI
+/// tidak mungkin dibuat dan penalaran ikut terkirim sebagai jawaban.
 class PotonganBalasan {
   const PotonganBalasan({
     this.teks = '',
+    this.penalaran = '',
     this.alat = const <PanggilanAlat>[],
     this.selesai = false,
     this.alasanBerhenti = '',
@@ -101,6 +106,7 @@ class PotonganBalasan {
   });
 
   final String teks;
+  final String penalaran;
   final List<PanggilanAlat> alat;
   final bool selesai;
   final String alasanBerhenti;
@@ -109,13 +115,16 @@ class PotonganBalasan {
   /// Lihat [KodeGalat] - dipakai agent loop untuk deciding auto-fallback.
   final int kodeGalat;
 
-  bool get tanpaIsi => teks.isEmpty && alat.isEmpty && !selesai && galat.isEmpty;
+  bool get tanpaIsi =>
+      teks.isEmpty && penalaran.isEmpty && alat.isEmpty && !selesai &&
+      galat.isEmpty;
 }
 
 /// Hasil satu putaran chat (non-streaming atau sudah dirangkum).
 class HasilBalasan {
   const HasilBalasan({
     required this.teks,
+    this.penalaran = '',
     this.alat = const <PanggilanAlat>[],
     this.galat = '',
     this.alasanBerhenti = '',
@@ -123,6 +132,7 @@ class HasilBalasan {
   });
 
   final String teks;
+  final String penalaran;
   final List<PanggilanAlat> alat;
   final String galat;
   final String alasanBerhenti;

@@ -110,7 +110,29 @@ class GelembungPesan extends StatelessWidget {
   }
 
   Widget _isi(BuildContext context, Color teks) {
+    final bool adaPenalaran = pesan.punyaPenalaran;
+
+    // Blok "Berpikir" duduk DI DALAM bubble, di atas jawaban - seperti Claude.
+    // Tanpa ini, penalaran yang sudah dipisah di layer data tidak pernah tampil
+    // dan user mengira model menjawab tanpa berpikir sama sekali.
+    final Widget? blokPenalaran = adaPenalaran
+        ? _BlokPenalaran(pesan: pesan, sedangAlir: sedangAlir)
+        : null;
+
     if (pesan.isi.isEmpty) {
+      if (blokPenalaran != null) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            blokPenalaran,
+            if (pesan.status == StatusPesan.mengalir) ...<Widget>[
+              const SizedBox(height: AppSpacing.sm),
+              _TeksSedangMengalir(),
+            ],
+          ],
+        );
+      }
       if (pesan.status == StatusPesan.mengalir) {
         return _TeksSedangMengalir();
       }
@@ -129,7 +151,21 @@ class GelembungPesan extends StatelessWidget {
       );
     }
 
-    return TampilanMarkdown(teks: pesan.isi);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (blokPenalaran != null) ...<Widget>[
+          blokPenalaran,
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        TampilanMarkdown(teks: pesan.isi),
+        if (pesan.status == StatusPesan.mengalir) ...<Widget>[
+          const SizedBox(height: AppSpacing.xs),
+          _TeksSedangMengalir(),
+        ],
+      ],
+    );
   }
 
   static String _modelRingkas(String id) {
@@ -173,6 +209,124 @@ class GelembungPesan extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Blok "Berpikir": isi penalaran model, bisa dibuka-tutup.
+///
+/// Default terbuka saat masih mengalir (supaya user lihat prosesnya), lalu
+/// menutup sendiri saat jawaban selesai - kecuali user yang membukanya
+/// secara manual, pilihan itu dihormati.
+class _BlokPenalaran extends StatefulWidget {
+  const _BlokPenalaran({required this.pesan, required this.sedangAlir});
+
+  final Pesan pesan;
+  final bool sedangAlir;
+
+  @override
+  State<_BlokPenalaran> createState() => _BlokPenalaranState();
+}
+
+class _BlokPenalaranState extends State<_BlokPenalaran> {
+  bool _buka = true;
+  bool _manual = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _buka = widget.sedangAlir;
+  }
+
+  @override
+  void didUpdateWidget(_BlokPenalaran lama) {
+    super.didUpdateWidget(lama);
+    // Selesai mengalir -> tutup sendiri, tapi jangan menimpa pilihan user.
+    if (lama.sedangAlir && !widget.sedangAlir && !_manual) {
+      setState(() => _buka = false);
+    }
+  }
+
+  String get _judul {
+    if (widget.sedangAlir) return 'Berpikir';
+    final int ms = widget.pesan.penalaranMs;
+    if (ms <= 0) return 'Berpikir';
+    return 'Berpikir ${Waktu.durasi(ms)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color aksen = AppColors.amber;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(left: AppSpacing.sm),
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(
+            color: aksen.withValues(alpha: 0.45),
+            width: 2.5,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          InkWell(
+            onTap: () {
+              setState(() {
+                _buka = !_buka;
+                _manual = true;
+              });
+            },
+            borderRadius: AppRadius.br8,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(LucideIcons.brain, size: 14, color: aksen),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    _judul,
+                    style: context.teks.labelMedium?.copyWith(color: aksen),
+                  ),
+                  AnimatedRotation(
+                    turns: _buka ? 0.5 : 0,
+                    duration: AppMotion.cepat,
+                    curve: AppMotion.masuk,
+                    child: Icon(
+                      LucideIcons.chevronDown,
+                      size: 14,
+                      color: aksen.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: AppMotion.sedang,
+            curve: AppMotion.emphasized,
+            alignment: Alignment.topCenter,
+            child: _buka
+                ? Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Theme(
+                      // Isi berpikir ditampilkan redup: bukan jawaban.
+                      data: Theme.of(context).copyWith(
+                        dividerColor: Colors.transparent,
+                      ),
+                      child: Opacity(
+                        opacity: widget.sedangAlir ? 0.75 : 0.6,
+                        child: TampilanMarkdown(teks: widget.pesan.penalaran, kecil: true),
+                      ),
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -254,8 +254,8 @@ class KlienLlm {
         if (barisTunggal.isEmpty) continue;
 
         for (final _IrisanSse iris in pengurai.urai(barisTunggal)) {
-          if (iris.teks.isNotEmpty) {
-            yield PotonganBalasan(teks: iris.teks);
+          if (iris.teks.isNotEmpty || iris.penalaran.isNotEmpty) {
+            yield PotonganBalasan(teks: iris.teks, penalaran: iris.penalaran);
           }
           iris.perubahanAlat.forEach((int idx, _IrisanAlat a) {
             alatAkum.putIfAbsent(idx, () => _AlatAkumulator());
@@ -293,6 +293,7 @@ class KlienLlm {
     required double suhu,
   }) async {
     final StringBuffer teks = StringBuffer();
+    final StringBuffer penalaran = StringBuffer();
     String galat = '';
     final List<PanggilanAlat> alat = <PanggilanAlat>[];
     try {
@@ -306,12 +307,18 @@ class KlienLlm {
           break;
         }
         teks.write(p.teks);
+        penalaran.write(p.penalaran);
         alat.addAll(p.alat);
       }
     } catch (e) {
       galat = 'Gagal: $e';
     }
-    return HasilBalasan(teks: teks.toString(), alat: alat, galat: galat);
+    return HasilBalasan(
+      teks: teks.toString(),
+      penalaran: penalaran.toString(),
+      alat: alat,
+      galat: galat,
+    );
   }
 
   /// Ambil daftar model langsung dari provider (katalog Settings).
@@ -709,8 +716,13 @@ class _IrisanAlat {
 }
 
 class _IrisanSse {
-  const _IrisanSse({this.teks = '', this.perubahanAlat = const <int, _IrisanAlat>{}});
+  const _IrisanSse({
+    this.teks = '',
+    this.penalaran = '',
+    this.perubahanAlat = const <int, _IrisanAlat>{},
+  });
   final String teks;
+  final String penalaran;
   final Map<int, _IrisanAlat> perubahanAlat;
 }
 
@@ -737,9 +749,12 @@ class _PenguraiSse {
 
   /// Format OpenAI: dipakai Groq, OVH, Pollinations, dan OpenRouter.
   ///
-  /// PENTING: beberapa provider (OVH, Pollinations) kirim penalaran di
-  /// `delta.reasoning`, bukan `reasoning_content`. Kalau hanya salah satu
-  /// dibaca, layar jadi kosong padahal server jalan.
+  /// PENTING: penalaran dipisah ke field `penalaran`, BUKAN ditumpangkan ke
+  /// `teks`. Provider berbeda-bedanya nama fieldnya:
+  /// - `delta.reasoning`        -> OVH, Pollinations (dan sebagian OpenRouter)
+  /// - `delta.reasoning_content` -> Groq, sebagian OpenRouter
+  /// Kalau keduanya dipakai sebagai isi jawaban, blok "Berpikir" mustahil
+  /// dibuat dan user baca proses berpikir yang seharusnya disembunyikan.
   List<_IrisanSse> _uraiOpenAi(Map<String, dynamic> j) {
     final List<dynamic> pilihan =
         (j['choices'] as List<dynamic>?) ?? <dynamic>[];
@@ -749,12 +764,13 @@ class _PenguraiSse {
     final Object? delta = c['delta'] ?? c['message'];
     if (delta is! Map<String, dynamic>) return const <_IrisanSse>[];
 
-    String teks = delta['content'] is String ? delta['content'] as String : '';
-    if (teks.isEmpty && delta['reasoning'] is String) {
-      teks = delta['reasoning'] as String;
-    }
-    if (teks.isEmpty && delta['reasoning_content'] is String) {
-      teks = delta['reasoning_content'] as String;
+    final String teks =
+        delta['content'] is String ? delta['content'] as String : '';
+    final StringBuffer penalaran = StringBuffer();
+    if (delta['reasoning'] is String) {
+      penalaran.write(delta['reasoning'] as String);
+    } else if (delta['reasoning_content'] is String) {
+      penalaran.write(delta['reasoning_content'] as String);
     }
 
     final Map<int, _IrisanAlat> alat = <int, _IrisanAlat>{};
@@ -774,8 +790,16 @@ class _PenguraiSse {
         );
       }
     }
-    if (teks.isEmpty && alat.isEmpty) return const <_IrisanSse>[];
-    return <_IrisanSse>[_IrisanSse(teks: teks, perubahanAlat: alat)];
+    if (teks.isEmpty && penalaran.isEmpty && alat.isEmpty) {
+      return const <_IrisanSse>[];
+    }
+    return <_IrisanSse>[
+      _IrisanSse(
+        teks: teks,
+        penalaran: penalaran.toString(),
+        perubahanAlat: alat,
+      ),
+    ];
   }
 
   List<_IrisanSse> _uraiGemini(Map<String, dynamic> j) {
@@ -789,13 +813,21 @@ class _PenguraiSse {
     final Object? bagian = konten['parts'];
     if (bagian is! List<dynamic>) return const <_IrisanSse>[];
     final StringBuffer teks = StringBuffer();
+    final StringBuffer penalaran = StringBuffer();
     for (final dynamic p in bagian) {
-      if (p is Map<String, dynamic> && p['text'] is String) {
+      if (p is! Map<String, dynamic>) continue;
+      if (p['text'] is! String) continue;
+      // Gemini menandai bagian berpikir dengan `"thought": true`.
+      if (p['thought'] == true) {
+        penalaran.write(p['text'] as String);
+      } else {
         teks.write(p['text'] as String);
       }
     }
-    if (teks.isEmpty) return const <_IrisanSse>[];
-    return <_IrisanSse>[_IrisanSse(teks: teks.toString())];
+    if (teks.isEmpty && penalaran.isEmpty) return const <_IrisanSse>[];
+    return <_IrisanSse>[
+      _IrisanSse(teks: teks.toString(), penalaran: penalaran.toString()),
+    ];
   }
 }
 
