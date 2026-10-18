@@ -60,22 +60,20 @@ class LayarLanjutan extends ConsumerWidget {
             judul: 'Koneksi',
             keterangan: 'Hanya perlu diubah kalau jawaban tidak muncul.',
             ikon: LucideIcons.plug,
+          ),
+          KartuSetelan(
             anak: <Widget>[
-              KartuSetelan(
-                anak: <Widget>[
-                  _Baris(
-                    ikon: LucideIcons.wifi,
-                    judul: 'Uji koneksi',
-                    keterangan: 'Cek apakah AI bisa menghubungi layanan.',
-                    onTap: () => context.push('/koneksi'),
-                  ),
-                  _Baris(
-                    ikon: LucideIcons.keyRound,
-                    judul: 'Kunci akses',
-                    keterangan: 'Masukkan kunci supaya jawaban tidak terputus.',
-                    onTap: () => context.push('/kunci'),
-                  ),
-                ],
+              _Baris(
+                ikon: LucideIcons.wifi,
+                judul: 'Uji koneksi',
+                keterangan: 'Cek apakah AI bisa menghubungi layanan.',
+                onTap: () => context.push('/koneksi'),
+              ),
+              _Baris(
+                ikon: LucideIcons.keyRound,
+                judul: 'Kunci akses',
+                keterangan: 'Masukkan kunci supaya jawaban tidak terputus.',
+                onTap: () => context.push('/kunci'),
               ),
             ],
           ),
