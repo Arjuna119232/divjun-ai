@@ -117,14 +117,14 @@ class HalamanKoneksi extends ConsumerWidget {
             judul: 'Cara cepat',
             ikon: LucideIcons.info,
             anak: <Widget>[
-              const _Teks(
+              _Teks(
                 'Semua model gagal biasanya karena 3 hal: (1) kunci API kosong '
                 'atau kadaluarsa, (2) model yang dipilih hanya tersedia di '
                 'paket berbayar, (3) kuota provider habis. Tekan "Tes" di '
                 'atas untuk melihat penyebabnya persis.',
               ),
-              const SizedBox(height: AppSpacing.sm),
-              const _Teks(
+              SizedBox(height: AppSpacing.sm),
+              _Teks(
                 'Kunci gratis: Groq (console.groq.com) dan Gemini '
                 '(aistudio.google.com) - keduanya tanpa kartu kredit.',
               ),
