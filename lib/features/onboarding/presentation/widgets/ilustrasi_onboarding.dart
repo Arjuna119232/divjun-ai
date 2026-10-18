@@ -41,18 +41,16 @@ class _Kaca extends StatelessWidget {
     required this.radius,
     required this.child,
     this.gradient,
-    this.padding = const EdgeInsets.all(12),
   });
 
   final double radius;
   final Widget child;
   final Gradient? gradient;
-  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: padding,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: gradient,
         color: gradient == null
@@ -105,7 +103,7 @@ class _IlustrasiObrolan extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Icon(LucideIcons.brain, size: 13, color: AppColors.amber),
+                    const Icon(LucideIcons.brain, size: 13, color: AppColors.amber),
                     const SizedBox(width: 6),
                     Text(
                       'Berpikir 2,4 detik',
@@ -117,11 +115,11 @@ class _IlustrasiObrolan extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 9),
-                _Garis(0.9),
+                const _Garis(0.9),
                 const SizedBox(height: 6),
-                _Garis(0.72),
+                const _Garis(0.72),
                 const SizedBox(height: 6),
-                _Garis(0.48),
+                const _Garis(0.48),
               ],
             ),
           ),

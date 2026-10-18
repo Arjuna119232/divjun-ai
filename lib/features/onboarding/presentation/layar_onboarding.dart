@@ -87,7 +87,7 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
       backgroundColor: const Color(0xFF0B0B10),
       body: Stack(
         children: <Widget>[
-          Positioned.fill(child: LatarOnboarding(animate: true)),
+          const Positioned.fill(child: LatarOnboarding(animate: true)),
           SafeArea(
             child: Column(
               children: <Widget>[

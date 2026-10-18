@@ -3,15 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
 import '../../../../core/constants/app_config.dart';
 import '../../../../core/constants/app_env.dart';
 import '../../../../core/providers.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../data/kontrol_chat.dart';
 import '../../../../domain/entities/model_ai.dart';
 import '../../../../domain/entities/percakapan.dart';
 import '../../../../domain/entities/setelan.dart';
+import '../../data/kontrol_chat.dart';
 
 /// Sidebar ala Claude: daftar percakapan di kiri, pencarian, dan navigasi.
 ///

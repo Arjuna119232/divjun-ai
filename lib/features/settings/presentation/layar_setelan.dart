@@ -3,16 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
 import '../../../core/constants/app_config.dart';
 import '../../../core/constants/app_env.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../domain/entities/model_ai.dart';
+import '../../../domain/entities/setelan.dart';
 import '../../onboarding/presentation/layar_onboarding.dart';
 import '../../skills/data/skill_providers.dart';
 import '../../skills/domain/skill.dart';
-import '../../../domain/entities/model_ai.dart';
-import '../../../domain/entities/setelan.dart';
 
 class LayarSetelan extends ConsumerWidget {
   const LayarSetelan({super.key});

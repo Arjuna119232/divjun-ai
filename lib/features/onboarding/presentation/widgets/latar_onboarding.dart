@@ -118,7 +118,7 @@ class _PelukisLatar extends CustomPainter {
     canvas.drawRect(
       layar,
       Paint()
-        ..shader = RadialGradient(
+        ..shader = const RadialGradient(
           center: Alignment.center,
           radius: 0.95,
           colors: <Color>[Colors.transparent, const Color(0xE605050C)],
@@ -137,10 +137,10 @@ class _PelukisLatar extends CustomPainter {
     Color warna,
     double opasitas,
   ) {
-    final double TAU = math.pi * 2;
-    final double fx = math.sin(t * TAU + radiusFraksi * 3) * 0.06;
-    final double fy = math.cos(t * TAU * 1.3 + radiusFraksi * 2) * 0.07;
-    final double skala = 1 + math.sin(t * TAU * 0.7) * 0.08;
+    const double tau = math.pi * 2;
+    final double fx = math.sin(t * tau + radiusFraksi * 3) * 0.06;
+    final double fy = math.cos(t * tau * 1.3 + radiusFraksi * 2) * 0.07;
+    final double skala = 1 + math.sin(t * tau * 0.7) * 0.08;
 
     final Offset c = Offset(
       (pusat.dx + fx) * size.width,
@@ -181,7 +181,7 @@ class _PelukisLatar extends CustomPainter {
       area,
       Paint()
         ..blendMode = BlendMode.dstOut
-        ..shader = RadialGradient(
+        ..shader = const RadialGradient(
           radius: 0.78,
           colors: <Color>[const Color(0x00000000), const Color(0xFF000000)],
           stops: const <double>[0.55, 1],

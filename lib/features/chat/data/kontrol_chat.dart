@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/constants/app_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
@@ -14,8 +11,9 @@ import '../../../domain/entities/percakapan.dart';
 import '../../../domain/entities/setelan.dart';
 import '../../../services/tool_executor.dart';
 import '../../agent/loop/agent_loop.dart';
-import '../../skills/data/skill_providers.dart';
 import '../../agent/tools/alat.dart';
+import '../../skills/data/skill_providers.dart';
+import 'dart:async';
 
 /// State chat: daftar percakapan + percakapan aktif + status sibuk.
 class StateChat {

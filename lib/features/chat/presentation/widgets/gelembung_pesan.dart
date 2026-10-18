@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/waktu.dart';
-import '../../../../shared/widgets/tampilan_markdown.dart';
 import '../../../../domain/entities/percakapan.dart';
+import '../../../../shared/widgets/tampilan_markdown.dart';
 
 /// Satu bubble pesan: user (kanan, warna brand) atau AI (kiri, netral).
 ///
