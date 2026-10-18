@@ -89,8 +89,6 @@ class SetelanController extends Notifier<SetelanApp> {
 
   Future<void> setTema(TemaMode m) => ubah(state.salin(tema: m));
 
-  Future<void> setModeAgent(ModeAgent m) => ubah(state.salin(modeAgent: m));
-
   Future<void> setSuhu(double v) => ubah(state.salin(suhu: v.clamp(0, 2)));
 
   Future<void> setIzinWeb(bool v) => ubah(state.salin(izinkanWeb: v));
@@ -106,11 +104,6 @@ class SetelanController extends Notifier<SetelanApp> {
 
   Future<void> setWarnaDinamis(bool v) =>
       ubah(state.salin(pakaiWarnaDinamis: v));
-
-  Future<void> setAutoRingkas(bool v) => ubah(state.salin(autoRingkas: v));
-
-  Future<void> setPakaiSkill(bool v) =>
-      ubah(state.salin(pakaiSkillPanduan: v));
 
   Future<void> setKunciGroq(String v) => ubah(state.salin(kunciGroq: v.trim()));
 

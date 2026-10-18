@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../../../core/constants/app_config.dart';
-import '../../../core/constants/app_env.dart';
+
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/model_ai.dart';
 import '../../../domain/entities/setelan.dart';
-import '../../onboarding/presentation/layar_onboarding.dart';
-import '../../skills/data/skill_providers.dart';
-import '../../skills/domain/skill.dart';
+import 'bagian_setelan.dart';
 
+/// Halaman Pengaturan.
+///
+/// Disusun dalam lima bagian (A-E) supaya pengguna awam bisa memindai halaman
+/// dengan cepat. Rombakan v3.0.0: seluruh detail teknis (provider, kunci API,
+/// jumlah berkas skill, tombol onboarding) dipindah ke sub-halaman, dan
+/// sakelar yang sebenarnya perilaku inti dihapus dari UI.
+///
+/// Isi helper di bawah file ini dipakai juga oleh layar chat, jadi jangan
+/// dipindah tanpa memeriksa pemanggilnya.
 class LayarSetelan extends ConsumerWidget {
   const LayarSetelan({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final SetelanApp s = ref.watch(setelanProvider);
-    final ModelAi model = ref.watch(modelProvider);
-    final int jumlahSkill = ref.watch(jumlahSkillProvider);
-    final IndeksSkill idxSkill =
-        ref.watch(indeksSkillProvider).valueOrNull ?? IndeksSkill.kosong;
     final SetelanController c = ref.read(setelanProvider.notifier);
 
     return Scaffold(
@@ -30,303 +31,222 @@ class LayarSetelan extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
-          AppSpacing.sm,
+          AppSpacing.md,
           AppSpacing.lg,
           AppSpacing.xxxl,
         ),
         children: <Widget>[
-          _Bagian(
-            judul: 'Model AI',
-            ikon: LucideIcons.brain,
-            anak: <Widget>[
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(model.label),
-                subtitle: Text(
-                  '${model.penyedia.name} · '
-                  '${model.dukungAlat ? 'support agent' : 'chat saja'}',
-                ),
-                trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                onTap: () async {
-                  final List<ModelAi>? pilih =
-                      await tampilkanPemilihModel(context, sekarang: model);
-                  if (pilih != null && pilih.isNotEmpty) {
-                    await c.setModel(pilih.first.id);
-                  }
-                },
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.modeAgent == ModeAgent.auto,
-                title: const Text('Pilih model otomatis'),
-                subtitle: const Text(
-                  'Model dipilih otomatis sesuai jenis pertanyaan.',
-                ),
-                onChanged: (bool v) =>
-                    c.setModeAgent(v ? ModeAgent.auto : ModeAgent.selalu),
-              ),
-            ],
+          // ------------------------------------------------ A. Profil
+          const BagianSetelan(
+            judul: 'Profil & personalisasi',
+            keterangan: 'Supaya DIVJUN terasa seperti milik Anda.',
+            ikon: LucideIcons.user,
           ),
-          _Bagian(
-            judul: 'Tampilan',
-            ikon: LucideIcons.palette,
+          KartuSetelan(
             anak: <Widget>[
-              SegmentedButton<TemaMode>(
-                segments: const <ButtonSegment<TemaMode>>[
-                  ButtonSegment<TemaMode>(
-                    value: TemaMode.sistem,
-                    label: Text('Sistem'),
-                    icon: Icon(LucideIcons.smartphone, size: 16),
-                  ),
-                  ButtonSegment<TemaMode>(
-                    value: TemaMode.terang,
-                    label: Text('Terang'),
-                    icon: Icon(LucideIcons.sun, size: 16),
-                  ),
-                  ButtonSegment<TemaMode>(
-                    value: TemaMode.gelap,
-                    label: Text('Gelap'),
-                    icon: Icon(LucideIcons.moon, size: 16),
-                  ),
-                ],
-                selected: <TemaMode>{s.tema},
-                onSelectionChanged: (Set<TemaMode> v) =>
-                    c.setTema(v.first),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.pakaiWarnaDinamis,
-                title: const Text('Warna dinamis (Material You)'),
-                subtitle: const Text(
-                  'Ambil palet warna dari wallpaper HP (Android 12+).',
-                ),
-                onChanged: c.setWarnaDinamis,
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(LucideIcons.bookOpen),
-                title: const Text('Tampilkan lagi onboarding'),
-                subtitle: const Text(
-                  'Ulangi 3 halaman perkenalan DIVJUN AI.',
-                ),
-                onTap: () async {
-                  // Kunci dihapus dulu supaya "/onboarding" yang dibuka manual
-                  // tetap menyimpan status selesai saat user menekan "Mulai".
-                  await ref
-                      .read(simpanCepitProvider)
-                      .hapus(kunciOnboarding);
-                  if (!context.mounted) return;
-                  context.push('/onboarding');
-                },
-              ),
-            ],
-          ),
-          _Bagian(
-            judul: 'Agent & alat',
-            ikon: LucideIcons.wand,
-            anak: <Widget>[
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.ingatMemori,
-                title: const Text('Memori jangka panjang'),
-                subtitle: const Text(
-                  'AI boleh mengingat fakta yang kamu minta disimpan.',
-                ),
-                onChanged: c.setIngatMemori,
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.izinkanKalkulator,
-                title: const Text('Kalkulator'),
-                onChanged: c.setIzinKalkulator,
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.izinkanWeb,
-                title: const Text('Buka web'),
-                subtitle: const Text(
-                  'Alamat privat & internal diblokir demi keamanan.',
-                ),
-                onChanged: c.setIzinWeb,
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.izinkanEmail,
-                title: const Text('Draf email'),
-                subtitle: const Text(
-                  'AI hanya membuat draf; kamu yang menekan kirim.',
-                ),
-                onChanged: c.setIzinEmail,
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Kelola memori'),
-                subtitle: const Text('Lihat, hapus, atau bersihkan semua entri.'),
-                trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                onTap: () => context.push('/memori'),
-              ),
-            ],
-          ),
-          _Bagian(
-            judul: 'Pustaka skill',
-            ikon: LucideIcons.bookOpen,
-            anak: <Widget>[
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Skill bawaan'),
-                subtitle: Text(
-                  '$jumlahSkill skill tersimpan di dalam app '
-                  '(offline, tidak butuh internet).',
-                ),
-                trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                onTap: () => context.push('/skills'),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.pakaiSkillPanduan,
-                title: const Text('AI memakai skill sebagai panduan'),
-                subtitle: const Text(
-                  'Skill yang cocok dengan pertanyaan ikut disuntik ke '
-                  'instructions, jadi jawaban AI mengikuti prosedur kerja '
-                  'yang sudah teruji.',
-                ),
-                onChanged: ref.read(setelanProvider.notifier).setPakaiSkill,
-              ),
-            ],
-          ),
-          _Bagian(
-            judul: 'Perilaku',
-            ikon: LucideIcons.sliders,
-            anak: <Widget>[
-              _SliderSuhu(
-                nilai: s.suhu,
-                onChanged: c.setSuhu,
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: s.autoRingkas,
-                title: const Text('Ringkas riwayat otomatis'),
-                subtitle: const Text(
-                  'Riwayat panjang diringkas agar hemat token.',
-                ),
-                onChanged: c.setAutoRingkas,
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Nama kamu'),
-                subtitle: Text(
-                  s.namaPengguna.isEmpty ? 'Belum diisi' : s.namaPengguna,
-                ),
-                trailing: const Icon(LucideIcons.chevronRight, size: 18),
+              BarisSetelan(
+                judul: 'Nama Anda',
+                keterangan: s.namaPengguna.isEmpty
+                    ? 'Dipakai AI untuk menyapa'
+                    : s.namaPengguna,
                 onTap: () async {
                   final String? v = await tampilkanEditor(
                     context,
-                    judul: 'Nama kamu',
+                    judul: 'Nama Anda',
                     awal: s.namaPengguna,
                     konfirmasi: 'Simpan',
-                    hint: 'Dipakai AI untuk menyapa',
+                    hint: 'Nama panggilan Anda',
                   );
                   if (v != null) await c.setNama(v);
                 },
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Instruksi tambahan'),
-                subtitle: Text(
-                  s.promptSistemTambahan.isEmpty
-                      ? 'Contoh: selalu balas singkat'
-                      : TeksRingkas.potong(s.promptSistemTambahan, 60),
-                ),
-                trailing: const Icon(LucideIcons.chevronRight, size: 18),
+              BarisSetelan(
+                judul: 'Instruksi Tambahan',
+                keterangan: s.promptSistemTambahan.isEmpty
+                    ? 'Misal: selalu balas singkat'
+                    : TeksRingkas.potong(s.promptSistemTambahan, 50),
                 onTap: () async {
                   final String? v = await tampilkanEditor(
                     context,
-                    judul: 'Instruksi tambahan',
+                    judul: 'Instruksi Tambahan',
                     awal: s.promptSistemTambahan,
                     konfirmasi: 'Simpan',
-                    hint: 'Misal: gunakan Bahasa Indonesia casual',
+                    hint: 'Misal: gunakan Bahasa Indonesia santai',
                     multiline: true,
                   );
                   if (v != null) await c.setPromptTambahan(v);
                 },
               ),
+              _SliderSuhu(nilai: s.suhu, onChanged: c.setSuhu),
             ],
           ),
-          _Bagian(
-            judul: 'Tentang',
-            ikon: LucideIcons.info,
+          const SizedBox(height: AppSpacing.xl),
+
+          // --------------------------------- B. Kecerdasan & memori
+          const BagianSetelan(
+            judul: 'Kecerdasan & memori',
+            keterangan: 'Apa yang boleh DIVJUN ingat dan kuasai.',
+            ikon: LucideIcons.brain,
+          ),
+          KartuSetelan(
             anak: <Widget>[
-              const ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('Versi'),
-                subtitle: Text('${AppConfig.appName} ${AppEnv.appVersion}'),
+              SakelarSetelan(
+                judul: 'Memori Jangka Panjang',
+                keterangan: 'Ingat fakta yang Anda minta disimpan.',
+                nilai: s.ingatMemori,
+                onChanged: c.setIngatMemori,
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Pustaka skill di dalam app'),
-                subtitle: Text(
-                  '$jumlahSkill skill · ${idxSkill.totalBerkas} berkas · '
-                  '${(idxSkill.totalUkuran / 1024 / 1024).toStringAsFixed(1)} MB '
-                  '· offline, ikut terpasang di APK',
-                ),
+              BarisSetelan(
+                judul: 'Kelola Memori',
+                keterangan: 'Lihat dan hapus hal yang diingat.',
+                onTap: () => context.push('/memori'),
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(LucideIcons.plug),
-                title: const Text('Koneksi AI'),
-                subtitle: Text(
-                  ref.watch(kunciGroqAktifProvider).trim().isNotEmpty ||
-                          ref.watch(kunciGeminiAktifProvider).trim().isNotEmpty
-                      ? 'Uji koneksi, ganti kunci API, lihat model yang hidup.'
-                      : 'Belum ada kunci API. Tekan untuk memasukkan kunci '
-                          'gratis (tanpa kartu kredit).',
-                  style: TextStyle(
-                    color: (ref.watch(kunciGroqAktifProvider).trim().isEmpty &&
-                            ref.watch(kunciGeminiAktifProvider).trim().isEmpty)
-                        ? context.cs.error
-                        : null,
-                  ),
-                ),
-                trailing: const Icon(LucideIcons.chevronRight, size: 18),
-                onTap: () => context.push('/koneksi'),
+              BarisSetelan(
+                judul: 'Keahlian Agen',
+                keterangan: 'Kemampuan khusus yang sudah disiapkan.',
+                onTap: () => context.push('/skills'),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // --------------------------------------- C. Izin alat kerja
+          const BagianSetelan(
+            judul: 'Izin Alat',
+            keterangan: 'Beri izin hanya yang memang Anda pakai.',
+            ikon: LucideIcons.wand,
+          ),
+          KartuSetelan(
+            anak: <Widget>[
+              SakelarSetelan(
+                judul: 'Akses Internet',
+                keterangan: 'DIVJUN boleh membuka halaman web.',
+                nilai: s.izinkanWeb,
+                onChanged: c.setIzinWeb,
+              ),
+              SakelarSetelan(
+                judul: 'Kalkulator',
+                keterangan: 'Untuk hitungan yang perlu tepat.',
+                nilai: s.izinkanKalkulator,
+                onChanged: c.setIzinKalkulator,
+              ),
+              SakelarSetelan(
+                judul: 'Pembuat Draf Email',
+                keterangan: 'DIVJUN menulis draf, Anda yang mengirim.',
+                nilai: s.izinkanEmail,
+                onChanged: c.setIzinEmail,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // -------------------------------------------- D. Tampilan
+          const BagianSetelan(
+            judul: 'Tampilan',
+            keterangan: 'Sesuaikan warna dengan liking Anda.',
+            ikon: LucideIcons.palette,
+          ),
+          KartuSetelan(
+            anak: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: SegmentedButton<TemaMode>(
+                  segments: const <ButtonSegment<TemaMode>>[
+                    ButtonSegment<TemaMode>(
+                      value: TemaMode.sistem,
+                      label: Text('Sistem'),
+                      icon: Icon(LucideIcons.smartphone, size: 16),
+                    ),
+                    ButtonSegment<TemaMode>(
+                      value: TemaMode.terang,
+                      label: Text('Terang'),
+                      icon: Icon(LucideIcons.sun, size: 16),
+                    ),
+                    ButtonSegment<TemaMode>(
+                      value: TemaMode.gelap,
+                      label: Text('Gelap'),
+                      icon: Icon(LucideIcons.moon, size: 16),
+                    ),
+                  ],
+                  selected: <TemaMode>{s.tema},
+                  onSelectionChanged: (Set<TemaMode> v) => c.setTema(v.first),
+                ),
+              ),
+              SakelarSetelan(
+                judul: 'Warna Dinamis',
+                keterangan: 'Warna app mengikuti wallpaper HP.',
+                nilai: s.pakaiWarnaDinamis,
+                onChanged: c.setWarnaDinamis,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // -------------------------------------------- E. Lainnya
+          const BagianSetelan(
+            judul: 'Lainnya',
+            keterangan: 'Pilihan yang jarang diganti.',
+            ikon: LucideIcons.ellipsis,
+          ),
+          KartuSetelan(
+            anak: <Widget>[
+              BarisSetelan(
+                judul: 'Pengaturan Lanjut',
+                keterangan: 'Model, koneksi, dan kunci akses.',
+                onTap: () => context.push('/setelan/lanjutan'),
+              ),
+              BarisSetelan(
+                judul: 'Tentang',
+                keterangan: 'Versi aplikasi dan ringkasan kemampuan.',
+                onTap: () => context.push('/setelan/tentang'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TombolBahaya(
+            judul: 'Hapus Semua Riwayat Chat',
+            onTap: () => _konfirmasiHapus(context, ref),
           ),
         ],
       ),
     );
   }
-}
 
-class _Bagian extends StatelessWidget {
-  const _Bagian({required this.judul, required this.ikon, required this.anak});
-
-  final String judul;
-  final IconData ikon;
-  final List<Widget> anak;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Icon(ikon, size: 16, color: context.cs.primary),
-              const SizedBox(width: AppSpacing.sm),
-              Text(judul, style: context.teks.labelMedium),
+  Future<void> _konfirmasiHapus(BuildContext context, WidgetRef ref) async {
+    final bool ok = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext d) => AlertDialog(
+            title: const Text('Hapus semua riwayat?'),
+            content: const Text(
+              'Semua percakapan akan hilang dan tidak bisa dikembalikan.',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(d).pop(false),
+                child: const Text('Batal'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(d).pop(true),
+                child: const Text('Hapus'),
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          ...anak,
-        ],
-      ),
+        ) ??
+        false;
+    if (!ok || !context.mounted) return;
+    await ref.read(chatProvider.notifier).hapusSemua();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Riwayat chat dihapus.')),
     );
   }
 }
 
+/// Slider "Gaya jawaban".
+///
+/// Nilai 0..2 tetap kompatibel dengan model, tapi yang ditampilkan ke user
+/// adalah nama gaya (Fokus / Seimbang / Luap / Kreatif) plus dua label ujung.
+/// Angka mentah tidak membantu pengguna awam memahami apa yang dia ubah.
 class _SliderSuhu extends StatelessWidget {
   const _SliderSuhu({required this.nilai, required this.onChanged});
 
@@ -335,31 +255,56 @@ class _SliderSuhu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Text('Kreativitas jawaban', style: context.teks.bodyLarge),
-            ),
-            Text(nilai.toStringAsFixed(1), style: context.teks.labelMedium),
-          ],
-        ),
-        Slider(
-          value: nilai.clamp(0, 2),
-          min: 0,
-          max: 2,
-          divisions: 8,
-          label: nilai.toStringAsFixed(1),
-          onChanged: onChanged,
-        ),
-        Text(
-          'Rendah = fokus dan singkat · Tinggi = lebih beragam',
-          style: context.teks.labelSmall,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text('Gaya Jawaban', style: context.teks.bodyLarge),
+              ),
+              Text(_label, style: context.teks.labelMedium),
+            ],
+          ),
+          Slider(
+            value: nilai.clamp(0, 2),
+            min: 0,
+            max: 2,
+            divisions: 4,
+            label: _label,
+            onChanged: onChanged,
+          ),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  'Fokus & Singkat',
+                  style: context.teks.labelSmall,
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  'Kreatif & Luas',
+                  style: context.teks.labelSmall,
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
+  }
+
+  /// Nama gaya yang dibaca user, bukan angka desimal.
+  String get _label {
+    if (nilai < 0.5) return 'Fokus';
+    if (nilai < 1.1) return 'Seimbang';
+    if (nilai < 1.6) return 'Luap';
+    return 'Kreatif';
   }
 }
 

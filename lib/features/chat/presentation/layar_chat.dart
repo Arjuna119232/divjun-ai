@@ -28,6 +28,12 @@ class LayarChat extends ConsumerStatefulWidget {
 class _LayarChatState extends ConsumerState<LayarChat> {
   final ScrollController _scroll = ScrollController();
 
+  /// Key Scaffold agar tombol menu dan item "Riwayat Chat" sama-sama
+  /// bisa membuka sidebar dari dalam AppBar dan dari dalam popup menu
+  /// (keduanya dibangun di luar subtree Scaffold, jadi `Scaffold.of`
+  /// tidak bisa diandalkan di sana).
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -73,13 +79,14 @@ class _LayarChatState extends ConsumerState<LayarChat> {
     });
 
     return Scaffold(
+      key: _scaffoldKey,
       drawer: const SidebarObrolan(),
       appBar: AppBar(
         leadingWidth: 60,
         leading: IconButton(
           tooltip: 'Menu dan riwayat percakapan',
           icon: const Icon(LucideIcons.menu, size: 22),
-          onPressed: () => Scaffold.of(context).openDrawer(),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: InkWell(
           borderRadius: AppRadius.br12,
@@ -133,24 +140,25 @@ class _LayarChatState extends ConsumerState<LayarChat> {
             icon: const Icon(LucideIcons.moreVertical, size: 22),
             onSelected: (String v) {
               switch (v) {
-                case 'skill':
-                  context.push('/skills');
+                case 'riwayat':
+                  // Sidebar riwayat, bukan halaman terpisah.
+                  _scaffoldKey.currentState?.openDrawer();
                 case 'memori':
                   context.push('/memori');
+                case 'keahlian':
+                  context.push('/skills');
                 case 'setelan':
                   context.push('/setelan');
-                case 'koneksi':
-                  context.push('/koneksi');
               }
             },
             itemBuilder: (BuildContext c) => <PopupMenuEntry<String>>[
               const PopupMenuItem<String>(
-                value: 'skill',
+                value: 'riwayat',
                 child: ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(LucideIcons.bookOpen, size: 18),
-                  title: Text('Pustaka skill'),
+                  leading: Icon(LucideIcons.history, size: 18),
+                  title: Text('Riwayat Chat'),
                 ),
               ),
               const PopupMenuItem<String>(
@@ -159,16 +167,16 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(LucideIcons.brain, size: 18),
-                  title: Text('Memori'),
+                  title: Text('Memori AI'),
                 ),
               ),
               const PopupMenuItem<String>(
-                value: 'koneksi',
+                value: 'keahlian',
                 child: ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(LucideIcons.plug, size: 18),
-                  title: Text('Koneksi AI'),
+                  leading: Icon(LucideIcons.sparkles, size: 18),
+                  title: Text('Keahlian Agen'),
                 ),
               ),
               const PopupMenuItem<String>(

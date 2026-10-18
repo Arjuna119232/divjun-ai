@@ -7,7 +7,9 @@ import '../../features/memory/presentation/layar_memori.dart';
 import '../../features/onboarding/presentation/layar_onboarding.dart';
 import '../../features/settings/presentation/halaman_koneksi.dart';
 import '../../features/settings/presentation/halaman_kunci.dart';
+import '../../features/settings/presentation/layar_lanjutan.dart';
 import '../../features/settings/presentation/layar_setelan.dart';
+import '../../features/settings/presentation/layar_tentang.dart';
 import '../../features/skills/presentation/layar_skill.dart';
 import '../theme/app_transitions.dart';
 
@@ -50,6 +52,16 @@ final GoRouter appRouter = GoRouter(
       path: '/koneksi',
       pageBuilder: (BuildContext c, GoRouterState s) =>
           AppTransisi.halaman<void>(s, const HalamanKoneksi()),
+    ),
+    GoRoute(
+      path: '/setelan/lanjutan',
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const LayarLanjutan()),
+    ),
+    GoRoute(
+      path: '/setelan/tentang',
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const LayarTentang()),
     ),
     GoRoute(
       path: '/kunci',

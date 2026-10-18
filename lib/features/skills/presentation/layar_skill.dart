@@ -5,7 +5,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/teks.dart';
-import '../../../domain/entities/setelan.dart';
 import '../../../shared/widgets/tampilan_markdown.dart';
 import '../data/skill_providers.dart';
 import '../data/skill_repository.dart';
@@ -31,7 +30,6 @@ class _LayarSkillState extends ConsumerState<LayarSkill> {
   @override
   Widget build(BuildContext context) {
     final AsyncValue<IndeksSkill> async = ref.watch(indeksSkillProvider);
-    final SetelanApp setelan = ref.watch(setelanProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pustaka Skill')),
@@ -95,8 +93,7 @@ class _LayarSkillState extends ConsumerState<LayarSkill> {
                         ],
                       ),
                     ),
-                    if (setelan.pakaiSkillPanduan)
-                      Container(
+                    Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
                           vertical: 2,

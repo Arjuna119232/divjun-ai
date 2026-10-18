@@ -154,13 +154,12 @@ class ChatController extends Notifier<StateChat> {
     final List<ModelAi> katalog =
         ref.read(katalogModelProvider).valueOrNull ?? ModelAi.bawaan;
     final ModelAi terpilih = ref.read(modelProvider);
-    final ModelAi model = setelan.modeAgent == ModeAgent.auto
-        ? AgentLoop.pilihOtomatis(
-            pesan: isi,
-            katalog: katalog,
-            fallback: terpilih,
-          )
-        : terpilih;
+    // Auto-pilih model selalu aktif (v3.0.0): lihat SetelanApp.modeAgent.
+    final ModelAi model = AgentLoop.pilihOtomatis(
+      pesan: isi,
+      katalog: katalog,
+      fallback: terpilih,
+    );
 
     final String idPesanAi = 'msg-${Id.pendek(12)}';
     _tambahPesan(
@@ -196,12 +195,9 @@ class ChatController extends Notifier<StateChat> {
 
     // Pustaka skill internal: kalau ada skill yang cocok dengan pertanyaan,
     // isinya disuntik sebagai prosedur kerja (bukan sumber jawaban).
-    String? panduanSkill;
-    if (setelan.pakaiSkillPanduan) {
-      panduanSkill = await ref
-          .read(skillRepositoryProvider)
-          .panduanUntuk(isi);
-    }
+    // Panduan skill selalu disuntik (v3.0.0): lihat SetelanApp.pakaiSkillPanduan.
+    final String? panduanSkill =
+        await ref.read(skillRepositoryProvider).panduanUntuk(isi);
 
     try {
       final Pesan hasil = await loop.jalankan(
@@ -288,9 +284,8 @@ class ChatController extends Notifier<StateChat> {
     // 6 pesan terakhir supaya token tetap hemat.
     final int karakter =
         pesan.fold<int>(0, (int a, Pesan x) => a + x.isi.length);
-    if (setelan.autoRingkas &&
-        karakter > AppConfig.ambangRingkas &&
-        pesan.length > 8) {
+    // Auto-ringkas selalu aktif (v3.0.0): lihat SetelanApp.autoRingkas.
+    if (karakter > AppConfig.ambangRingkas && pesan.length > 8) {
       final String ringkasan = ref.read(memoryServiceProvider).ringkas(pesan);
       pesan = <Pesan>[
         Pesan(

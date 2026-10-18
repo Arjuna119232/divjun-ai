@@ -163,10 +163,16 @@ def deklarasi_ekspor(path: Path, kode_mentah: str) -> tuple[set[str], set[str]]:
     # Gejalanya false positive UNDEF-PRIVATE untuk fungsi yang jelas ada
     # (contoh nyata: `TextStyle _putih(double x, {FontWeight w = ...})`).
     # Karena itu satu tingkat `{...}` diperbolehkan di dalam tanda kurung.
+    # CATATAN JEBRAKAN #4 (v3.0.0): kurung kurawal di dalam daftar parameter
+    # WAJIB menyaring `;` juga. Kalau hanya menyaring `{}`, pola bisa
+    # mencocokkan kurung kurawal milik ISI FUNGSI dan thereby melintasi batas
+    # fungsi - akibatnya deklarasi fungsi berikutnya ikut tertelan dan
+    # dilaporkan MISSING-IMPORT padahal jelas ada. Gejalanya muncul begitu
+    # jumlah pasangan `{}` di file cukup banyak.
     for m in re.finditer(
         r"^(?:const\s+|final\s+|late\s+final\s+)?(?:[\w<>,?\s\.]+\s+)?"
         r"([a-z_$][\w$]*)\s*(?:<[^>]*>)?\s*"
-        r"\([^;{}]*(?:\{[^{}]*\}[^;{}]*)*\)\s*(?:async\s*)?[{=]",
+        r"\([^;{}]*(?:\{[^;{}]*\}[^;{}]*)*\)\s*(?:async\s*)?[{=]",
         bersih,
         re.M,
     ):
