@@ -130,6 +130,48 @@ class ChatController extends Notifier<StateChat> {
     state = const StateChat(daftar: <Percakapan>[], sudahSiap: true);
   }
 
+  /// Sematkan / lepas sematan. Tidak mengubah `diperbarui` supaya urutan
+  /// "Terbaru" tetap stabil saat hanya menyematkan.
+  Future<void> sematkan(String id, bool nilai) async {
+    final Percakapan? p = _cari(id);
+    if (p == null || p.disematkan == nilai) return;
+    final Percakapan baru = Percakapan(
+      id: p.id,
+      judul: p.judul,
+      dibuat: p.dibuat,
+      diperbarui: p.diperbarui,
+      pesan: p.pesan,
+      disematkan: nilai,
+    );
+    state = state.salin(
+      daftar: state.daftar
+          .map((Percakapan q) => q.id == id ? baru : q)
+          .toList(),
+    );
+    await _repo.simpan(baru);
+  }
+
+  /// Ganti nama percakapan. Judul kosong diabaikan.
+  Future<void> gantiNama(String id, String judul) async {
+    final String bersih = judul.trim();
+    final Percakapan? p = _cari(id);
+    if (p == null || bersih.isEmpty || bersih == p.judul) return;
+    final Percakapan baru = Percakapan(
+      id: p.id,
+      judul: bersih,
+      dibuat: p.dibuat,
+      diperbarui: p.diperbarui,
+      pesan: p.pesan,
+      disematkan: p.disematkan,
+    );
+    state = state.salin(
+      daftar: state.daftar
+          .map((Percakapan q) => q.id == id ? baru : q)
+          .toList(),
+    );
+    await _repo.simpan(baru);
+  }
+
   // ------------------------------------------------------------ kirim
 
   Future<void> kirim(String teks) async {
@@ -315,6 +357,7 @@ class ChatController extends Notifier<StateChat> {
         dibuat: p.dibuat,
         diperbarui: DateTime.now(),
         pesan: isi ?? p.pesan,
+        disematkan: p.disematkan,
       );
 
   List<Percakapan> _ganti(

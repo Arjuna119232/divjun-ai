@@ -130,12 +130,14 @@ class _LayarChatState extends ConsumerState<LayarChat> {
           ),
         ),
         actions: <Widget>[
-          IconButton(
-            tooltip: 'Riwayat lengkap',
-            icon: const Icon(LucideIcons.history, size: 22),
-            onPressed: () => LembarRiwayat.tampilkan(context, ref),
-          ),
-          PopupMenuButton<String>(
+          if (state.daftar.isNotEmpty)
+            IconButton(
+              tooltip: 'Riwayat lengkap',
+              icon: const Icon(LucideIcons.history, size: 22),
+              onPressed: () => LembarRiwayat.tampilkan(context, ref),
+            ),
+          if (state.daftar.isNotEmpty)
+            PopupMenuButton<String>(
             tooltip: 'Lainnya',
             icon: const Icon(LucideIcons.moreVertical, size: 22),
             onSelected: (String v) {
@@ -145,8 +147,6 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                   _scaffoldKey.currentState?.openDrawer();
                 case 'memori':
                   context.push('/memori');
-                case 'keahlian':
-                  context.push('/skills');
                 case 'setelan':
                   context.push('/setelan');
               }
@@ -168,15 +168,6 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(LucideIcons.brain, size: 18),
                   title: Text('Memori AI'),
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'keahlian',
-                child: ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(LucideIcons.sparkles, size: 18),
-                  title: Text('Keahlian Agen'),
                 ),
               ),
               const PopupMenuItem<String>(

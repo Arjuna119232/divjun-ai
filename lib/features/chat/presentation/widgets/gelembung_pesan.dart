@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../../core/constants/app_config.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/waktu.dart';
 import '../../../../domain/entities/percakapan.dart';
@@ -102,6 +104,14 @@ class GelembungPesan extends StatelessWidget {
           if (pesan.status == StatusPesan.gagal && onCobaLagi != null) ...<Widget>[
             const SizedBox(height: AppSpacing.xs),
             _KartuGalat(pesan: pesan, onCobaLagi: onCobaLagi!),
+          ],
+          // Deretan aksi + disclaimer: hanya untuk jawaban AI yang sudah
+          // selesai (bukan saat mengalir / gagal).
+          if (!user &&
+              pesan.status == StatusPesan.selesai &&
+              pesan.isi.trim().isNotEmpty) ...<Widget>[
+            const SizedBox(height: AppSpacing.sm),
+            _AksiPesan(pesan: pesan, onUlang: onUlang),
           ],
         ],
       ),
@@ -482,4 +492,145 @@ class _ItemMenu {
   final String label;
   final VoidCallback? aksi;
   final bool bahaya;
+}
+
+/// Deretan ikon aksi di bawah jawaban AI + disclaimer kecil.
+///
+/// Muncul HANYA setelah jawaban selesai. Ikon outline abu di baris atas,
+/// teks disclaimer di bawahnya - keduanya DI LUAR bubble (bukan bagian dari
+/// kotak warna) supaya terasa seperti metadata, bukan isi jawaban.
+class _AksiPesan extends StatefulWidget {
+  const _AksiPesan({required this.pesan, this.onUlang});
+
+  final Pesan pesan;
+  final VoidCallback? onUlang;
+
+  @override
+  State<_AksiPesan> createState() => _AksiPesanState();
+}
+
+class _AksiPesanState extends State<_AksiPesan> {
+  /// 0 = belum dinilai, 1 = suka, 2 = tidak suka.
+  int _nilai = 0;
+
+  void _pesanSingkat(String teks) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(teks), duration: const Duration(seconds: 2)),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color abu = context.cs.onSurfaceVariant;
+    return Padding(
+      padding: const EdgeInsets.only(left: AppSpacing.xxs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _Ikon(
+                ikon: LucideIcons.copy,
+                tooltip: 'Salin',
+                warna: abu,
+                onTap: () async {
+                  await Clipboard.setData(
+                    ClipboardData(text: widget.pesan.isi),
+                  );
+                  if (mounted) _pesanSingkat('Teks disalin');
+                },
+              ),
+              const SizedBox(width: 18),
+              _Ikon(
+                ikon: LucideIcons.share,
+                tooltip: 'Bagikan',
+                warna: abu,
+                onTap: () => SharePlus.instance.share(
+                  ShareParams(text: widget.pesan.isi),
+                ),
+              ),
+              const SizedBox(width: 18),
+              _Ikon(
+                ikon: LucideIcons.play,
+                tooltip: 'Bacakan',
+                warna: abu,
+                onTap: () => _pesanSingkat('Fitur bacakan suara segera hadir'),
+              ),
+              const SizedBox(width: 18),
+              _Ikon(
+                ikon: LucideIcons.thumbsUp,
+                tooltip: 'Jawaban bagus',
+                warna: _nilai == 1 ? context.cs.primary : abu,
+                onTap: () {
+                  setState(() => _nilai = 1);
+                  _pesanSingkat('Terima kasih atas masukannya');
+                },
+              ),
+              const SizedBox(width: 18),
+              _Ikon(
+                ikon: LucideIcons.thumbsDown,
+                tooltip: 'Jawaban kurang',
+                warna: _nilai == 2 ? context.cs.error : abu,
+                onTap: () {
+                  setState(() => _nilai = 2);
+                  _pesanSingkat('Masukan Anda dicatat');
+                },
+              ),
+              const SizedBox(width: 18),
+              _Ikon(
+                ikon: LucideIcons.refreshCw,
+                tooltip: 'Buat ulang',
+                warna: abu,
+                onTap: widget.onUlang,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '${AppConfig.appName} adalah AI dan dapat melakukan kesalahan.',
+            style: context.teks.labelSmall?.copyWith(color: abu),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Ikon extends StatelessWidget {
+  const _Ikon({
+    required this.ikon,
+    required this.tooltip,
+    required this.warna,
+    this.onTap,
+  });
+
+  final IconData ikon;
+  final String tooltip;
+  final Color warna;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkResponse(
+        radius: 20,
+        onTap: onTap == null
+            ? null
+            : () {
+                HapticFeedback.selectionClick();
+                onTap!();
+              },
+        child: Icon(
+          ikon,
+          size: 18,
+          color: onTap == null ? warna.withValues(alpha: 0.4) : warna,
+        ),
+      ),
+    );
+  }
 }

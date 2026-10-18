@@ -166,6 +166,7 @@ class Percakapan {
     required this.dibuat,
     required this.diperbarui,
     this.pesan = const <Pesan>[],
+    this.disematkan = false,
   });
 
   final String id;
@@ -173,6 +174,9 @@ class Percakapan {
   final DateTime dibuat;
   DateTime diperbarui;
   List<Pesan> pesan;
+
+  /// Disematkan di atas daftar sidebar (tidak ikut urutan waktu).
+  bool disematkan;
 
   bool get kosong => pesan.isEmpty;
 
@@ -183,6 +187,7 @@ class Percakapan {
         'judul': judul,
         'dibuat': dibuat.toIso8601String(),
         'diperbarui': diperbarui.toIso8601String(),
+        'disematkan': disematkan,
         'pesan': pesan.map((Pesan p) => p.keJson()).toList(),
       };
 
@@ -192,6 +197,7 @@ class Percakapan {
         dibuat: DateTime.tryParse(j['dibuat'] as String? ?? '') ?? DateTime.now(),
         diperbarui:
             DateTime.tryParse(j['diperbarui'] as String? ?? '') ?? DateTime.now(),
+        disematkan: j['disematkan'] as bool? ?? false,
         pesan: (j['pesan'] as List<dynamic>? ?? <dynamic>[])
             .whereType<Map<String, dynamic>>()
             .map(Pesan.dariJson)

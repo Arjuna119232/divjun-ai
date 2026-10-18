@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_config.dart';
 import '../../../../core/constants/app_env.dart';
 import '../../../../core/providers.dart';
@@ -59,23 +60,33 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
         sekarang.subtract(const Duration(days: 7));
     final DateTime awalBulan = DateTime(sekarang.year, sekarang.month, 1);
 
-    final List<Percakapan> gHariIni = <Percakapan>[
+    // Pisahkan yang disematkan dari daftar waktu.
+    final List<Percakapan> gSemat = <Percakapan>[
       for (final Percakapan p in semua)
+        if (p.disematkan) p,
+    ];
+    final List<Percakapan> lain = <Percakapan>[
+      for (final Percakapan p in semua)
+        if (!p.disematkan) p,
+    ];
+
+    final List<Percakapan> gHariIni = <Percakapan>[
+      for (final Percakapan p in lain)
         if (hariIni(p.diperbarui)) p,
     ];
     final List<Percakapan> gTujuh = <Percakapan>[
-      for (final Percakapan p in semua)
+      for (final Percakapan p in lain)
         if (!hariIni(p.diperbarui) && p.diperbarui.isAfter(tujuhHariLalu)) p,
     ];
     final List<Percakapan> gBulan = <Percakapan>[
-      for (final Percakapan p in semua)
+      for (final Percakapan p in lain)
         if (!hariIni(p.diperbarui) &&
             !p.diperbarui.isAfter(tujuhHariLalu) &&
             p.diperbarui.isAfter(awalBulan))
           p,
     ];
     final List<Percakapan> gLama = <Percakapan>[
-      for (final Percakapan p in semua)
+      for (final Percakapan p in lain)
         if (!p.diperbarui.isAfter(awalBulan)) p,
     ];
 
@@ -193,6 +204,13 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
                       ),
                       children: <Widget>[
                         _Kelompok(
+                          judul: 'Disematkan',
+                          items: gSemat,
+                          onPilih: _pilih,
+                          ref: ref,
+                          tersemat: true,
+                        ),
+                        _Kelompok(
                           judul: 'Hari ini',
                           items: gHariIni,
                           onPilih: _pilih,
@@ -221,22 +239,10 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
             ),
             Divider(height: 1, color: context.cs.outlineVariant),
             _Menu(
-              ikon: LucideIcons.bookOpen,
-              label: 'Pustaka skill',
-              detail: '111 panduan kerja di dalam app',
-              onTap: () => _pergi(context, '/skills'),
-            ),
-            _Menu(
               ikon: LucideIcons.brain,
               label: 'Memori',
               detail: 'Yang diingat lintas percakapan',
               onTap: () => _pergi(context, '/memori'),
-            ),
-            _Menu(
-              ikon: LucideIcons.plug,
-              label: 'Koneksi AI',
-              detail: 'Uji provider + model',
-              onTap: () => _pergi(context, '/koneksi'),
             ),
             _Menu(
               ikon: LucideIcons.settings2,
@@ -280,12 +286,14 @@ class _Kelompok extends StatelessWidget {
     required this.items,
     required this.onPilih,
     required this.ref,
+    this.tersemat = false,
   });
 
   final String judul;
   final List<Percakapan> items;
   final void Function(String id) onPilih;
   final WidgetRef ref;
+  final bool tersemat;
 
   @override
   Widget build(BuildContext context) {
@@ -314,25 +322,30 @@ class _Kelompok extends StatelessWidget {
               child: InkWell(
                 borderRadius: AppRadius.br12,
                 onTap: () => onPilih(p.id),
-                onLongPress: () => _hapus(context, p),
+                onLongPress: () => _menu(context, p),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: 10,
+                  padding: const EdgeInsets.only(
+                    left: AppSpacing.md,
+                    top: 4,
+                    bottom: 4,
                   ),
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        p.kosong
-                            ? LucideIcons.messageSquare
-                            : LucideIcons.messageSquareText,
+                        p.disematkan
+                            ? LucideIcons.pin
+                            : (p.kosong
+                                ? LucideIcons.messageSquare
+                                : LucideIcons.messageSquareText),
                         size: 16,
-                        color: context.cs.onSurfaceVariant,
+                        color: p.disematkan
+                            ? context.cs.primary
+                            : context.cs.onSurfaceVariant,
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
-                          p.judul,
+                          p.kosong ? 'Percakapan baru' : p.judul,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: context.teks.bodyMedium?.copyWith(
@@ -341,6 +354,13 @@ class _Kelompok extends StatelessWidget {
                                 : FontWeight.w400,
                           ),
                         ),
+                      ),
+                      IconButton(
+                        tooltip: 'Opsi',
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(LucideIcons.moreVertical, size: 18),
+                        color: context.cs.onSurfaceVariant,
+                        onPressed: () => _menu(context, p),
                       ),
                     ],
                   ),
@@ -352,18 +372,134 @@ class _Kelompok extends StatelessWidget {
     );
   }
 
+  Future<void> _menu(BuildContext context, Percakapan p) async {
+    HapticFeedback.selectionClick();
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext c) {
+        final Color redup = c.cs.onSurfaceVariant;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _Opsi(
+                ikon: LucideIcons.share,
+                label: 'Bagikan',
+                onTap: () {
+                  Navigator.of(c).pop();
+                  _bagikan(p);
+                },
+              ),
+              _Opsi(
+                ikon: LucideIcons.squarePen,
+                label: 'Ganti nama',
+                onTap: () {
+                  Navigator.of(c).pop();
+                  _gantiNama(context, p);
+                },
+              ),
+              _Opsi(
+                ikon: p.disematkan ? LucideIcons.pinOff : LucideIcons.pin,
+                label: p.disematkan ? 'Lepas sematan' : 'Sematkan',
+                onTap: () {
+                  Navigator.of(c).pop();
+                  HapticFeedback.lightImpact();
+                  ref.read(chatProvider.notifier).sematkan(p.id, !p.disematkan);
+                },
+              ),
+              _Opsi(
+                ikon: LucideIcons.folderPlus,
+                label: 'Tambahkan ke proyek',
+                warna: redup,
+                onTap: null,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Divider(height: 1, color: c.cs.outlineVariant),
+              _Opsi(
+                ikon: LucideIcons.trash2,
+                label: 'Hapus',
+                warna: c.cs.error,
+                onTap: () {
+                  Navigator.of(c).pop();
+                  _hapus(context, p);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _bagikan(Percakapan p) async {
+    final StringBuffer sb = StringBuffer('${p.judul}\n');
+    for (final Pesan m in p.pesan) {
+      if (m.isi.trim().isEmpty) continue;
+      final String siapa = m.peran == Peran.pengguna
+          ? 'Saya'
+          : (m.peran == Peran.ai ? AppConfig.appName : null) ?? '';
+      if (siapa.isEmpty) continue;
+      sb.write('\n$siapa:\n${m.isi}\n');
+    }
+    final String isi = sb.toString().trim();
+    if (isi.isEmpty) return;
+    await SharePlus.instance.share(ShareParams(text: isi));
+  }
+
+  Future<void> _gantiNama(BuildContext context, Percakapan p) async {
+    final TextEditingController ctrl = TextEditingController(text: p.judul);
+    final String? nama = await showDialog<String>(
+      context: context,
+      builder: (BuildContext c) => AlertDialog(
+        title: const Text('Ganti nama chat'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            hintText: 'Nama percakapan',
+            isDense: true,
+          ),
+          onSubmitted: (String v) => Navigator.of(c).pop(v),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(c).pop(ctrl.text),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (nama != null) {
+      await ref.read(chatProvider.notifier).gantiNama(p.id, nama);
+    }
+  }
+
   Future<void> _hapus(BuildContext context, Percakapan p) async {
     final bool? ya = await showDialog<bool>(
       context: context,
       builder: (BuildContext c) => AlertDialog(
-        title: const Text('Hapus percakapan?'),
-        content: Text('"${p.judul}" akan dihapus permanen.'),
+        title: const Text('Hapus chat?'),
+        content: const Text('Tindakan ini tidak bisa dibatalkan.'),
         actions: <Widget>[
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(c).pop(false),
             child: const Text('Batal'),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: c.cs.error,
+              foregroundColor: c.cs.onError,
+            ),
             onPressed: () => Navigator.of(c).pop(true),
             child: const Text('Hapus'),
           ),
@@ -371,6 +507,31 @@ class _Kelompok extends StatelessWidget {
       ),
     );
     if (ya ?? false) await ref.read(chatProvider.notifier).hapusPercakapan(p.id);
+  }
+}
+
+class _Opsi extends StatelessWidget {
+  const _Opsi({
+    required this.ikon,
+    required this.label,
+    required this.onTap,
+    this.warna,
+  });
+
+  final IconData ikon;
+  final String label;
+  final VoidCallback? onTap;
+  final Color? warna;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color c = warna ?? context.cs.onSurface;
+    return ListTile(
+      enabled: onTap != null,
+      onTap: onTap,
+      leading: Icon(ikon, size: 20, color: c),
+      title: Text(label, style: context.teks.bodyMedium?.copyWith(color: c)),
+    );
   }
 }
 
