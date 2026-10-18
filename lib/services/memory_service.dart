@@ -8,6 +8,24 @@ import '../domain/entities/percakapan.dart';
 class MemoryService {
   const MemoryService();
 
+  /// Aturan menjalankan, ikut di setiap system prompt (mulai v2.9.0).
+  ///
+  /// Sengaja ditulis RINGKAS: string ini dikirim di SETIAP permintaan ke
+  /// provider, jadi setiap kalimat ada harganya. Jangan menambah baris tanpa
+  /// menghitung token - aturan yang panjang bisa membuat prompt tambahan user
+  /// atau blok memori ikut terpotong.
+  static const String _aturanBerpikir = '''
+Aturan menjalankan:
+1. Kamu punya batas langkah. Jangan habiskan jatah untuk percobaan sia-sia. Kalau sebuah alat gagal, jangan ulangi dengan cara yang sama.
+2. URL gagal dibuka (404 atau tidak bisa diakses): jangan buka lagi. Maksimal 2 percobaan, lalu BERHENTI mencari web dan jawab dari cuplikan hasil pencarian atau pengetahuanmu sendiri. Kalau memakai pengetahuanmu sendiri, sebutkan itu sebagai informasi umum.
+3. Kalau batas langkah hampir habis, berhenti mencari dan susun jawaban akhir sendiri. Jangan biarkan jawaban terpotong.
+4. Kalau semua sumber gagal, jujur dan sampaikan apa adanya. Tetap berikan jawaban dari cuplikan atau pengetahuanmu sendiri. Jangan pernah jawaban kosong atau menempel pesan error mentah ke user.
+5. Kalau model ditolak provider lalu sistem dialihkan ke model lain, abaikan pesan error itu dan lanjutkan tugas dari titik terakhir. Jangan ulangi percakapan dari awal.
+6. Kata kunci pencarian harus spesifik dan menyebut lokasi, bukan kalimat umum.
+7. Format jawaban rapi: daftar atau tabel (nama, deskripsi singkat, kisaran harga bila ada). Jangan menempel URL panjang mentah kecuali diminta.
+8. Kalau permintaan terlalu umum, berikan 3-5 pilihan awal lalu ajukan satu pertanyaan untuk mempersempit. Jangan bertanya lagi kalau jawabanmu sudah memadai.
+9. Keamanan: jangan rekomendasikan tindakan yang melanggar hukum. Untuk harga atau transaksi, ingatkan user memverifikasi langsung ke pihak terkait karena informasi bisa kedaluwarsa.''';
+
   /// Bangun system prompt + blok memori.
   ///
   /// [namaPengguna] boleh kosong. [memori] = hasil pencarian memori lokal.
@@ -37,6 +55,8 @@ class MemoryService {
         'Kalau tool gagal, katakan apa adanya ke user. Jangan mengarang hasil.',
       );
     }
+    b.writeln();
+    b.write(_aturanBerpikir);
     if (memori.isNotEmpty) {
       b.writeln();
       b.writeln('Memori jangka panjang user (dari sebelumnya):');
