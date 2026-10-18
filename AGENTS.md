@@ -6,9 +6,13 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
 `main`; `main` masih berisi app WebView lama + pipeline Gradle-nya).
 
 - Lokasi kerja: `$HOME/divjun-flutter` (bukan `/storage` — FUSE + git lambat)
-- Package: `com.divjun.ai` · versi `2.5.0+43` · minSdk 24 · targetSdk 35
+- Package: `com.divjun.ai` · versi `2.8.0+46` · minSdk 24 · targetSdk 35
 - Status "seukuran Claude AI": tahap 1 (sidebar + kolom 820) ✅ v2.4.0+42 ·
   tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ❌
+- Intro: splash 4 detik (`AppConfig.durasiSplashMs`) + 4 detik PER HALAMAN
+  onboarding (`durasiHalamanOnboardingMs`, total 12 detik), auto-lanjut dengan
+  garis countdown 2 px. Transisi splash->onboarding->chat = zoom-through dua
+  arah + ledakan cahaya (`lib/core/theme/app_transitions.dart`).
 - Keystore: **sama** dengan app lama (`KEYSTORE_BASE64` di repo secrets) →
   APK baru bisa update di atas APK lama, jangan ganti keystore.
 - Audit brief vs kenyataan: `docs/REBUILD-AUDIT.md` (agent.js tidak pernah ada;
