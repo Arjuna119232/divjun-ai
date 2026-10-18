@@ -8,6 +8,7 @@ import '../../../core/constants/app_config.dart';
 import '../../../core/constants/app_env.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../onboarding/presentation/layar_onboarding.dart';
 import '../../skills/data/skill_providers.dart';
 import '../../skills/domain/skill.dart';
 import '../../../domain/entities/model_ai.dart';
@@ -101,6 +102,23 @@ class LayarSetelan extends ConsumerWidget {
                   'Ambil palet warna dari wallpaper HP (Android 12+).',
                 ),
                 onChanged: c.setWarnaDinamis,
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(LucideIcons.bookOpen),
+                title: const Text('Tampilkan lagi onboarding'),
+                subtitle: const Text(
+                  'Ulangi 3 halaman perkenalan DIVJUN AI.',
+                ),
+                onTap: () async {
+                  // Kunci dihapus dulu supaya "/onboarding" yang dibuka manual
+                  // tetap menyimpan status selesai saat user menekan "Mulai".
+                  await ref
+                      .read(simpanCepitProvider)
+                      .hapus(kunciOnboarding);
+                  if (!context.mounted) return;
+                  context.push('/onboarding');
+                },
               ),
             ],
           ),

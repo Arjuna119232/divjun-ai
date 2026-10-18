@@ -157,9 +157,16 @@ def deklarasi_ekspor(path: Path, kode_mentah: str) -> tuple[set[str], set[str]]:
         nama.add(m.group(1))
 
     # top-level: fungsi (bisa signature multi-baris) dan variabel
+    #
+    # CATATAN JEBRAKAN #3: `\([^;{}]*\)` GAGAL untuk named parameter, karena
+    # `{FontWeight w = ...}` memuat kurung kurawal di dalam daftar parameter.
+    # Gejalanya false positive UNDEF-PRIVATE untuk fungsi yang jelas ada
+    # (contoh nyata: `TextStyle _putih(double x, {FontWeight w = ...})`).
+    # Karena itu satu tingkat `{...}` diperbolehkan di dalam tanda kurung.
     for m in re.finditer(
         r"^(?:const\s+|final\s+|late\s+final\s+)?(?:[\w<>,?\s\.]+\s+)?"
-        r"([a-z_$][\w$]*)\s*(?:<[^>]*>)?\s*\([^;{}]*\)\s*(?:async\s*)?[{=]",
+        r"([a-z_$][\w$]*)\s*(?:<[^>]*>)?\s*"
+        r"\([^;{}]*(?:\{[^{}]*\}[^;{}]*)*\)\s*(?:async\s*)?[{=]",
         bersih,
         re.M,
     ):

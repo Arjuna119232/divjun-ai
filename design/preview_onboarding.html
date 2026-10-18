@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pratinjau Onboarding - DIVJUN AI</title>
+<style>
+  :root{
+    --brand:#5B5BD6; --brandDeep:#3B3BA8; --mint:#00BFA6;
+    --amber:#FFA726; --coral:#FF6B4A;
+    --ink:#0B0B10; --paper:#F2F2F7; --muted:rgba(255,255,255,.62);
+    --ui:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:#07070C;color:#fff;font-family:var(--ui);
+    display:flex;flex-direction:column;align-items:center;gap:18px;
+    padding:24px 12px 40px;overflow-x:hidden;
+  }
+  .catatan{max-width:400px;color:rgba(255,255,255,.5);font-size:12px;text-align:center;line-height:1.6}
+  .ponsel{
+    position:relative;width:360px;height:760px;border-radius:42px;overflow:hidden;
+    background:var(--ink);box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 10px #16161E,0 0 0 11px #2A2A34;
+    flex:0 0 auto;
+  }
+  /* ---------------- latar beranimasi ---------------- */
+  .latar{position:absolute;inset:0;overflow:hidden}
+  .latar::before{
+    content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #23234A 0%, #14142B 42%, #0B0B10 100%);
+  }
+  .orb{position:absolute;border-radius:50%;filter:blur(46px);opacity:.55;mix-blend-mode:screen}
+  .orb.a{width:280px;height:280px;background:var(--brand);left:-90px;top:-60px;animation:drift1 19s ease-in-out infinite}
+  .orb.b{width:240px;height:240px;background:var(--mint);right:-100px;top:180px;animation:drift2 23s ease-in-out infinite;opacity:.4}
+  .orb.c{width:300px;height:300px;background:var(--coral);left:-40px;bottom:-120px;animation:drift3 27s ease-in-out infinite;opacity:.26}
+  .orb.d{width:180px;height:180px;background:var(--amber);right:20px;bottom:120px;animation:drift1 31s ease-in-out infinite reverse;opacity:.22}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,70px) scale(1.14)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1.08)}50%{transform:translate(-70px,90px) scale(.92)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,-60px) scale(1.2)}}
+  .grid{
+    position:absolute;inset:-20%;
+    background-image:
+      linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+    background-size:34px 34px;
+    -webkit-mask-image:radial-gradient(58% 46% at 50% 42%,#000 0%,transparent 78%);
+            mask-image:radial-gradient(58% 46% at 50% 42%,#000 0%,transparent 78%);
+    animation:geser 26s linear infinite;
+  }
+  @keyframes geser{to{transform:translate(34px,34px)}}
+  .titik{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5;animation:kedip 4s ease-in-out infinite}
+  @keyframes kedip{0%,100%{opacity:.12;transform:scale(.7)}50%{opacity:.85;transform:scale(1.25)}}
+  .vignette{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,transparent 42%,rgba(5,5,12,.86) 100%)}
+
+  /* ---------------- isi ---------------- */
+  .alaman{position:relative;height:100%;display:flex;flex-direction:column;padding:26px 24px 22px}
+  .atas{display:flex;align-items:center;justify-content:space-between}
+  .merek{display:flex;align-items:center;gap:10px}
+  .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brandDeep));
+        display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff;box-shadow:0 6px 18px rgba(91,91,214,.5)}
+  .nama{font-size:12.5px;font-weight:700;letter-spacing:2.6px}
+  .nama span{color:var(--mint)}
+  .lewati{
+    border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);
+    color:rgba(255,255,255,.72);font-size:12px;font-weight:600;padding:7px 14px;border-radius:999px;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .halaman{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px}
+  .ilustrasi{height:250px;display:grid;place-items:center}
+  .judul{font-size:29px;font-weight:800;line-height:1.14;letter-spacing:-.6px}
+  .judul em{font-style:normal;background:linear-gradient(92deg,var(--mint),var(--brand) 60%,var(--coral));
+             -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:14px;line-height:1.62;color:var(--muted);max-width:300px}
+  .poin{margin-top:4px;display:flex;flex-direction:column;gap:9px}
+  .poin div{display:flex;align-items:center;gap:9px;font-size:12.5px;color:rgba(255,255,255,.72)}
+  .poin i{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-style:normal;font-size:11px;
+          background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+  .bawah{display:flex;flex-direction:column;gap:16px}
+  .indikator{display:flex;gap:6px;align-items:center}
+  .indikator b{display:block;height:4px;border-radius:99px;background:rgba(255,255,255,.22);
+               transition:width .42s cubic-bezier(.22,1,.36,1),background .42s}
+  .indikator b.on{width:26px;background:linear-gradient(90deg,var(--mint),var(--brand))}
+  .indikator b.off{width:9px}
+  .cta{
+    height:54px;border-radius:18px;border:0;width:100%;font-family:inherit;font-size:15px;font-weight:700;
+    color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;
+    background:linear-gradient(100deg,var(--brand) 0%,#6E6EF0 45%,var(--brandDeep) 100%);
+    box-shadow:0 16px 40px rgba(91,91,214,.46);transition:transform .18s ease,box-shadow .18s ease;
+  }
+  .cta:active{transform:scale(.975);box-shadow:0 10px 26px rgba(91,91,214,.4)}
+
+  /* ---- ilustrasi 1: gelembung chat ---- */
+  .chat{width:100%;display:flex;flex-direction:column;gap:10px}
+  .gel{width:78%;padding:11px 14px;border-radius:16px;font-size:13px;line-height:1.45;position:relative;overflow:hidden}
+  .gel.ai{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);border-top-left-radius:5px;align-self:flex-start;
+          display:flex;flex-direction:column;gap:8px}
+  .gel.user{background:linear-gradient(135deg,var(--brand),#6E6EF0);border-bottom-right-radius:5px;align-self:flex-end}
+  .ttp{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--amber)}
+  .ttp .b{width:13px;height:13px;border-radius:4px;background:rgba(255,167,38,.16);display:grid;place-items:center;font-size:8px}
+  .kursor{display:inline-block;width:6px;height:13px;background:var(--mint);vertical-align:-2px;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .baris{height:8px;border-radius:99px;background:rgba(255,255,255,.14)}
+  .gel:not(.user) .kursor{background:#fff}
+
+  /* ---- ilustrasi 2: orbit tool ---- */
+  .orbit{position:relative;width:230px;height:230px}
+  .orbit .cincin{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(255,255,255,.14);
+                 animation:putar 24s linear infinite}
+  .orbit .cincin.dalam{inset:38px;border-style:solid;border-color:rgba(255,255,255,.08);animation-duration:16s;animation-direction:reverse}
+  @keyframes putar{to{transform:rotate(360deg)}}
+  .inti{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:24px;
+        background:linear-gradient(140deg,var(--brand),var(--brandDeep));display:grid;place-items:center;font-size:30px;
+        box-shadow:0 0 0 8px rgba(91,91,214,.14),0 18px 40px rgba(0,0,0,.5);animation:nafas 3.4s ease-in-out infinite}
+  @keyframes nafas{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.06)}}
+  .sat{position:absolute;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.1);
+       border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;font-size:17px;backdrop-filter:blur(8px)}
+  @keyframes apit{to{transform:rotate(360deg)}}
+  @keyframes revolt{to{transform:rotate(-360deg)}}
+  .s1{animation:apit 16s linear infinite}
+  .s1 .sat{bottom:-6px;left:50%;margin-left:-22px;animation:revolt 16s linear infinite}
+  .s2{animation:apit 20s linear infinite reverse}
+  .s2 .sat{top:-8px;left:50%;margin-left:-22px;animation:revolt 20s linear infinite reverse}
+  .s3{animation:apit 26s linear infinite}
+  .s3 .sat{left:-8px;top:50%;margin-top:-22px;animation:revolt 26s linear infinite}
+  .s4{animation:apit 22s linear infinite reverse}
+  .s4 .sat{right:-8px;top:50%;margin-top:-22px;animation:revolt 22s linear infinite reverse}
+
+  /* ---- ilustrasi 3: kartu skill ---- */
+  .stack{position:relative;width:250px;height:210px}
+  .kartu{position:absolute;left:0;right:0;height:62px;border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:12px;
+         background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.13);backdrop-filter:blur(10px);
+         box-shadow:0 14px 34px rgba(0,0,0,.34)}
+  .kartu .ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:17px;flex:0 0 auto}
+  .kartu .tx{flex:1}
+  .kartu .tx b{display:block;font-size:12.5px;font-weight:700}
+  .kartu .tx s{display:block;height:6px;border-radius:99px;background:rgba(255,255,255,.14);margin-top:6px;width:70%}
+  .k1{top:0;animation:naik 6s ease-in-out infinite}
+  .k2{top:70px;animation:naik 6s ease-in-out infinite .5s}
+  .k3{top:140px;animation:naik 6s ease-in-out infinite 1s}
+  @keyframes naik{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .lencana{position:absolute;right:-6px;top:-16px;background:linear-gradient(135deg,var(--amber),var(--coral));color:#241100;
+           font-size:11px;font-weight:800;padding:6px 11px;border-radius:999px;box-shadow:0 10px 24px rgba(255,109,74,.42)}
+</style>
+</head>
+<body>
+<div class="ponsel">
+  <div class="latar">
+    <div class="grid"></div>
+    <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div><div class="orb d"></div>
+    <div class="vignette"></div>
+  </div>
+  <div class="alaman">
+    <div class="atas">
+      <div class="merek"><div class="logo">D</div><div class="nama">DIVJUN <span>AI</span></div></div>
+      <div class="lewati">Lewati</div>
+    </div>
+
+    <div class="halaman" id="halaman"></div>
+
+    <div class="bawah">
+      <div class="indikator" id="indikator"></div>
+      <button class="cta" id="cta">Mulai <span>&#8594;</span></button>
+    </div>
+  </div>
+</div>
+<div class="catatan">
+  Pratinjau gerak latar + 3 halaman onboarding. Geser/klik untuk pindah halaman.<br>
+  Angka &amp; warna diambil dari <b>app_colors.dart</b> (brand #5B5BD6, mint #00BFA6, coral #FF6B4A).
+</div>
+
+<script>
+const HALAMAN = [
+  {
+    html: `
+    <div class="chat">
+      <div class="gel user">Buatkan draf email minta cuti 3 hari</div>
+      <div class="gel ai">
+        <div class="ttp"><span class="b">&#129504;</span> Berpikir 2,4 detik</div>
+        <div class="baris" style="width:92%"></div>
+        <div class="baris" style="width:76%"></div>
+        <div class="baris" style="width:54%"></div>
+      </div>
+      <div class="gel user" style="width:62%">Kirim besok pagi<span class="kursor"></span></div>
+    </div>`,
+    judul: 'Tanya apa saja,<br><em>jawabannya mengalir</em>',
+    sub: 'Setiap token tampil seketika. Blok "Berpikir" bisa lu buka-tutup sendiri kalau mau lihat prosesnya.',
+    poin: [['&#9889;','Stream token per provider'],['&#128065;','Blok berpikir terpisah'],['&#128203;','Riwayat percakapan tersimpan']]
+  },
+  {
+    html: `
+    <div class="orbit">
+      <div class="cincin"></div><div class="cincin dalam"></div>
+      <div class="inti">&#9889;</div>
+      <div class="s1"><div class="sat">&#128298;</div></div>
+      <div class="s2"><div class="sat">&#128196;</div></div>
+      <div class="s3"><div class="sat">&#128337;</div></div>
+      <div class="s4"><div class="sat">&#128231;</div></div>
+    </div>`,
+    judul: 'Agent yang <em>benar-benar mengerjakan</em>',
+    sub: 'Bukan cuma ngetik. Dia pilih sendiri alat yang perlu dipakai lalu menjalankan tool-nya.',
+    poin: [['&#128298;','Kalkulator presisi'],['&#128337;','Buka web + baca halaman'],['&#9993;','Draf email']]
+  },
+  {
+    html: `
+    <div class="stack">
+      <div class="kartu k1"><div class="ic" style="background:rgba(0,191,166,.16)">&#128218;</div>
+        <div class="tx"><b>Pustaka skill</b><s></s></div><div class="lencana">111</div></div>
+      <div class="kartu k2"><div class="ic" style="background:rgba(91,91,214,.2)">&#128218;</div>
+        <div class="tx"><b>Prosedur kerja</b><s></s></div></div>
+      <div class="kartu k3"><div class="ic" style="background:rgba(255,167,38,.18)">&#128218;</div>
+        <div class="tx"><b>Taksonomi lengkap</b><s></s></div></div>
+    </div>`,
+    judul: '111 skill <em>siap pakai</em>',
+    sub: 'Skill yang cocok dengan pertanyaan lu disuntik sebagai prosedur kerja, bukan sumber jawaban.',
+    poin: [['&#128269;','Dicari otomatis tiap pertanyaan'],['&#128190;','Bisa dimatikan di pengaturan'],['&#128274;','Berjalan lokal, tanpa server']]
+  }
+];
+
+let i = 0;
+const wrap = document.getElementById('halaman');
+const ind  = document.getElementById('indikator');
+const cta  = document.getElementById('cta');
+
+function gambar(){
+  const h = HALAMAN[i];
+  wrap.innerHTML = `
+    <div class="ilustrasi">${h.html}</div>
+    <div>
+      <div class="judul">${h.judul}</div>
+      <div class="sub">${h.sub}</div>
+    </div>
+    <div class="poin">${h.poin.map(function(p){
+      return '<div><i>'+p[0]+'</i>'+p[1]+'</div>';
+    }).join('')}</div>`;
+  ind.innerHTML = HALAMAN.map(function(_,n){
+    return '<b class="'+(n===i?'on':'off')+'"></b>';
+  }).join('');
+  cta.innerHTML = (i===HALAMAN.length-1 ? 'Mulai' : 'Lanjut') + ' <span>&#8594;</span>';
+}
+function pindah(n){
+  i = Math.max(0, Math.min(HALAMAN.length-1, n));
+  gambar();
+}
+cta.addEventListener('click', function(){
+  if (i < HALAMAN.length-1) pindah(i+1);
+});
+document.querySelector('.lewati').addEventListener('click', function(){ pindah(HALAMAN.length-1); });
+let tx = null;
+document.querySelector('.ponsel').addEventListener('touchstart', function(e){ tx = e.touches[0].clientX; }, {passive:true});
+document.querySelector('.ponsel').addEventListener('touchend', function(e){
+  if (tx === null) return;
+  const d = e.changedTouches[0].clientX - tx;
+  if (Math.abs(d) > 46) pindah(i + (d < 0 ? 1 : -1));
+  tx = null;
+}, {passive:true});
+gambar();
+</script>
+</body>
+</html>

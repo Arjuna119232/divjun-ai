@@ -38,6 +38,8 @@ class _KolomTulisState extends ConsumerState<KolomTulis> {
       final bool ada = _c.text.trim().isNotEmpty;
       if (ada != _adaTeks) setState(() => _adaTeks = ada);
     });
+    // Border pil ikut berubah saat input fokus (bukan hanya saat ada teks).
+    _f.addListener(() => setState(() {}));
   }
 
   @override
@@ -65,7 +67,7 @@ class _KolomTulisState extends ConsumerState<KolomTulis> {
         AppSpacing.md,
         AppSpacing.sm,
         AppSpacing.md,
-        AppSpacing.md,
+        AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: context.cs.surface,
@@ -76,59 +78,80 @@ class _KolomTulisState extends ConsumerState<KolomTulis> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Expanded(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 160),
-                  child: TextField(
-                    controller: _c,
-                    focusNode: _f,
-                    minLines: 1,
-                    maxLines: 6,
-                    textInputAction: TextInputAction.newline,
-                    keyboardType: TextInputType.multiline,
-                    style: context.teks.bodyMedium,
-                    decoration: InputDecoration(
-                      hintText: 'Tanya apa saja…',
-                      hintStyle: context.teks.bodyMedium?.copyWith(
-                        color: context.cs.onSurfaceVariant.withValues(alpha: 0.6),
+          // Satu pil: input + tombol menyatu. Dua kotak terpisah (input kotak
+          // + tombol di luar) terlihat seperti form, bukan messaging app.
+          AnimatedContainer(
+            duration: AppMotion.cepat,
+            curve: AppMotion.emphasized,
+            padding: const EdgeInsets.fromLTRB(18, 4, 5, 4),
+            decoration: BoxDecoration(
+              color: context.cs.surfaceContainer,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: _f.hasFocus
+                    ? context.cs.primary.withValues(alpha: 0.55)
+                    : Colors.transparent,
+                width: 1.4,
+              ),
+              boxShadow: _f.hasFocus
+                  ? <BoxShadow>[
+                      BoxShadow(
+                        color: context.cs.primary.withValues(alpha: 0.14),
+                        blurRadius: 22,
+                        offset: const Offset(0, 8),
                       ),
-                      filled: true,
-                      fillColor: context.cs.surfaceContainer,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.lg,
-                        vertical: 14,
-                      ),
-                      border: const OutlineInputBorder(
-                        borderRadius: AppRadius.br16,
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: const OutlineInputBorder(
-                        borderRadius: AppRadius.br16,
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: AppRadius.br16,
-                        borderSide: BorderSide(
-                          color: context.cs.primary,
-                          width: 1.4,
+                    ]
+                  : null,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Expanded(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 150),
+                    child: TextField(
+                      controller: _c,
+                      focusNode: _f,
+                      minLines: 1,
+                      maxLines: 6,
+                      textInputAction: TextInputAction.newline,
+                      keyboardType: TextInputType.multiline,
+                      style: context.teks.bodyMedium,
+                      decoration: InputDecoration(
+                        hintText: 'Tanya apa saja…',
+                        hintStyle: context.teks.bodyMedium?.copyWith(
+                          color:
+                              context.cs.onSurfaceVariant.withValues(alpha: 0.6),
+                        ),
+                        filled: false,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 13),
+                        border: const OutlineInputBorder(
+                          borderRadius: AppRadius.br16,
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: const OutlineInputBorder(
+                          borderRadius: AppRadius.br16,
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderRadius: AppRadius.br16,
+                          borderSide: BorderSide.none,
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              _TombolAksi(
-                aktif: bisaKirim || widget.sibuk,
-                sibuk: widget.sibuk,
-                onTekan: widget.sibuk ? widget.onStop : _kirim,
-              ),
-            ],
+                const SizedBox(width: AppSpacing.xs),
+                _TombolAksi(
+                  aktif: bisaKirim || widget.sibuk,
+                  sibuk: widget.sibuk,
+                  onTekan: widget.sibuk ? widget.onStop : _kirim,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             children: <Widget>[
               Icon(
@@ -180,27 +203,49 @@ class _TombolAksi extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: AppMotion.cepat,
-      width: 48,
-      height: 48,
+      curve: AppMotion.emphasized,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
-        color: aktif ? context.cs.primary : context.cs.surfaceContainerHigh,
-        borderRadius: AppRadius.br16,
+        gradient: aktif
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  context.cs.primary,
+                  AppColors.brandDeep,
+                ],
+              )
+            : null,
+        color: aktif ? null : context.cs.surfaceContainerHigh,
+        shape: BoxShape.circle,
+        boxShadow: aktif
+            ? <BoxShadow>[
+                BoxShadow(
+                  color: context.cs.primary.withValues(alpha: 0.32),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : null,
       ),
       child: Material(
         color: Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
-          borderRadius: AppRadius.br16,
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTekan();
-          },
+          onTap: aktif
+              ? () {
+                  HapticFeedback.lightImpact();
+                  onTekan();
+                }
+              : null,
           child: Center(
             child: Icon(
               sibuk ? LucideIcons.square : LucideIcons.arrowUp,
-              size: 20,
-              color: aktif
-                  ? context.cs.onPrimary
-                  : context.cs.onSurfaceVariant,
+              size: 19,
+              color:
+                  aktif ? Colors.white : context.cs.onSurfaceVariant,
             ),
           ),
         ),

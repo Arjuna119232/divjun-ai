@@ -1,24 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/boot/diagnostik.dart';
 import '../../../core/constants/app_config.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../onboarding/presentation/layar_onboarding.dart';
 
 /// Splash pendek (900 ms) dengan logo + progress bar.
 ///
 /// Tidak ada teks marketing di sini: hanya nama app dan indikator proses.
 /// Warna latar = warna brand, jadi tidak ada kedip putih saat app dibuka.
-class LayarSplash extends StatefulWidget {
+class LayarSplash extends ConsumerStatefulWidget {
   const LayarSplash({super.key});
 
   @override
-  State<LayarSplash> createState() => _LayarSplashState();
+  ConsumerState<LayarSplash> createState() => _LayarSplashState();
 }
 
-class _LayarSplashState extends State<LayarSplash>
+class _LayarSplashState extends ConsumerState<LayarSplash>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
@@ -44,9 +47,14 @@ class _LayarSplashState extends State<LayarSplash>
   void _keBeranda() {
     if (!mounted) return;
     try {
-      context.go('/chat');
+      // Onboarding hanya sekali: kuncinya dibaca di sini, bukan di dalam
+      // LayarOnboarding, supaya `/onboarding` yang dibuka manual dari
+      // Pengaturan tidak ikut terpengaruh keputusan ini.
+      final bool sudah =
+          ref.read(simpanCepitProvider).bacaBool(kunciOnboarding) ?? false;
+      context.go(sudah ? '/chat' : '/onboarding');
     } catch (e, s) {
-      Diagnostik.catat(e, s, konteks: 'splash.go(/chat)');
+      Diagnostik.catat(e, s, konteks: 'splash.go');
       setState(() => _galat = '$e');
     }
   }

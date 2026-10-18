@@ -25,38 +25,15 @@ class StatusKosong extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
-            vertical: AppSpacing.xxl,
+            vertical: AppSpacing.xl,
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: batas.maxHeight - 48),
+            constraints: BoxConstraints(minHeight: batas.maxHeight - 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: <Color>[AppColors.brand, AppColors.brandDeep],
-                    ),
-                    borderRadius: AppRadius.br16,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'D',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: AppTypography.ui,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        height: 1,
-                      ),
-                    ),
-                  ),
-                ),
+                const _LambangBerdenyut(),
                 const SizedBox(height: AppSpacing.xl),
                 Text(salam, style: context.teks.headlineSmall),
                 const SizedBox(height: AppSpacing.xs),
@@ -70,11 +47,16 @@ class StatusKosong extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xl),
                 Text('Coba ini', style: context.teks.labelMedium),
                 const SizedBox(height: AppSpacing.sm),
-                for (final String s in saran)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: _KartuSaran(teks: s, onTekan: () => onPilih(s)),
-                  ),
+                // Wrap, bukan kolom: di layar sempit chip membungkus sendiri,
+                // jadi tidak ada kartu selebar layar yang terbaca seperti form.
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: <Widget>[
+                    for (final String s in saran)
+                      _ChipSaran(teks: s, onTekan: () => onPilih(s)),
+                  ],
+                ),
               ],
             ),
           ),
@@ -84,8 +66,71 @@ class StatusKosong extends StatelessWidget {
   }
 }
 
-class _KartuSaran extends StatelessWidget {
-  const _KartuSaran({required this.teks, required this.onTekan});
+/// Lambang berdenyut: gradasian brand + halo yang berdenyut pelan. State-nya
+/// bergerak, jadi layar kosong tidak terasa mati.
+class _LambangBerdenyut extends StatefulWidget {
+  const _LambangBerdenyut();
+
+  @override
+  State<_LambangBerdenyut> createState() => _LambangBerdenyutState();
+}
+
+class _LambangBerdenyutState extends State<_LambangBerdenyut>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2600),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (BuildContext context, Widget? _) {
+        return Container(
+          width: 58,
+          height: 58,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[AppColors.brand, AppColors.brandDeep],
+            ),
+            borderRadius: AppRadius.br16,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: AppColors.brand.withValues(alpha: 0.18 + _c.value * 0.22),
+                blurRadius: 18 + _c.value * 14,
+                spreadRadius: _c.value * 2,
+              ),
+            ],
+          ),
+          child: const Center(
+            child: Text(
+              'D',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: AppTypography.ui,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                height: 1,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ChipSaran extends StatelessWidget {
+  const _ChipSaran({required this.teks, required this.onTekan});
 
   final String teks;
   final VoidCallback onTekan;
@@ -100,20 +145,19 @@ class _KartuSaran extends StatelessWidget {
         onTap: onTekan,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+            horizontal: AppSpacing.md,
+            vertical: 11,
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(
                 LucideIcons.arrowUpRight,
-                size: 16,
+                size: 15,
                 color: context.cs.onSurfaceVariant,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(teks, style: context.teks.bodyMedium),
-              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(teks, style: context.teks.bodyMedium),
             ],
           ),
         ),
