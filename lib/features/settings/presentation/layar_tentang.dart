@@ -70,7 +70,7 @@ class _LayarTentangState extends ConsumerState<LayarTentang> {
           Center(
             child: Column(
               children: <Widget>[
-                const Container(
+                Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
