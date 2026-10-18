@@ -61,12 +61,6 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
     _selesai = true;
     await ref.read(simpanCepitProvider).tulis(kunciOnboarding, 'true');
     if (!mounted) return;
-    await _page.animateToPage(
-      halamanOnboarding.length,
-      duration: AppMotion.sedang,
-      curve: AppMotion.emphasized,
-    );
-    if (!mounted) return;
     context.go('/chat');
   }
 
