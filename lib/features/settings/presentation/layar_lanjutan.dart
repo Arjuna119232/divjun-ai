@@ -85,8 +85,9 @@ class LayarLanjutan extends ConsumerWidget {
 
 /// Baris navigasi dengan ikon, judul, keterangan, dan tanda panah.
 class _Baris extends StatelessWidget {
+  // Tanpa `super.key`: kelas ini private, jadi lint use_key tidak berlaku
+  // danwns key justru dilaporkan sebagai parameter tak terpakai.
   const _Baris({
-    super.key,
     required this.ikon,
     required this.judul,
     required this.keterangan,
