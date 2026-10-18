@@ -104,7 +104,7 @@ class _LayarTentangState extends ConsumerState<LayarTentang> {
                         if (_ketukan > 0) ...<Widget>[
                           const SizedBox(width: AppSpacing.sm),
                           Text(
-                            '$sisax lagi',
+                            '$sisa lagi',
                             style: context.teks.labelSmall?.copyWith(
                               color: context.cs.primary,
                             ),

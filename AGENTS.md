@@ -131,6 +131,19 @@ Berlaku untuk setiap update dan setiap pencarian saat mengerjakan DIVJUN AI.
 - `abstract final class` + static member pernah bikin simbol tak terlihat
   (router sekarang top-level `final GoRouter appRouter`).
 - Lupa `git push` setelah commit = CI dijalankan di kode lama (terbukti 1x).
+- **Gap `check_source.py` yang SUDAH TAHU dan belum ditutup (v3.0.0):**
+  cek MISSING-IMPORT hanya mengambil identifier yang mulai huruf KAPITAL
+  (`[A-Z][A-Za-z0-9_]{2,}`). Top-level provider huruf kecil seperti
+  `chatProvider` / `setelanProvider` **tidak pernah dicek sama sekali**, jadi
+  import `kontrol_chat.dart` yang hilang lolos 0 masalah. Percobaan
+  memperluasnya ke huruf kecil menghasilkan **52 false positive** (keyword
+  `return`/`switch`, method framework `setState`/`showDialog`, getter
+  `label`/`aktif`) karena filter `n in semua_nama` ikut menelan keyword itu.
+  Lösung yang benar butuh daftar simbol proyek yang terpisah dari
+  keyword - belum dikerjakan. SAMBIL itu ada, `flutter analyze` di CI tetap
+  satu-satunya oracle untuk kelas bug ini.
+  Bolshep: **simbol SDK** (`HapticFeedback`, `showDialog`, `TextField`)
+  juga di luar cakupan checker - hanya simbol proyek yang dicek.
 - **Reasoning tidak boleh jadi fallback dari teks.** Field penalaran beda per
   provider (`delta.reasoning` OVH/Pollinations, `delta.reasoning_content`
   Groq, `parts[].thought` Gemini). Detail + pola UI ada di skill
