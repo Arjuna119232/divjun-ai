@@ -17,7 +17,7 @@ class AlatWeb extends Alat {
       : _dio = dio ??
             Dio(BaseOptions(
               connectTimeout: const Duration(seconds: 10),
-              receiveTimeout: Duration(seconds: AppConfig.timeoutWebDetik),
+              receiveTimeout: const Duration(seconds: AppConfig.timeoutWebDetik),
               maxRedirects: 3,
               validateStatus: (int? s) => s != null && s < 500,
             ));

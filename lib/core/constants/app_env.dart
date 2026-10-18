@@ -11,9 +11,14 @@ abstract final class AppEnv {
   static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
   static const String openRouterApiKey =
       String.fromEnvironment('OPENROUTER_API_KEY');
+  /// Versi aplikasi, disuntik CI dari `pubspec.yaml`.
+  ///
+  /// Default-nya sengaja TIDAK ditulis tangan: versi pernah macet di "2.0.0"
+  /// padahal APK sudah 2.8.x, jadi layar Pengaturan menampilkan angka yang
+  /// salah. CI selalu mengisinya; nilai bawaan hanya untuk `flutter run` lokal.
   static const String appVersion = String.fromEnvironment(
     'APP_VERSION',
-    defaultValue: '2.0.0',
+    defaultValue: 'dev',
   );
 
   static bool get punyaGroq => groqApiKey.trim().isNotEmpty;

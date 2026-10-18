@@ -256,12 +256,10 @@ class LayarSetelan extends ConsumerWidget {
             judul: 'Tentang',
             ikon: LucideIcons.info,
             anak: <Widget>[
-              ListTile(
+              const ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Versi'),
-                subtitle: Text(
-                  '${AppConfig.appName} ${AppConfig.versi} · build ${AppEnv.appVersion}',
-                ),
+                title: Text('Versi'),
+                subtitle: Text('${AppConfig.appName} ${AppEnv.appVersion}'),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,

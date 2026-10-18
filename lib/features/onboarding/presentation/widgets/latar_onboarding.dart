@@ -122,7 +122,7 @@ class _PelukisLatar extends CustomPainter {
           center: Alignment.center,
           radius: 0.95,
           colors: <Color>[Colors.transparent, Color(0xE605050C)],
-          stops: const <double>[0.45, 1],
+          stops: <double>[0.45, 1],
         ).createShader(layar),
     );
   }
@@ -184,7 +184,7 @@ class _PelukisLatar extends CustomPainter {
         ..shader = const RadialGradient(
           radius: 0.78,
           colors: <Color>[Color(0x00000000), Color(0xFF000000)],
-          stops: const <double>[0.55, 1],
+          stops: <double>[0.55, 1],
         ).createShader(area),
     );
   }

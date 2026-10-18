@@ -113,7 +113,7 @@ class HalamanKoneksi extends ConsumerWidget {
                   _BarisUji(model: m),
             ],
           ),
-          _Blok(
+          const _Blok(
             judul: 'Cara cepat',
             ikon: LucideIcons.info,
             anak: <Widget>[

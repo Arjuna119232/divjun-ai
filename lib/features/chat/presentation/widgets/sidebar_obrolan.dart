@@ -161,9 +161,9 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
                 style: AppTypography.mono(size: 13),
                 decoration: const InputDecoration(
                   hintText: 'Cari percakapan',
-                  prefixIcon: const Icon(LucideIcons.search, size: 18),
+                  prefixIcon: Icon(LucideIcons.search, size: 18),
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
+                  contentPadding: EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
                     vertical: 12,
                   ),
@@ -252,7 +252,7 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
                 AppSpacing.lg,
               ),
               child: Text(
-                '${AppConfig.appName} ${AppConfig.versi} · build ${AppEnv.appVersion}',
+                '${AppConfig.appName} ${AppEnv.appVersion}',
                 style: context.teks.labelSmall,
               ),
             ),
