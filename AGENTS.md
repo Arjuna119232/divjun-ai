@@ -57,15 +57,58 @@ Semua sudah diuji dengan fault injection.
    lalu di-patch oleh `tool/setup_android.py`.
 6. Setiap file baru: `python3 tool/check_source.py` harus hijau sebelum commit.
 
+## Aturan operasi saat update (dari user, 18 Okt 2026)
+Berlaku untuk setiap update dan setiap pencarian saat mengerjakan DIVJUN AI.
+
+**1. Hemat tool call.** Ada batas langkah. Jangan habiskan jatah untuk
+   percobaan sia-sia. Evaluasi hasil tiap tool; kalau sebuah tool gagal,
+   JANGAN langsung mengulangnya dengan cara yang sama.
+
+**2. Kegagalan URL = berhenti, jangan ulangi.**
+   - `buka_url` balas HTTP 404 / URL tidak bisa diakses -> jangan buka lagi.
+   - URL dari hasil pencarian yang tampak tidak valid -> jangan dipaksakan.
+   - Toleransi maksimal **2 percobaan**, lalu **BERHENTI** searching web.
+   - Alihkan ke pengetahuan internal, atau jawab dari cuplikan (snippet)
+     hasil pencarian. Snippet umumnya sudah memuat nama, alamat, harga, rating
+     yang cukup untuk menjawab.
+
+**3. Exit strategy.** Kalau jatah tool hampir habis (sekitar langkah
+   4-5), berhenti searching dan susun jawaban akhir sendiri. Jangan biarkan
+   sistem memutus secara paksa.
+
+**4. Jujur saat gagal.** Kalau semua akses URL gagal, katakan terus terang.
+   Diberi jawaban dari cuplikan/pengetahuan internal - **jangan pernah**
+   jawaban kosong atau menempel error mentah ke user.
+
+**5. Fallback model.** Kalau model ditolak provider lalu dialihkan, ABAIKAN
+   pesan error itu dan LANJUT dari titik terakhir. Jangan ulangi percakapan
+   dari awal.
+
+**6. Pencarian harus spesifik + konteks lokal.** Untuk rekomendasi tempat,
+   pakai kata kunci spesifik ("rekomendasi cafe di Cipete Jakarta Selatan"),
+   bukan "tempat ngopi di Cipete".
+
+**7. Format jawaban ke user.** Jangan tampilkan URL mentah yang panjang.
+   Pakai daftar/tabel rapi: nama tempat, deskripsi singkat, dan kisaran harga bila ada.
+
+**8. Proaktif kalau data kurang.** Permintaan terlalu umum -> berikan 3-5
+   rekomendasi awal, lalu ajukan pertanyaan pempersempit (WFC? nongkrong
+   malam? outdoor?). Kalau jawaban sudah valid, jangan bertanya balik.
+
+**9. Safety & harga.** Jangan rekomendasikan tempat/tindakan yang
+   melanggar hukum. Untuk harga/transaksi, selalu ingatkan user memverifikasi
+   langsung ke pihak terkait karena info internet bisa kedaluwarsa.
+
 ## Jebakan yang sudah kejadian (jangan ulangi)
 - **`-f demo=true` menghasilkan APK bertanda tangan DEBUG (`CN=Android Debug`)**,
   karena step `Tulis key.properties` di-skip `if: !inputs.demo` sehingga
   Gradle jatuh ke debug signing. Build tetap hijau, analyze tetap 0 issue,
   test tetap lulus - tapi APK-nya **tidak bisa update di atas rilis lama**
-  (INSTALL_FAILED_UPDATE_INCOMPATIBLE) dan meng Uninstall = history chat hilang.
-  Untuk rilis ke user WAJIB `-f demo=false`. SetELAHP selalu cek:
-  `apksigner verify --print-certs <apk> | grep 'certificate DN'`
-  harus `CN=DIVJUN AI`, bukan `CN=Android Debug`.
+(INSTALL_FAILED_UPDATE_INCOMPATIBLE) dan memaksa uninstall = history chat
+   hilang. Untuk rilis ke user WAJIB `-f demo=false`. Sebelum menyerahkan APK
+   selalu cek:
+   `apksigner verify --print-certs <apk> | grep 'certificate DN'`
+   harus `CN=DIVJUN AI`, bukan `CN=Android Debug`.
 - **Versi app TAK boleh ditulis tangan.** `AppConfig.versi` pernah macet di
   "2.0.0" padahal APK sudah 2.8.x, dan "build" diisi `github.run_number`
   (nomor workflow GitHub = tidak berguna buat user). Sekarang CI membaca
@@ -77,7 +120,6 @@ Semua sudah diuji dengan fault injection.
   `dart:async`. Hanya `Timer`, `Completer`, `StreamController`,
   `StreamSubscription`, `unawaited`, dan extension method seperti
   `asBroadcastStream()` yang benar-benar butuh import itu.
-
 - `flutter create` di template terbaru (3.4x) **tidak** menulis `versionCode`/
   `versionName` angka di `build.gradle.kts` (baca dari pubspec) → patcher harus
   adaptable, bukan `versionCode = \d+` polos.
