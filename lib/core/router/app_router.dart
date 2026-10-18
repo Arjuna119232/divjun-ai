@@ -9,12 +9,18 @@ import '../../features/settings/presentation/halaman_koneksi.dart';
 import '../../features/settings/presentation/halaman_kunci.dart';
 import '../../features/settings/presentation/layar_setelan.dart';
 import '../../features/skills/presentation/layar_skill.dart';
+import '../theme/app_transitions.dart';
 
 /// Routing app.
 ///
-/// `context.go()` untuk perpindahan root (splash -> chat), `context.push()`
-/// untuk halaman turunan (chat -> setelan) supaya tombol back perangkat
-/// selalu benar-benar kembali, bukan langsung menutup app.
+/// Setiap route memakai [CustomTransitionPage] sendiri, bukan animasi Material
+/// bawaan. Alasannya: perpindahan "dunia baru" (onboarding -> chat) memakai
+/// zoom-through dua arah, sementara halaman turunan (chat -> pengaturan) memakai
+/// geser kecil. Campur keduanya dalam satu `builder:` tidak mungkin.
+///
+/// `context.go()` untuk perpindahan root (splash -> onboarding -> chat),
+/// `context.push()` untuk halaman turunan (chat -> setelan) supaya tombol back
+/// perangkat selalu benar-benar kembali, bukan langsung menutup app.
 ///
 /// Satu instance global, dipakai `MaterialApp.router` di app.dart.
 final GoRouter appRouter = GoRouter(
@@ -22,35 +28,43 @@ final GoRouter appRouter = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: '/splash',
-      builder: (BuildContext c, GoRouterState s) => const LayarSplash(),
-    ),
-    GoRoute(
-      path: '/chat',
-      builder: (BuildContext c, GoRouterState s) => const LayarChat(),
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const LayarSplash()),
     ),
     GoRoute(
       path: '/onboarding',
-      builder: (BuildContext c, GoRouterState s) => const LayarOnboarding(),
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.portalPage<void>(s, const LayarOnboarding()),
+    ),
+    GoRoute(
+      path: '/chat',
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.portalPage<void>(s, const LayarChat()),
     ),
     GoRoute(
       path: '/setelan',
-      builder: (BuildContext c, GoRouterState s) => const LayarSetelan(),
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const LayarSetelan()),
     ),
     GoRoute(
       path: '/koneksi',
-      builder: (BuildContext c, GoRouterState s) => const HalamanKoneksi(),
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const HalamanKoneksi()),
     ),
     GoRoute(
       path: '/kunci',
-      builder: (BuildContext c, GoRouterState s) => const HalamanKunci(),
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const HalamanKunci()),
     ),
     GoRoute(
       path: '/skills',
-      builder: (BuildContext c, GoRouterState s) => const LayarSkill(),
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const LayarSkill()),
     ),
     GoRoute(
       path: '/memori',
-      builder: (BuildContext c, GoRouterState s) => const LayarMemori(),
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const LayarMemori()),
     ),
   ],
 );

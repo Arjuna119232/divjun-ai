@@ -8,6 +8,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../domain/halaman_onboarding.dart';
 import 'widgets/ilustrasi_onboarding.dart';
+import 'widgets/ledakan_cahaya.dart';
 import 'widgets/latar_onboarding.dart';
 
 /// Kunci penanda onboarding sudah pernah ditutup.
@@ -39,6 +40,14 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
 
   int _indeks = 0;
   bool _selesai = false;
+  bool _keluar = false;
+
+  /// Controller transisi keluar: satu controller untuk ledakan cahaya DAN zoom
+  /// layar, jadi keduanya tidak pernah meleset waktunya.
+  late final AnimationController _cKeluar = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 560),
+  );
 
   @override
   void initState() {
@@ -50,16 +59,30 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
   void dispose() {
     _page.dispose();
     _masuk.dispose();
+    _cKeluar.dispose();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     super.dispose();
   }
 
   bool get _terakhir => _indeks == halamanOnboarding.length - 1;
 
-  Future<void> _tandaiSelesai() async {
+  /// Tutup onboarding: tulis kunci, mainkan ledakan cahaya, lalu ke chat.
+  ///
+  /// Zoom halaman + router transisi (`AppTransisi.portal`) sengaja dibuat
+  /// SETENGAH-bertumpuk: layar lama mulai membesar sebelum `go()` dipanggil,
+  /// sementara halaman baru sudah disiapkan di belakang. Kalau keduanya
+  /// sequential (tunggu satu selesai baru pindah), efeknya terasa seperti
+  /// ganti slide, bukan menembus.
+  Future<void> _tandaiSelesai({bool denganLedakan = true}) async {
     if (_selesai) return;
     _selesai = true;
     await ref.read(simpanCepitProvider).tulis(kunciOnboarding, 'true');
+    if (!mounted) return;
+    if (denganLedakan) {
+      setState(() => _keluar = true);
+      await _cKeluar.forward();
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+    }
     if (!mounted) return;
     context.go('/chat');
   }
@@ -77,36 +100,54 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
 
   @override
   Widget build(BuildContext context) {
+    final Widget layar = SafeArea(
+      child: Column(
+        children: <Widget>[
+          _BarisAtas(selesai: () => _tandaiSelesai(denganLedakan: false)),
+          Expanded(
+            child: PageView.builder(
+              controller: _page,
+              itemCount: halamanOnboarding.length,
+              onPageChanged: (int i) => setState(() => _indeks = i),
+              itemBuilder: (BuildContext context, int i) => _KartuHalaman(
+                halaman: halamanOnboarding[i],
+                aksen: aksenHalaman[i],
+                masuk: _masuk,
+              ),
+            ),
+          ),
+          _BagianBawah(
+            jumlah: halamanOnboarding.length,
+            indeks: _indeks,
+            terakhir: _terakhir,
+            onLanjut: _lanjut,
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFF0B0B10),
       body: Stack(
         children: <Widget>[
-          const Positioned.fill(child: LatarOnboarding(animate: true)),
-          SafeArea(
-            child: Column(
-              children: <Widget>[
-                _BarisAtas(selesai: _tandaiSelesai),
-                Expanded(
-                  child: PageView.builder(
-                    controller: _page,
-                    itemCount: halamanOnboarding.length,
-                    onPageChanged: (int i) => setState(() => _indeks = i),
-                    itemBuilder: (BuildContext context, int i) => _KartuHalaman(
-                      halaman: halamanOnboarding[i],
-                      aksen: aksenHalaman[i],
-                      masuk: _masuk,
-                    ),
-                  ),
+          Positioned.fill(child: LatarOnboarding(animate: !_keluar)),
+          // Zoom keluar + memudar: layar ini "diterbang" ke depan, persis
+          // kebalikan dari arah halaman chat yang datang dari 1.10.
+          AnimatedBuilder(
+            animation: _cKeluar,
+            builder: (BuildContext context, Widget? _) {
+              final double v = Curves.easeInCubic.transform(_cKeluar.value);
+              return Opacity(
+                opacity: 1 - v,
+                child: Transform.scale(
+                  scale: 1 + (0.22 * v),
+                  alignment: Alignment.center,
+                  child: layar,
                 ),
-                _BagianBawah(
-                  jumlah: halamanOnboarding.length,
-                  indeks: _indeks,
-                  terakhir: _terakhir,
-                  onLanjut: _lanjut,
-                ),
-              ],
-            ),
+              );
+            },
           ),
+          if (_keluar) Positioned.fill(child: LedakanCahaya(animasi: _cKeluar)),
         ],
       ),
     );

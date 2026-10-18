@@ -187,8 +187,23 @@ def deklarasi_ekspor(path: Path, kode_mentah: str) -> tuple[set[str], set[str]]:
         re.M,
     ):
         nama.add(m.group(1))
+    # CATATAN JEBRAKAN #4: pola lama hanya mengenali method TANPA body
+    # (`void foo();`). Method dengan body blok `{ ... }` maupun arrow
+    # `=> expr;` tidak pernah masuk daftar deklarasi. Gejalanya: pemanggilan
+    # `@override bool shouldRepaint(X lama) => ...` dilaporkan
+    # MISSING-IMPORT padahal yang mendeklarasikannya cuma file lain di proyek
+    # dan simbol itu sebenarnya method bawaan Flutter yang di-override.
+    # Sekarang tiga bentuk body diterima: `;`, `=>`, `{`.
+    # Tipe opsional (bisa tanpa return type). WAJIB longgar: kalau tipe
+    # diwajibkan, pemanggilan yang mirip deklarasi ikut terlewat dan
+    # muncul sebagai false positive baru (terbukti: parameter `cadangan`
+    # di main.dart dilaporkan "tidak ada deklarasinya").
     for m in re.finditer(
-        r"^\s+(?:[\w<>,?\s\.]+\s+)?([a-z_$][\w$]*)\s*\([^;{}]*\)\s*;",
+        r"^[ \t]+(?:@\w+[ \t]*\n[ \t]*)*"
+        r"(?:[\w$<>,? \t.]+?[ \t])?"
+        r"([a-z_$][\w$]*)[ \t]*"
+        r"\([^;{}]*(?:\{[^{}]*\}[^;{}]*)*\)[ \t]*"
+        r"(?:async[ \t]*)?(?:=>|\{|;)",
         bersih,
         re.M,
     ):
@@ -339,6 +354,18 @@ def main() -> int:
             if m.group(1) in KW_DART or m.group(1) in KW_FRAMEWORK:
                 continue
             dipakai.add(m.group(1))
+
+        # CATATAN JEBRAKAN #5: nama method ber-@override TIDAK boleh
+        # dicek import. Method override berasal dari superclass (framework
+        # atau kelas proyek), bukan dari import file ini. Kalau ikut dicek,
+        # `@override bool shouldRepaint(X lama) => ...` dilaporkan
+        # MISSING-IMPORT hanya karena ada file lain di proyek yang punya
+        # method bernama sama - padahal tidak ada import yang relevan.
+        for m in re.finditer(
+            r"@override\s+(?:[\w$<>,?\s\.]+?\s+)?([a-z_$][\w$]*)\s*\(",
+            bersih,
+        ):
+            dipakai.discard(m.group(1))
         # hanya nama yang benar-benar dideklarasi di proyek yang dicek
         semua_nama = set()
         for s in semua_provides_cache.values():
