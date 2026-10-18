@@ -29,7 +29,7 @@ abstract final class AppTheme {
     final bool gelap = b == Brightness.dark;
     final Color seed = dynamic?.primary ?? AppColors.brand;
 
-    ColorScheme cs = ColorScheme.fromSeed(
+    final ColorScheme cs = ColorScheme.fromSeed(
       seedColor: seed,
       brightness: b,
     ).copyWith(

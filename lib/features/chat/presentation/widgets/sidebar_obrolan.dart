@@ -159,7 +159,7 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
                 controller: _cari,
                 onChanged: (_) => setState(() {}),
                 style: AppTypography.mono(size: 13),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Cari percakapan',
                   prefixIcon: const Icon(LucideIcons.search, size: 18),
                   isDense: true,

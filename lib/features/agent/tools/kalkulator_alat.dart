@@ -1,5 +1,5 @@
-import 'kalkulator.dart';
 import 'alat.dart';
+import 'kalkulator.dart';
 
 /// Tool kalkulator. Parser aman (tidak memakai eval), hasil diformat gaya
 /// Indonesia (pemisah ribuan titik).
@@ -52,7 +52,7 @@ class AlatKalkulator extends Alat {
     }
     return HasilAlat.ok(
       '$ekspresi = ${Kalkulator.format(nilai)}',
-      ringkasan: '${Kalkulator.format(nilai)}',
+      ringkasan: Kalkulator.format(nilai),
     );
   }
 }

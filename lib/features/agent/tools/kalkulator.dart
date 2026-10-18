@@ -171,7 +171,7 @@ class _Lexer {
 
   static bool _huruf(String c) {
     final int k = c.codeUnitAt(0);
-    return (k >= 97 && k <= 122);
+    return k >= 97 && k <= 122;
   }
 }
 
@@ -197,7 +197,7 @@ class _Parser {
 
   void sPastiAkhir() {
     if (_p != token.length) {
-      throw FormatException('ada sisa ekspresi');
+      throw const FormatException('ada sisa ekspresi');
     }
   }
 
@@ -222,7 +222,7 @@ class _Parser {
       _makan(op);
       final double kanan = ekspresiUnary();
       if (op == '/') {
-        if (kanan == 0) throw FormatException('bagi dengan nol');
+        if (kanan == 0) throw const FormatException('bagi dengan nol');
         nilai = nilai / kanan;
       } else {
         nilai = nilai * kanan;
@@ -274,7 +274,7 @@ class _Parser {
       _p++;
       final double v = ekspresi();
       if (_peek().jenis != _Jenis.kurungTutup) {
-        throw FormatException('kurung tidak tertutup');
+        throw const FormatException('kurung tidak tertutup');
       }
       _p++;
       return v;
@@ -287,7 +287,7 @@ class _Parser {
       _makan('-');
       return -ekspresiUnary();
     }
-    throw FormatException('ekspresi tidak lengkap');
+    throw const FormatException('ekspresi tidak lengkap');
   }
 
   double _nilaiIden(String nama) {
@@ -301,7 +301,7 @@ class _Parser {
         b = ekspresi();
       }
       if (_peek().jenis != _Jenis.kurungTutup) {
-        throw FormatException('kurung fungsi tidak tertutup');
+        throw const FormatException('kurung fungsi tidak tertutup');
       }
       _p++;
       return _fungsi(nama, a, b);
@@ -322,7 +322,7 @@ class _Parser {
     switch (nama) {
       case 'sqrt':
       case 'akar':
-        if (a < 0) throw FormatException('akar dari bilangan negatif');
+        if (a < 0) throw const FormatException('akar dari bilangan negatif');
         return math.sqrt(a);
       case 'sin':
         return math.sin(a);
@@ -359,7 +359,7 @@ class _Parser {
       case 'max':
         return math.max(a, b);
       case 'mod':
-        if (b == 0) throw FormatException('modulo dengan nol');
+        if (b == 0) throw const FormatException('modulo dengan nol');
         return a % b;
       default:
         throw FormatException('fungsi tidak dikenal: $nama');

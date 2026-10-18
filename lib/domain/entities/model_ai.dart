@@ -69,7 +69,7 @@ class ModelAi {
   bool get untukGratis => !perluBayar;
 
   @override
-  bool operator ==(Object o) => o is ModelAi && o.id == id;
+  bool operator ==(Object other) => other is ModelAi && other.id == id;
 
   @override
   int get hashCode => id.hashCode;

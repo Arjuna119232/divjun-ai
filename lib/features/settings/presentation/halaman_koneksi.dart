@@ -204,7 +204,7 @@ class _BarisKunci extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Text('$nama', style: context.teks.bodyMedium),
+          child: Text(nama, style: context.teks.bodyMedium),
         ),
         Text(
           terisi

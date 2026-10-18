@@ -5,7 +5,7 @@ import 'dart:convert';
 /// Definisi satu tool yang dikirim ke LLM sebagai native function calling.
 /// Klasifikasi galat supaya UI dan agent loop bereaksi berbeda.
 abstract final class KodeGalat {
-  static const int GalatKosong = 0;
+  static const int galatKosong = 0;
   static const int modelTidakAda = 1; // 404 / model butuh paket berbayar
   static const int kuotaHabis = 2; // 429
   static const int kunciDitolak = 3; // 401 / 403 auth
@@ -102,7 +102,7 @@ class PotonganBalasan {
     this.selesai = false,
     this.alasanBerhenti = '',
     this.galat = '',
-    this.kodeGalat = KodeGalat.GalatKosong,
+    this.kodeGalat = KodeGalat.galatKosong,
   });
 
   final String teks;

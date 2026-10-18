@@ -11,8 +11,8 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../domain/halaman_onboarding.dart';
 import 'widgets/ilustrasi_onboarding.dart';
-import 'widgets/ledakan_cahaya.dart';
 import 'widgets/latar_onboarding.dart';
+import 'widgets/ledakan_cahaya.dart';
 
 /// Kunci penanda onboarding sudah pernah ditutup.
 const String kunciOnboarding = 'onboarding_v3';

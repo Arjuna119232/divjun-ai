@@ -175,7 +175,7 @@ class LayarSetelan extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Skill bawaan'),
                 subtitle: Text(
-                  '${jumlahSkill} skill tersimpan di dalam app '
+                  '$jumlahSkill skill tersimpan di dalam app '
                   '(offline, tidak butuh internet).',
                 ),
                 trailing: const Icon(LucideIcons.chevronRight, size: 18),

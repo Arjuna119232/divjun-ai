@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/constants/app_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
@@ -13,7 +16,6 @@ import '../../../services/tool_executor.dart';
 import '../../agent/loop/agent_loop.dart';
 import '../../agent/tools/alat.dart';
 import '../../skills/data/skill_providers.dart';
-import 'dart:async';
 
 /// State chat: daftar percakapan + percakapan aktif + status sibuk.
 class StateChat {
@@ -39,7 +41,7 @@ class StateChat {
     return null;
   }
 
-  bool get adaPesan => (aktif?.pesan.isNotEmpty) ?? false;
+  bool get adaPesan => aktif?.pesan.isNotEmpty ?? false;
 
   StateChat salin({
     List<Percakapan>? daftar,

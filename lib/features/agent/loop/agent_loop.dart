@@ -72,11 +72,11 @@ class AgentLoop {
     final List<ModelAi> percobaan = <ModelAi>[modelAktif];
     final List<String> catatFallback = <String>[];
     String galat = '';
-    int kodeGalat = KodeGalat.GalatKosong;
+    int kodeGalat = KodeGalat.galatKosong;
     bool mentok = false;
 
     /// Kandidat model berikutnya saat yang sekarang ditolak provider.
-    ModelAi? _berikutnya(List<ModelAi> dicoba, List<ModelAi> katalog) {
+    ModelAi? modelBerikutnya(List<ModelAi> dicoba, List<ModelAi> katalog) {
       final List<ModelAi> urut = ModelAi.cadangan(dicoba.first, katalog);
       for (final ModelAi m in urut) {
         if (!dicoba.any((ModelAi d) => d.id == m.id)) return m;
@@ -141,7 +141,7 @@ class AgentLoop {
             kodeGalat == KodeGalat.kuotaHabis ||
             kodeGalat == KodeGalat.kunciDitolak;
         if (perluCobaLagi && !sudahBatal() && percobaan.length <= 3) {
-          final ModelAi? berikutnya = _berikutnya(percobaan, katalog);
+          final ModelAi? berikutnya = modelBerikutnya(percobaan, katalog);
           if (berikutnya != null) {
             percobaan.add(berikutnya);
             modelAktif = berikutnya;
@@ -152,7 +152,7 @@ class AgentLoop {
             // PENTING: jangan sentuh `wire` di sini - daftar percakapan tetap
             // utuh, hanya model yang ditukar.
             galat = '';
-            kodeGalat = KodeGalat.GalatKosong;
+            kodeGalat = KodeGalat.galatKosong;
             continue;
           }
         }

@@ -10,7 +10,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../onboarding/presentation/layar_onboarding.dart';
 
-/// Splash pendek (900 ms) dengan logo + progress bar.
+/// Splash dengan logo + progress bar, durasi [AppConfig.durasiSplashMs].
 ///
 /// Tidak ada teks marketing di sini: hanya nama app dan indikator proses.
 /// Warna latar = warna brand, jadi tidak ada kedip putih saat app dibuka.
@@ -61,9 +61,25 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
   /// Logo melebar sampai memenuhi layar, lalu pindah ke onboarding/chat.
   /// Efeknya membaca sebagai "pintu terbuka", jadi halaman berikutnya
   /// terasa seperti dunia yang sedang dimasuki, bukan layar yang diganti.
-  Future<void> _bukaPortal() async {
-    if (!mounted || _keluar) return;
-    setState(() => _keluar = true);
+  ///
+  /// [paksa] dipakai tombol "Coba Lagi" di panel tersendat. Tanpa itu,
+  /// menekan ulang tidak akan melakukan apa-apa: `_keluar` sudah bernilai
+  /// true dari percobaan pertama yang menggantung, sehingga penjaga di bawah
+  /// akan menelan perintah. Padahal penjaga itu persis jaring pengaman yang
+  /// paling membutuhkan tombol yang benar-benar bekerja.
+  Future<void> _bukaPortal({bool paksa = false}) async {
+    if (!mounted) return;
+    if (_keluar && !paksa) return;
+    if (paksa) {
+      // Kembalikan animasi ke kondisi awal, kalau tidak `forward()` langsung
+      // selesai dan layar berpindah tanpa efek portal sama sekali.
+      _cKeluar.reset();
+      _c.value = 0;
+    }
+    setState(() {
+      _keluar = true;
+      _galat = null;
+    });
     await _cKeluar.forward();
     if (!mounted) return;
     await Future<void>.delayed(const Duration(milliseconds: 70));
@@ -105,11 +121,11 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
           final double v = Curves.easeInCubic.transform(_cKeluar.value);
           return Stack(
             children: <Widget>[
-              // Gradasian tetap ada saat portal menutup: kalau latar rata,
-              // lambang yang melebar tidak kelihatan bergerak.
-              Positioned.fill(
+// Gradasian tetap ada saat portal menutup: kalau latar rata,
+               // lambang yang melebar tidak kelihatan bergerak.
+              const Positioned.fill(
                 child: DecoratedBox(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -204,7 +220,7 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
                     padding: const EdgeInsets.all(20),
                     child: Diagnostik.panel(
                       judul: 'DIVJUN tersendat',
-                      onCobaLagi: _bukaPortal,
+                      onCobaLagi: () => _bukaPortal(paksa: true),
                     ),
                   ),
                 ),
