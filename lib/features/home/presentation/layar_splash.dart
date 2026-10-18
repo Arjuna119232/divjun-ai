@@ -43,13 +43,19 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(milliseconds: 900), () => _bukaPortal());
+    _timer = Timer(
+      const Duration(milliseconds: AppConfig.durasiSplashMs),
+      () => _bukaPortal(),
+    );
     // Watchdog: kalau 6 detik lalu masih di splash, tombol "Lanjut"
     // muncul. Ini jaring pengaman untuk laporan "layar ungu nyangkut".
-    _jaga = Timer(const Duration(seconds: 6), () {
-      if (!mounted) return;
-      setState(() => _galat ??= 'Layar splash belum berhasil pindah ke beranda.');
-    });
+    _jaga = Timer(
+      const Duration(seconds: AppConfig.durasiSplashMs ~/ 1000 + 6),
+      () {
+        if (!mounted) return;
+        setState(() => _galat ??= 'Layar splash belum berhasil pindah ke beranda.');
+      },
+    );
   }
 
   /// Logo melebar sampai memenuhi layar, lalu pindah ke onboarding/chat.

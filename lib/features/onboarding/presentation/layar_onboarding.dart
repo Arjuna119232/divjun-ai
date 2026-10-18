@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/constants/app_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../domain/halaman_onboarding.dart';
@@ -41,6 +44,7 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
   int _indeks = 0;
   bool _selesai = false;
   bool _keluar = false;
+  Timer? _auto;
 
   /// Controller transisi keluar: satu controller untuk ledakan cahaya DAN zoom
   /// layar, jadi keduanya tidak pernah meleset waktunya.
@@ -49,17 +53,62 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
     duration: const Duration(milliseconds: 560),
   );
 
+  /// Garis countdown halaman: 0..1 selama 4 detik, lalu halaman berikutnya.
+  /// Harus linear - kalau eased, sisa detik terasa tidak akurat.
+  late final AnimationController _cHitung = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: AppConfig.durasiHalamanOnboardingMs),
+  )..addStatusListener(_saatHitungSelesai);
+
+  void _saatHitungSelesai(AnimationStatus status) {
+    if (status != AnimationStatus.completed) return;
+    _auto = null;
+    _lanjutOtomatis();
+  }
+
   @override
   void initState() {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _mulaiHitung());
+  }
+
+  /// Mulai ulang countdown untuk halaman sekarang. Dipanggil tiap kali
+  /// halaman berganti (dan sekali saat layar pertama tampil).
+  void _mulaiHitung() {
+    if (!mounted || _selesai) return;
+    _auto?.cancel();
+    _auto = null;
+    _cHitung.forward(from: 0);
+  }
+
+  void _hentiHitung() {
+    _auto?.cancel();
+    _auto = null;
+    _cHitung.stop();
+  }
+
+  /// Auto-lanjut setelah 4 detik. Halaman terakhir langsung memicu ledakan.
+  Future<void> _lanjutOtomatis() async {
+    if (!mounted || _selesai) return;
+    _hentiHitung();
+    if (_terakhir) {
+      await _tandaiSelesai();
+      return;
+    }
+    await _page.nextPage(
+      duration: AppMotion.sangatLambat,
+      curve: AppMotion.emphasized,
+    );
   }
 
   @override
   void dispose() {
+    _auto?.cancel();
     _page.dispose();
     _masuk.dispose();
     _cKeluar.dispose();
+    _cHitung.dispose();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     super.dispose();
   }
@@ -76,6 +125,7 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
   Future<void> _tandaiSelesai({bool denganLedakan = true}) async {
     if (_selesai) return;
     _selesai = true;
+    _hentiHitung();
     await ref.read(simpanCepitProvider).tulis(kunciOnboarding, 'true');
     if (!mounted) return;
     if (denganLedakan) {
@@ -88,6 +138,9 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
   }
 
   Future<void> _lanjut() async {
+    // Tombol ditekan = kemauan user, hentikan hitungan mundur supaya
+    // halaman tidak meloncat lagi 4 detik setelahnya.
+    _hentiHitung();
     if (_terakhir) {
       await _tandaiSelesai();
       return;
@@ -104,11 +157,15 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
       child: Column(
         children: <Widget>[
           _BarisAtas(selesai: () => _tandaiSelesai(denganLedakan: false)),
+          _GarisHitung(animasi: _cHitung),
           Expanded(
             child: PageView.builder(
               controller: _page,
               itemCount: halamanOnboarding.length,
-              onPageChanged: (int i) => setState(() => _indeks = i),
+              onPageChanged: (int i) {
+                setState(() => _indeks = i);
+                _mulaiHitung();
+              },
               itemBuilder: (BuildContext context, int i) => _KartuHalaman(
                 halaman: halamanOnboarding[i],
                 aksen: aksenHalaman[i],
@@ -429,6 +486,46 @@ class _PilPoin extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Garis tipis yang menipis saat halaman menunggu auto-lanjut.
+///
+/// Ini yang membuat lama 4 detik terasa fair: user tahu persis kapan
+/// halaman akan berganti, jadi tidak merasa diburu. Kalau autoplay tanpa
+/// indikator, 4 detik terasa lama dan membosankan.
+class _GarisHitung extends StatelessWidget {
+  const _GarisHitung({required this.animasi});
+
+  final AnimationController animasi;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(99),
+        child: SizedBox(
+          height: 2,
+          child: AnimatedBuilder(
+            animation: animasi,
+            builder: (BuildContext context, Widget? _) {
+              return LinearProgressIndicator(
+                value: animasi.value,
+                minHeight: 2,
+                backgroundColor: Colors.white.withValues(alpha: 0.10),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.mint,
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

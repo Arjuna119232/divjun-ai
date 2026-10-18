@@ -55,6 +55,8 @@
   .vig{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,transparent 42%,rgba(5,5,12,.86))}
 
   #onb .isi{position:absolute;inset:0;display:flex;flex-direction:column;padding:26px 24px 22px}
+  .hitung{margin:14px 24px 0;height:2px;border-radius:99px;background:rgba(255,255,255,.10);overflow:hidden}
+  .hitung i{display:block;height:100%;width:0%;background:#00BFA6;border-radius:99px}
   .bawah{margin-top:auto;display:flex;flex-direction:column;gap:16px}
   .ind{display:flex;gap:6px}
   .ind b{display:block;height:4px;border-radius:99px;background:rgba(255,255,255,.22);transition:width .42s cubic-bezier(.22,1,.36,1),background .42s}
@@ -119,6 +121,7 @@
     <div class="grid"></div>
     <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
     <div class="vig"></div>
+    <div class="hitung"><i id="hitungBar"></i></div>
     <div class="isi" id="onbIsi">
       <div class="gelembung">
         <div class="gel user">Buatkan draf email minta cuti 3 hari</div>
@@ -192,7 +195,7 @@ async function keSplash(){
   L.ring1.style.opacity = L.ring2.style.opacity = L.flash.style.opacity = 0;
   L.onbIsi.style.opacity = 1; L.onbIsi.style.transform = 'scale(1)';
   L.chat.style.transform = 'scale(1)'; L.chat.style.opacity = 1;
-  await jeda(700);
+  await jeda(4000);
   await portalSplash();
 }
 function jeda(ms){ return new Promise(r=>setTimeout(r,ms)); }
@@ -215,6 +218,7 @@ async function portalSplash(){
   L.onbIsi.style.opacity = 1;
   L.onbIsi.style.transform = 'scale(1)';
   await jeda(520);
+  mulaiHitung();
 }
 
 async function keChat(){
@@ -254,7 +258,21 @@ async function keChat(){
   L.onbIsi.style.transition = 'none';
 }
 
-L.cta.addEventListener('click', keChat);
+const hitungBar = document.getElementById('hitungBar');
+let autoTimer = null;
+function mulaiHitung(){
+  if (autoTimer) clearTimeout(autoTimer);
+  hitungBar.style.transition = 'none';
+  hitungBar.style.width = '0%';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    hitungBar.style.transition = 'width 4s linear';
+    hitungBar.style.width = '100%';
+  }));
+  autoTimer = setTimeout(()=>{ /* di app: pindah halaman / ledakan */ }, 4000);
+}
+function hentiHitung(){ if (autoTimer) clearTimeout(autoTimer); autoTimer = null; }
+
+L.cta.addEventListener('click', ()=>{ hentiHitung(); keChat(); });
 document.getElementById('btnUlang').addEventListener('click', keSplash);
 document.getElementById('btnLoncat').addEventListener('click', async ()=>{
   TUNJUK(L.splash,false); TUNJUK(L.onb,true); TUNJUK(L.chat,true);

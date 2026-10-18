@@ -18,6 +18,14 @@ abstract final class AppConfig {
   static const int maksHurufWeb = 6000;
   static const int timeoutWebDetik = 12;
 
+  // Intro: splash + durasi per halaman onboarding.
+  // 4 detik per halaman, BUKAN 4 detik total: tiga halaman berisi teks,
+  // 1,3 detik per halaman tidak terbaca. Countdown-nya tampil sebagai garis
+  // tipis di atas konten supaya auto-lanjut tidak terasa mencuri waktu baca.
+  // konten supaya auto-lanjut tidak terasa mencuri waktu baca.
+  static const int durasiSplashMs = 4000;
+  static const int durasiHalamanOnboardingMs = 4000;
+
   // Kunci penyimpanan lokal
   static const String kPengaturan = 'divjun.pengaturan.v2';
   static const String kRiwayat = 'divjun.riwayat.v2';
