@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/layar_login.dart';
 import '../../features/chat/presentation/layar_chat.dart';
 import '../../features/home/presentation/layar_splash.dart';
 import '../../features/memory/presentation/layar_memori.dart';
@@ -37,6 +38,11 @@ final GoRouter appRouter = GoRouter(
       path: '/onboarding',
       pageBuilder: (BuildContext c, GoRouterState s) =>
           AppTransisi.portalPage<void>(s, const LayarOnboarding()),
+    ),
+    GoRoute(
+      path: '/login',
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.portalPage<void>(s, const LayarLogin()),
     ),
     GoRoute(
       path: '/chat',

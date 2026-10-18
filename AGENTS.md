@@ -6,11 +6,49 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
 `main`; `main` masih berisi app WebView lama + pipeline Gradle-nya).
 
 - Lokasi kerja: `$HOME/divjun-flutter` (bukan `/storage` — FUSE + git lambat)
-- Package: `com.divjun.ai` · versi `2.8.1+47` · minSdk 24 · targetSdk 36
+- Package: `com.divjun.ai` · versi `3.0.2+51` · minSdk 24 · targetSdk 36
 - Sertifikat rilis SHA-256 `c3923241b05990b2575e215090f037e09be5d1da5cc715b1ef11ded4cb18feb7`
   (CN=DIVJUN AI). APK dengan sertifikat lain TIDAK bisa update di atas v2.8.0.
 - Status "seukuran Claude AI": tahap 1 (sidebar + kolom 820) ✅ v2.4.0+42 ·
   tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ❌
+- UI v3.0.1: **overlap splash diperbaiki** — lambang + nama app kini SATU
+  `Column` ber-center; sebelumnya dua anak `Center` terpisah di dalam `Stack`
+  sehingga saling tumpang. Ditambah kredit "FROM : 0XMAHEN" di atas progress
+  bar. Onboarding: judul 29→26sp, **grid latar dihapus** (garisnya bikin teks
+  ramai), halaman 3 diganti dari "Pustaka skill" → "Ingat detail" (memori)
+  karena UI skill disembunyikan dari user.
+- **UI skill & koneksi AI disembunyikan dari user** (permintaan user, backend
+  tetap utuh): entri `Pustaka skill` + `Koneksi AI` di `sidebar_obrolan.dart`,
+  menu `Keahlian Agen` di `layar_chat.dart`, baris `Keahlian Agen` DAN
+  `Pengaturan Lanjut` di `layar_setelan.dart` DIHAPUS. Rute `/skills`,
+  `/koneksi`, `/setelan/lanjutan` sengaja tetap terdaftar di router supaya
+  file tidak jadi DEAD-FILE = hanya bisa dibuka via deep link (tidak ada lagi
+  entry di UI biasa). `_IlustrasiSkill` → `_IlustrasiMemori`, enum `kartuSkill`
+  → `kartuMemori`.
+  ⚠️ Konsekuensi yang diterima user: tanpa "Pengaturan Lanjut" user tidak bisa
+  memasang API key manual — app tetap jalan lewat penyedia tanpa kunci
+  (OVHcloud / Pollinations), jadi tidak ada fitur yang benar-benar hilang.
+- **Login dummy v3.0.2** (`lib/features/auth/presentation/layar_login.dart`):
+  alur jadi `/splash → /onboarding → /login → /chat`. Rute `/login` memakai
+  `AppTransisi.portalPage` (masuk seperti portal dari onboarding).
+  `kunciLogin = 'login_v1'` ditulis SEBELUM `context.go('/chat')`; dibaca di
+  `layar_splash.dart` (bukan di dalam LayarLogin) supaya penanda lama tidak
+  bergantung pada layar yang sedang dibuka. Isi: merek (kotak D + nama app),
+  ilustrasi "napas" (`CustomPainter` cincin progres + inti berdenyut),
+  headline **Playfair Display 30sp w600**, tombol "Lanjutkan dengan Google"
+  (lambang G digambar dari 4 busur `drawArc` + batang biru — TANPA
+  `flutter_svg`), pembatas ATAU, kolom email, tombol "Lanjut" muncul hanya bila
+  email lolos regex `^[^@\s]+@[^@\s]+\.[^@\s]{2,}$`, footer legal.
+  ⚠️ Validasi email sengaja longgar (1 `@` + 1 titik) — regex ketat menolak
+  email sah seperti `nama+label@domain.co.id`.
+  ⚠️ Sudut busur G (0 = kanan, bertambah searah jarum jam): hijau 21+80 ·
+  kuning 100+91 · merah 190+111 · biru 299+59, tiap busur diberi tumpang 1°
+  karena `StrokeCap.butt` menyisakan garis rambut di sambungan.
+- **Font Playfair Display = di-bundle ke APK** (bukan `google_fonts`, supaya
+  tidak butuh jaringan): `assets/fonts/PlayfairDisplay-Regular.ttf` (400) +
+  `SemiBold.ttf` (600), family `PlayfairDisplay`. Dua instance statis itu
+  dibuat dari variable font memakai fontTools (dokumen: `docs/FONTS.md`).
+  Dipakai HANYA untuk headline halaman Login.
 - Intro: splash 4 detik (`AppConfig.durasiSplashMs`) + 4 detik PER HALAMAN
   onboarding (`durasiHalamanOnboardingMs`, total 12 detik), auto-lanjut dengan
   garis countdown 2 px. Transisi splash->onboarding->chat = zoom-through dua

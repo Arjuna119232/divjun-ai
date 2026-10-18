@@ -44,4 +44,12 @@ abstract final class AppColors {
   /// Warna aksen untuk status tool saat agent sedang jalan.
   static const Color tool = Color(0xFF7C4DFF);
   static const Color toolSoft = Color(0xFFEDE4FF);
+
+  /// Warna resmi lambang Google — dipakai tombol "Lanjutkan dengan Google"
+  /// di halaman Login. Keempatnya wajib persis; Google melarang versi
+  /// monokrom untuk tombol masuk.
+  static const Color googleBlue = Color(0xFF4285F4);
+  static const Color googleGreen = Color(0xFF34A853);
+  static const Color googleYellow = Color(0xFFFBBC05);
+  static const Color googleRed = Color(0xFFEA4335);
 }

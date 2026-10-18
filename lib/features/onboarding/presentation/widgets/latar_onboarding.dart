@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 
-/// Latar onboarding: gradasian dalam, orb melayang, grid halus, dan
-/// partikel berkedip - semuanya digambar di satu [CustomPainter].
+/// Latar onboarding: gradasian gelap halus, orb temaram, dan partikel
+/// berkedip - semuanya digambar di satu [CustomPainter].
+/// -tidak ada grid: garis-garisnya membuat teks di atasnya terasa ramai.
 ///
 /// Kenapa painter dan bukan tumpukan widget: tiap lapisan butuh berubah
 /// setiap frame. Kalau lewat widget, tiap frame membangun ulang subtree dan
@@ -106,12 +107,11 @@ class _PelukisLatar extends CustomPainter {
         ).createShader(layar),
     );
 
-    _gambarOrb(canvas, size, const Offset(-0.22, -0.14), 0.52, AppColors.brand, 0.52);
-    _gambarOrb(canvas, size, const Offset(1.06, 0.42), 0.46, AppColors.mint, 0.30);
-    _gambarOrb(canvas, size, const Offset(-0.10, 1.06), 0.58, AppColors.coral, 0.20);
-    _gambarOrb(canvas, size, const Offset(0.86, 0.92), 0.34, AppColors.amber, 0.16);
+    _gambarOrb(canvas, size, const Offset(-0.22, -0.14), 0.52, AppColors.brand, 0.22);
+    _gambarOrb(canvas, size, const Offset(1.06, 0.42), 0.46, AppColors.mint, 0.13);
+    _gambarOrb(canvas, size, const Offset(-0.10, 1.06), 0.58, AppColors.coral, 0.09);
+    _gambarOrb(canvas, size, const Offset(0.86, 0.92), 0.34, AppColors.amber, 0.07);
 
-    _gambarGrid(canvas, size);
     _gambarPartikel(canvas, size);
 
     // Vignette supaya teks di tengah selalu terbaca.
@@ -155,37 +155,6 @@ class _PelukisLatar extends CustomPainter {
         ..color = warna.withValues(alpha: opasitas)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 46)
         ..blendMode = BlendMode.screen,
-    );
-  }
-
-  /// Grid 34 px dengan mask radial supaya memudar di tepi, digeser pelan.
-  void _gambarGrid(Canvas canvas, Size size) {
-    final Paint garis = Paint()
-      ..color = Colors.white.withValues(alpha: 0.055)
-      ..strokeWidth = 1;
-
-    final double geser = 34 * t;
-    canvas.save();
-    final Rect area = Offset.zero & size;
-    canvas.clipRect(area);
-    for (double x = -34 + geser; x < size.width + 34; x += 34) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), garis);
-    }
-    for (double y = -34 + geser; y < size.height + 34; y += 34) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), garis);
-    }
-    canvas.restore();
-
-    // Mask: hanya bagian tengah yang terlihat.
-    canvas.drawRect(
-      area,
-      Paint()
-        ..blendMode = BlendMode.dstOut
-        ..shader = const RadialGradient(
-          radius: 0.78,
-          colors: <Color>[Color(0x00000000), Color(0xFF000000)],
-          stops: <double>[0.55, 1],
-        ).createShader(area),
     );
   }
 

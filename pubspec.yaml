@@ -4,7 +4,7 @@ publish_to: "none"
 
 # 2.0.0 = versi rebuild Flutter (WebView lama = 1.15.2 / versionCode 34).
 # versionCode 35 > 34 -> APK baru bisa update DI ATAS APK lama (tanda tangan sama).
-version: 3.0.1+50
+version: 3.0.2+51
 
 environment:
   sdk: ^3.9.0
@@ -2851,3 +2851,11 @@ flutter:
           weight: 400
         - asset: assets/fonts/JetBrainsMono-Bold.ttf
           weight: 700
+    # Instance statis dari variable font (master diunduh dari google/fonts,
+    # lihat docs/FONTS.md). Dipakai HANYA untuk headline halaman Login.
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlayfairDisplay-SemiBold.ttf
+          weight: 600

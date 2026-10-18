@@ -5,7 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 /// Jenis ilustrasi yang digambar kode (tanpa aset gambar).
-enum GambarOnboarding { obrolan, orbitAlat, kartuSkill }
+enum GambarOnboarding { obrolan, orbitAlat, kartuMemori }
 
 class HalamanOnboarding {
   const HalamanOnboarding({
@@ -39,8 +39,8 @@ const List<HalamanOnboarding> halamanOnboarding = <HalamanOnboarding>[
     judul: 'Tanya apa saja,',
     judulAksen: 'jawabannya mengalir',
     subjudul:
-        'Setiap token tampil seketika. Blok "Berpikir" bisa lu buka sendiri '
-        'kalau mau lihat proses model sebelum jawaban.',
+        'Setiap token tampil seketika. Blok "Berpikir" bisa Anda buka sendiri '
+        'kalau mau melihat proses model sebelum jawaban.',
     gambar: GambarOnboarding.obrolan,
     poin: <String>['Blok berpikir terpisah dari jawaban', 'Riwayat percakapan tersimpan'],
   ),
@@ -54,13 +54,13 @@ const List<HalamanOnboarding> halamanOnboarding = <HalamanOnboarding>[
     poin: <String>['Kalkulator, web, memori, email', 'Mode agent bisa dimatikan kapan saja'],
   ),
   HalamanOnboarding(
-    judul: 'Pustaka skill',
-    judulAksen: 'siap pakai',
+    judul: 'Ingat detail,',
+    judulAksen: 'tak perlu diulang',
     subjudul:
-        'Skill yang cocok dengan pertanyaan lu disuntik sebagai prosedur kerja '
-        '- panduan cara mengerjakan, bukan sumber jawaban siap saji.',
-    gambar: GambarOnboarding.kartuSkill,
-    poin: <String>['Berjalan lokal, tanpa server', 'Semua skill bisa dibaca & diubah'],
+        'Hal yang Anda minta diingat disimpan, lalu dipakai lagi di percakapan '
+        'berikutnya tanpa perlu Anda jelaskan dari awal.',
+    gambar: GambarOnboarding.kartuMemori,
+    poin: <String>['Tersimpan di HP Anda', 'Bisa Anda lihat & hapus kapan saja'],
   ),
 ];
 

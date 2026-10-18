@@ -23,8 +23,8 @@ const String kunciOnboarding = 'onboarding_v3';
 /// sudah ada = langsung ke chat. Tombol "Tampilkan lagi" di Pengaturan
 /// menghapus kunci lalu membuka halaman ini, tanpa mengubah apa pun.
 ///
-/// Latar selalu gelap dan beranimasi penuh (gradasian dalam, orb melayang,
-/// grid, partikel). Setelah selesai, [_OnboardingState.dispose] mengembalikan
+/// Latar selalu gelap dan beranimasi halus (gradasian dalam, orb temaram,
+/// partikel). Setelah selesai, [_OnboardingState.dispose] mengembalikan
 /// gaya system bar ke tema app supaya tidak ada sisa gaya.
 class LayarOnboarding extends ConsumerStatefulWidget {
   const LayarOnboarding({super.key});
@@ -115,7 +115,7 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
 
   bool get _terakhir => _indeks == halamanOnboarding.length - 1;
 
-  /// Tutup onboarding: tulis kunci, mainkan ledakan cahaya, lalu ke chat.
+  /// Tutup onboarding: tulis kunci, mainkan ledakan cahaya, lalu ke login.
   ///
   /// Zoom halaman + router transisi (`AppTransisi.portal`) sengaja dibuat
   /// SETENGAH-bertumpuk: layar lama mulai membesar sebelum `go()` dipanggil,
@@ -134,7 +134,7 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
       await Future<void>.delayed(const Duration(milliseconds: 60));
     }
     if (!mounted) return;
-    context.go('/chat');
+    context.go('/login');
   }
 
   Future<void> _lanjut() async {
@@ -438,7 +438,7 @@ class _JudulBergaris extends StatelessWidget {
     const TextStyle gaya = TextStyle(
       color: Colors.white,
       fontFamily: AppTypography.ui,
-      fontSize: 29,
+      fontSize: 26,
       fontWeight: FontWeight.w800,
       height: 1.14,
       letterSpacing: -0.6,

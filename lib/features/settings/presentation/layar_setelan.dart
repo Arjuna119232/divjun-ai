@@ -103,11 +103,6 @@ class LayarSetelan extends ConsumerWidget {
                 keterangan: 'Lihat dan hapus hal yang diingat.',
                 onTap: () => context.push('/memori'),
               ),
-              BarisSetelan(
-                judul: 'Keahlian Agen',
-                keterangan: 'Kemampuan khusus yang sudah disiapkan.',
-                onTap: () => context.push('/skills'),
-              ),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -192,11 +187,6 @@ class LayarSetelan extends ConsumerWidget {
           ),
           KartuSetelan(
             anak: <Widget>[
-              BarisSetelan(
-                judul: 'Pengaturan Lanjut',
-                keterangan: 'Model, koneksi, dan kunci akses.',
-                onTap: () => context.push('/setelan/lanjutan'),
-              ),
               BarisSetelan(
                 judul: 'Tentang',
                 keterangan: 'Versi aplikasi dan ringkasan kemampuan.',

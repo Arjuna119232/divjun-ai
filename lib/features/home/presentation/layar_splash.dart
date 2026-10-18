@@ -8,6 +8,7 @@ import '../../../core/boot/diagnostik.dart';
 import '../../../core/constants/app_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../auth/presentation/layar_login.dart';
 import '../../onboarding/presentation/layar_onboarding.dart';
 
 /// Splash dengan logo + progress bar, durasi [AppConfig.durasiSplashMs].
@@ -92,9 +93,15 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
       // Onboarding hanya sekali: kuncinya dibaca di sini, bukan di dalam
       // LayarOnboarding, supaya `/onboarding` yang dibuka manual dari
       // Pengaturan tidak ikut terpengaruh keputusan ini.
-      final bool sudah =
-          ref.read(simpanCepitProvider).bacaBool(kunciOnboarding) ?? false;
-      context.go(sudah ? '/chat' : '/onboarding');
+      final simpan = ref.read(simpanCepitProvider);
+      final bool sudah = simpan.bacaBool(kunciOnboarding) ?? false;
+      if (!sudah) {
+        context.go('/onboarding');
+        return;
+      }
+      // Layar masuk juga hanya sekali, dengan alasan yang sama.
+      final bool pernahMasuk = simpan.bacaBool(kunciLogin) ?? false;
+      context.go(pernahMasuk ? '/chat' : '/login');
     } catch (e, s) {
       Diagnostik.catat(e, s, konteks: 'splash.go');
       setState(() => _galat = '$e');
@@ -121,8 +128,8 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
           final double v = Curves.easeInCubic.transform(_cKeluar.value);
           return Stack(
             children: <Widget>[
-// Gradasian tetap ada saat portal menutup: kalau latar rata,
-               // lambang yang melebar tidak kelihatan bergerak.
+              // Gradasian tetap ada saat portal menutup: kalau latar rata,
+              // lambang yang melebar tidak kelihatan bergerak.
               const Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -148,43 +155,45 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
                   ),
                 ),
               ),
-              // Nama aplikasi memudar duluan, lambang yang jadi portal.
+              // Logo dan nama ada dalam SATU Column supaya tidak saling
+              // tumpang. Sebelumnya keduanya anak `Center` yang terpisah,
+              // jadi tulisan menimpa lambang tepat di tengah layar.
               Opacity(
                 opacity: (1 - v * 1.6).clamp(0.0, 1.0),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
+                      // Lambang inilah yang membesar jadi "portal".
+                      AnimatedBuilder(
+                        animation: _c,
+                        builder: (BuildContext context, Widget? _) {
+                          return Opacity(
+                            opacity: _c.value,
+                            child: Transform.scale(
+                              scale: 1 + (v * 9),
+                              child: _LogoSplash(menempel: v > 0.01),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 22),
+                      // Nama menyusut di bawah lambang, bukan di atasnya.
                       FadeTransition(
                         opacity: _c,
                         child: Text(
                           AppConfig.appName,
-                          style: AppTypography.textTheme(Brightness.dark)
-                              .displaySmall
-                              ?.copyWith(
-                                color: Colors.white,
-                                letterSpacing: 2.4,
-                              ),
+                          style:
+                              AppTypography.textTheme(Brightness.dark)
+                                  .displaySmall
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    letterSpacing: 2.4,
+                                  ),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-              // Logo becomes the portal: border radius shrinks to a circle
-              // while it grows to fill the whole screen.
-              Center(
-                child: AnimatedBuilder(
-                  animation: _c,
-                  builder: (BuildContext context, Widget? _) {
-                    return Opacity(
-                      opacity: _c.value,
-                      child: Transform.scale(
-                        scale: 1 + (v * 9),
-                        child: _LogoSplash(menempel: v > 0.01),
-                      ),
-                    );
-                  },
                 ),
               ),
               if (_galat == null)
@@ -196,20 +205,41 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
                     opacity: (1 - v * 2).clamp(0.0, 1.0),
                     child: FadeTransition(
                       opacity: _c,
-                      child: Center(
-                        child: SizedBox(
-                          width: 120,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              minHeight: 3,
-                              backgroundColor:
-                                  Colors.white.withValues(alpha: 0.22),
-                              valueColor:
-                                  const AlwaysStoppedAnimation<Color>(Colors.white),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          // Kredit pembuat, tepat di ATAS bar proses.
+                          Text(
+                            'FROM : 0XMAHEN',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              fontFamily: AppTypography.ui,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 3.2,
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 14),
+                          Center(
+                            child: SizedBox(
+                              width: 120,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  minHeight: 3,
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.22,
+                                  ),
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

@@ -29,7 +29,7 @@ class IlustrasiOnboarding extends StatelessWidget {
       child: switch (jenis) {
         GambarOnboarding.obrolan => _IlustrasiObrolan(aksen: aksen),
         GambarOnboarding.orbitAlat => _IlustrasiOrbit(aksen: aksen),
-        GambarOnboarding.kartuSkill => _IlustrasiSkill(aksen: aksen),
+        GambarOnboarding.kartuMemori => _IlustrasiMemori(aksen: aksen),
       },
     );
   }
@@ -71,7 +71,7 @@ class _IlustrasiObrolan extends StatelessWidget {
 
   final List<Color> aksen;
 
-@override
+  @override
   Widget build(BuildContext context) {
     final Color warnaAksen = aksen.isNotEmpty ? aksen.first : AppColors.brand;
     return Column(
@@ -356,26 +356,34 @@ class _Satelit extends StatelessWidget {
 
 // --------------------------------------------------------------- halaman 3
 
-class _IlustrasiSkill extends StatefulWidget {
-  const _IlustrasiSkill({required this.aksen});
+/// Satu baris kartu memori di ilustrasi halaman 3.
+class _ItemMemori {
+  const _ItemMemori(this.judul, this.ikon);
+
+  final String judul;
+  final IconData ikon;
+}
+
+class _IlustrasiMemori extends StatefulWidget {
+  const _IlustrasiMemori({required this.aksen});
 
   final List<Color> aksen;
 
   @override
-  State<_IlustrasiSkill> createState() => _IlustrasiSkillState();
+  State<_IlustrasiMemori> createState() => _IlustrasiMemoriState();
 }
 
-class _IlustrasiSkillState extends State<_IlustrasiSkill>
+class _IlustrasiMemoriState extends State<_IlustrasiMemori>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 6),
   )..repeat(reverse: true);
 
-  static const List<String> _judul = <String>[
-    'Pustaka skill',
-    'Prosedur kerja',
-    'Taksonomi lengkap',
+  static const List<_ItemMemori> _item = <_ItemMemori>[
+    _ItemMemori('Yang Anda minta diingat', LucideIcons.brain),
+    _ItemMemori('Konteks percakapan', LucideIcons.history),
+    _ItemMemori('Bisa dihapus kapan saja', LucideIcons.sparkles),
   ];
 
   @override
@@ -389,14 +397,14 @@ class _IlustrasiSkillState extends State<_IlustrasiSkill>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        for (int i = 0; i < _judul.length; i++)
+        for (int i = 0; i < _item.length; i++)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: _BarisSkill(
-              judul: _judul[i],
+            child: _BarisMemori(
+              judul: _item[i].judul,
+              ikon: _item[i].ikon,
               warna: widget.aksen[i % widget.aksen.length],
               naik: math.sin((_c.value * 2 * math.pi) + (i * 0.9)) * 6,
-              lencana: i == 0 ? '111' : '',
             ),
           ),
       ],
@@ -404,18 +412,18 @@ class _IlustrasiSkillState extends State<_IlustrasiSkill>
   }
 }
 
-class _BarisSkill extends StatelessWidget {
-  const _BarisSkill({
+class _BarisMemori extends StatelessWidget {
+  const _BarisMemori({
     required this.judul,
+    required this.ikon,
     required this.warna,
     required this.naik,
-    required this.lencana,
   });
 
   final String judul;
+  final IconData ikon;
   final Color warna;
   final double naik;
-  final String lencana;
 
   @override
   Widget build(BuildContext context) {
@@ -438,31 +446,12 @@ class _BarisSkill extends StatelessWidget {
                 color: warna.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(11),
               ),
-              child: Icon(LucideIcons.bookOpen, size: 17, color: warna),
+              child: Icon(ikon, size: 17, color: warna),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(judul, style: _putih(12.5, w: FontWeight.w700)),
             ),
-            if (lencana.isNotEmpty)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: <Color>[AppColors.amber, AppColors.coral],
-                  ),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-                child: Text(
-                  lencana,
-                  style: const TextStyle(
-                    color: Color(0xFF241100),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
           ],
         ),
       ),
