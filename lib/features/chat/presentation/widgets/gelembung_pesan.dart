@@ -312,18 +312,16 @@ class _BlokPenalaranState extends State<_BlokPenalaran> {
             child: _buka
                 ? Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: Theme(
-                      // Isi berpikir ditampilkan redup: bukan jawaban.
-                      data: Theme.of(context).copyWith(
-                        dividerColor: Colors.transparent,
-                      ),
-                      child: Opacity(
-                        opacity: widget.sedangAlir ? 0.75 : 0.6,
-                        child: TampilanMarkdown(teks: widget.pesan.penalaran, kecil: true),
+                    // Redup: isi berpikir bukan jawaban.
+                    child: Opacity(
+                      opacity: widget.sedangAlir ? 0.75 : 0.6,
+                      child: TampilanMarkdown(
+                        teks: widget.pesan.penalaran,
+                        kecil: true,
                       ),
                     ),
                   )
-                : const SizedBox(width: double.infinity),
+                : const SizedBox.shrink(),
           ),
         ],
       ),
