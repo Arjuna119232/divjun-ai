@@ -30,8 +30,17 @@ class _LayarTentangState extends ConsumerState<LayarTentang> {
     HapticFeedback.selectionClick();
     _ketukan++;
     // direset supaya tidak memicu sendiri jauh di kemudian hari
-    if (_ketukan > 8) _ketukan = 0;
+    if (_ketukan > 8) {
+      _ketukan = 0;
+      setState(() {});
+      return;
+    }
     setState(() {});
+    // Pemicu sebenarnya. Tanpa baris ini, ketukan hanya mengubah angka di
+    // layar dan tidak pernah membuka apa pun - funsi ini jadi tidak terpakai.
+    if (_ketukan >= _butuhKetukan) {
+      _bukaOnboardingLagi();
+    }
   }
 
   Future<void> _bukaOnboardingLagi() async {
@@ -61,7 +70,7 @@ class _LayarTentangState extends ConsumerState<LayarTentang> {
           Center(
             child: Column(
               children: <Widget>[
-                Container(
+                const Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(

@@ -9,6 +9,7 @@ import '../../../core/theme/app_theme.dart';
 /// (slider, daftar tombol) tanpa membuat header ikut memanjang.
 class BagianSetelan extends StatelessWidget {
   const BagianSetelan({
+    super.key,
     required this.judul,
     required this.keterangan,
     required this.ikon,
@@ -51,7 +52,7 @@ class BagianSetelan extends StatelessWidget {
 /// Inilah yang membuat lima bagian A-E terlihat terpisah jelas, tanpa perlu
 /// garis tebal atau jarak besar di antaranya.
 class KartuSetelan extends StatelessWidget {
-  const KartuSetelan({required this.anak});
+  const KartuSetelan({super.key, required this.anak});
 
   final List<Widget> anak;
 
@@ -77,6 +78,7 @@ class KartuSetelan extends StatelessWidget {
 /// Sakelar satu baris dengan keterangan singkat.
 class SakelarSetelan extends StatelessWidget {
   const SakelarSetelan({
+    super.key,
     required this.judul,
     required this.nilai,
     required this.onChanged,
@@ -106,6 +108,7 @@ class SakelarSetelan extends StatelessWidget {
 /// "Hapus Semua Riwayat Chat".
 class BarisSetelan extends StatelessWidget {
   const BarisSetelan({
+    super.key,
     required this.judul,
     required this.onTap,
     this.keterangan,
@@ -136,6 +139,7 @@ class BarisSetelan extends StatelessWidget {
 /// Tombol besar berwarna merah untuk aksi merusak.
 class TombolBahaya extends StatelessWidget {
   const TombolBahaya({
+    super.key,
     required this.judul,
     required this.onTap,
     this.keterangan,

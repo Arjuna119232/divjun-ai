@@ -276,7 +276,6 @@ class ChatController extends Notifier<StateChat> {
   List<Pesan> _pesanUntukModel(String idPercakapan, String idDilewati) {
     final Percakapan? p = _cari(idPercakapan);
     if (p == null) return <Pesan>[];
-    final SetelanApp setelan = ref.read(setelanProvider);
     List<Pesan> pesan =
         p.pesan.where((Pesan x) => x.id != idDilewati).toList();
 

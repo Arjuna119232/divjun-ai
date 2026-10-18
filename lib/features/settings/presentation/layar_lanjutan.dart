@@ -56,7 +56,7 @@ class LayarLanjutan extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          BagianSetelan(
+          const BagianSetelan(
             judul: 'Koneksi',
             keterangan: 'Hanya perlu diubah kalau jawaban tidak muncul.',
             ikon: LucideIcons.plug,
@@ -86,6 +86,7 @@ class LayarLanjutan extends ConsumerWidget {
 /// Baris navigasi dengan ikon, judul, keterangan, dan tanda panah.
 class _Baris extends StatelessWidget {
   const _Baris({
+    super.key,
     required this.ikon,
     required this.judul,
     required this.keterangan,
