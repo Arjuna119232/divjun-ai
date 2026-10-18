@@ -154,7 +154,9 @@ class _RobotPainter extends CustomPainter {
             AppColors.brand.withValues(alpha: 0.30),
             Colors.transparent,
           ],
-        ).createShader(const Rect.fromCircle(center: Offset.zero, radius: 40)),
+        // Rect.fromCircle itu FACTORY, bukan constructor const (ia menghitung
+        // lebar/tinggi sendiri) - menulis `const` di sini bikin analyze gagal.
+        ).createShader(Rect.fromCircle(center: Offset.zero, radius: 40)),
     );
   }
 
