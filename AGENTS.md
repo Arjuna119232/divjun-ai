@@ -6,7 +6,9 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
 `main`; `main` masih berisi app WebView lama + pipeline Gradle-nya).
 
 - Lokasi kerja: `$HOME/divjun-flutter` (bukan `/storage` — FUSE + git lambat)
-- Package: `com.divjun.ai` · versi `2.0.0+35` · minSdk 24 · targetSdk 35
+- Package: `com.divjun.ai` · versi `2.5.0+43` · minSdk 24 · targetSdk 35
+- Status "seukuran Claude AI": tahap 1 (sidebar + kolom 820) ✅ v2.4.0+42 ·
+  tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ❌
 - Keystore: **sama** dengan app lama (`KEYSTORE_BASE64` di repo secrets) →
   APK baru bisa update di atas APK lama, jangan ganti keystore.
 - Audit brief vs kenyataan: `docs/REBUILD-AUDIT.md` (agent.js tidak pernah ada;
@@ -61,3 +63,9 @@ Semua sudah diuji dengan fault injection.
 - `abstract final class` + static member pernah bikin simbol tak terlihat
   (router sekarang top-level `final GoRouter appRouter`).
 - Lupa `git push` setelah commit = CI dijalankan di kode lama (terbukti 1x).
+- **Reasoning tidak boleh jadi fallback dari teks.** Field penalaran beda per
+  provider (`delta.reasoning` OVH/Pollinations, `delta.reasoning_content`
+  Groq, `parts[].thought` Gemini). Detail + pola UI ada di skill
+  `flutter-app-seukuran-claude`.
+- `_buffer.remove(id)` SEBELUM membaca sisa buffer = seluruh teks yang sudah
+  streaming hilang saat stream gagal. Ambil sisanya dulu, baru hapus.

@@ -32,7 +32,7 @@ COMPILE_SDK = 36
 TARGET_SDK = 36
 BRAND_HEX = "5B5BD6"
 BRAND_NIGHT = "0B0B10"
-# Marker在不同 format: Kotlin pakai `//`, XML pakai `<!-- -->`.
+# Marker beda format: Kotlin pakai `//`, XML pakai `<!-- -->`.
 # (Salah satu sempat bikin Gradle gagal: "Line 7: # DIVJUN-SETUP Expecting an element")
 MARK_KOTLIN = "// DIVJUN-SETUP"
 MARK_XML = "<!-- DIVJUN-SETUP -->"
