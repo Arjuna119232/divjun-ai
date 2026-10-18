@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pratinjau Transisi - DIVJUN AI</title>
+<style>
+  :root{
+    --brand:#5B5BD6; --brandDeep:#3B3BA8; --mint:#00BFA6;
+    --amber:#FFA726; --coral:#FF6B4A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#07070C;color:#fff;font-family:Inter,system-ui,Roboto,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:16px;
+    padding:22px 12px 40px;
+  }
+  h1{font-size:15px;font-weight:700;letter-spacing:.3px}
+  p.catatan{max-width:380px;color:rgba(255,255,255,.55);font-size:12px;text-align:center;line-height:1.6}
+  .ponsel{position:relative;width:360px;height:720px;border-radius:40px;overflow:hidden;
+    background:#0B0B10;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 10px #16161E,0 0 0 11px #2A2A34;flex:0 0 auto}
+  .layer{position:absolute;inset:0;opacity:0;transition:none}
+  .layer.on{opacity:1}
+
+  /* --- SPLASH --- */
+  #splash{background:linear-gradient(180deg,#5B5BD6,#3B3BA8);display:grid;place-items:center}
+  #splash .glow{position:absolute;inset:0;background:radial-gradient(58% 46% at 50% 50%,rgba(255,255,255,.10),transparent 72%)}
+  #splash .isi{text-align:center;transition:opacity .25s linear}
+  #splash .logo{width:84px;height:84px;margin:0 auto 22px;border-radius:20px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.35);display:grid;place-items:center;font-size:40px;font-weight:800;
+    transition:transform .46s cubic-bezier(.55,0,.55,1),border-radius .46s linear}
+  #splash .nama{font-size:30px;font-weight:800;letter-spacing:2.4px}
+  #splash .bar{width:120px;height:3px;border-radius:99px;background:rgba(255,255,255,.22);margin:34px auto 0;overflow:hidden}
+  #splash .bar i{display:block;height:100%;width:40%;background:#fff;border-radius:99px;animation:jel 1.1s infinite ease-in-out}
+  @keyframes jel{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+
+  /* --- ONBOARDING (latar sama dengan app) --- */
+  #onb{background:radial-gradient(120% 90% at 50% -10%,#26264E 0%,#15152E 42%,#0B0B10 100%)}
+  .grid{position:absolute;inset:-20%;
+    background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+    background-size:34px 34px;
+    -webkit-mask-image:radial-gradient(58% 46% at 50% 42%,#000,transparent 78%);
+            mask-image:radial-gradient(58% 46% at 50% 42%,#000,transparent 78%);
+    animation:geser 26s linear infinite}
+  @keyframes geser{to{transform:translate(34px,34px)}}
+  .orb{position:absolute;border-radius:50%;filter:blur(46px);opacity:.5;mix-blend-mode:screen}
+  .orb.a{width:280px;height:280px;background:#5B5BD6;left:-90px;top:-60px;animation:d1 19s ease-in-out infinite}
+  .orb.b{width:240px;height:240px;background:#00BFA6;right:-100px;top:180px;animation:d2 23s ease-in-out infinite;opacity:.38}
+  .orb.c{width:300px;height:300px;background:#FF6B4A;left:-40px;bottom:-120px;animation:d3 27s ease-in-out infinite;opacity:.24}
+  @keyframes d1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,70px) scale(1.14)}}
+  @keyframes d2{0%,100%{transform:translate(0,0) scale(1.08)}50%{transform:translate(-70px,90px) scale(.92)}}
+  @keyframes d3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,-60px) scale(1.2)}}
+  .vig{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,transparent 42%,rgba(5,5,12,.86))}
+
+  #onb .isi{position:absolute;inset:0;display:flex;flex-direction:column;padding:26px 24px 22px}
+  .bawah{margin-top:auto;display:flex;flex-direction:column;gap:16px}
+  .ind{display:flex;gap:6px}
+  .ind b{display:block;height:4px;border-radius:99px;background:rgba(255,255,255,.22);transition:width .42s cubic-bezier(.22,1,.36,1),background .42s}
+  .ind b.on{width:26px;background:linear-gradient(90deg,#00BFA6,#5B5BD6)}
+  .ind b.off{width:9px}
+  .cta{height:54px;border-radius:18px;border:0;width:100%;font-family:inherit;font-size:15px;font-weight:700;
+    color:#fff;cursor:pointer;background:linear-gradient(100deg,#5B5BD6,#6E6EF0 45%,#3B3BA8);
+    box-shadow:0 16px 40px rgba(91,91,214,.46)}
+  .judul{font-size:29px;font-weight:800;line-height:1.14;letter-spacing:-.6px}
+  .judul em{font-style:normal;background:linear-gradient(92deg,#00BFA6,#5B5BD6 60%,#FF6B4A);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:14px;line-height:1.62;color:rgba(255,255,255,.62);margin-top:10px;max-width:300px}
+  .gelembung{margin:26px 0;display:flex;flex-direction:column;gap:9px}
+  .gel{padding:10px 13px;border-radius:16px;font-size:12.5px;line-height:1.4}
+  .gel.ai{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-top-left-radius:5px;align-self:flex-start}
+  .gel.user{background:linear-gradient(135deg,#5B5BD6,#6E6EF0);border-bottom-right-radius:5px;align-self:flex-end}
+
+  /* --- LEDAKAN CAHAYA --- */
+  #burst{position:absolute;inset:0;pointer-events:none}
+  .ring{position:absolute;left:50%;top:46%;border-radius:50%;transform:translate(-50%,-50%);
+    border:20px solid transparent;background:
+      conic-gradient(from 0deg,#00BFA6,#5B5BD6,#6E6EF0,#00BFA6) border-box;
+    -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;opacity:0}
+  .flash{position:absolute;inset:0;background:radial-gradient(50% 50% at 50% 46%,rgba(255,255,255,.34),transparent 70%);opacity:0}
+
+  /* --- CHAT (dunia baru) --- */
+  #chat{background:#FBFBFD;display:flex;flex-direction:column}
+  #chat .bar{height:60px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #E7E7EE;background:#fff}
+  #chat .ic{width:34px;height:34px;border-radius:10px;background:#F1F1F6;display:grid;place-items:center;color:#6B6B78;font-size:16px}
+  #chat .tt{font-size:14px;font-weight:700;color:#14141A}
+  #chat .sb{font-size:11px;color:#6B6B78}
+  #chat .balon{padding:20px 16px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .bubble{max-width:80%;padding:11px 14px;border-radius:20px;font-size:13.5px;line-height:1.5}
+  .bubble.u{background:linear-gradient(135deg,#5B5BD6,#6E6EF0);color:#fff;align-self:flex-end;border-bottom-right-radius:6px}
+  .bubble.a{background:#fff;border:1px solid #E7E7EE;align-self:flex-start;border-top-left-radius:6px;color:#14141A}
+  .ttp{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#FFA726;margin-bottom:7px}
+  #chat .in{margin:0 12px 12px;height:48px;border-radius:24px;background:#F1F1F6;display:flex;align-items:center;
+    padding:0 6px 0 18px;gap:10px}
+  #chat .in span{flex:1;color:#9A9AA8;font-size:13px}
+  #chat .send{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#5B5BD6,#3B3BA8);color:#fff;display:grid;place-items:center;font-size:15px}
+
+  .kendali{display:flex;gap:10px}
+  button.k{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);
+    border-radius:12px;padding:10px 16px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+  button.k:hover{background:rgba(255,255,255,.18)}
+</style>
+</head>
+<body>
+<h1>Pratinjau transisi DIVJUN AI</h1>
+<div class="ponsel">
+  <div class="layer on" id="splash">
+    <div class="glow"></div>
+    <div class="isi" id="splashIsi">
+      <div class="logo" id="splashLogo">D</div>
+      <div class="nama">DIVJUN AI</div>
+      <div class="bar"><i></i></div>
+    </div>
+  </div>
+
+  <div class="layer" id="onb">
+    <div class="grid"></div>
+    <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
+    <div class="vig"></div>
+    <div class="isi" id="onbIsi">
+      <div class="gelembung">
+        <div class="gel user">Buatkan draf email minta cuti 3 hari</div>
+        <div class="gel ai">
+          <div class="ttp">&#129504; Berpikir 2,4 detik</div>
+          Yth. Bapak Atasan,<br>
+          Mohon izin cuti 3 hari kerja...
+        </div>
+      </div>
+      <div class="judul">Pustaka skill<br><em>siap pakai</em></div>
+      <div class="sub">Skill yang cocok dengan pertanyaan lu disuntik sebagai prosedur kerja.</div>
+      <div class="bawah">
+        <div class="ind"><b class="on"></b><b class="off"></b><b class="off"></b></div>
+        <button class="cta" id="cta">Mulai &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="burst">
+    <div class="ring" id="ring1"></div>
+    <div class="ring" id="ring2"></div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div class="layer" id="chat">
+    <div class="bar">
+      <div class="ic">&#9776;</div>
+      <div><div class="tt">GPT-OSS 120B</div><div class="sb">mode agent</div></div>
+    </div>
+    <div class="balon">
+      <div class="bubble u">Buatkan draf email minta cuti 3 hari</div>
+      <div class="bubble a"><div class="ttp">&#129504; Berpikir 2,4 detik</div>
+Yth. Bapak Atasan,<br><br>Dengan hormat, saya memohon izin cuti 3 hari kerja...</div>
+    </div>
+    <div class="in"><span>Tanya apa saja&hellip;</span><div class="send">&#8593;</div></div>
+  </div>
+</div>
+
+<div class="kendali">
+  <button class="k" id="btnUlang">&#8635; Ulangi dari splash</button>
+  <button class="k" id="btnLoncat">Langsung ke chat</button>
+</div>
+<p class="catatan">
+  1. Lambang <b>D</b> melebar jadi lingkaran penuh (portal tertutup) &rarr; onboarding naik dari 0.96.<br>
+  2. Tekan <b>Mulai</b>: kilatan + dua cincin cahaya, layar onboarding melesat ke depan, chat datang dari skala 1.10 lalu menapak.<br>
+  3. Durasi di app: portal 460 ms + route 620 ms, ledakan 560 ms.
+</p>
+
+<script>
+const L = {
+  splash: document.getElementById('splash'),
+  onb:    document.getElementById('onb'),
+  chat:   document.getElementById('chat'),
+  splashIsi: document.getElementById('splashIsi'),
+  splashLogo: document.getElementById('splashLogo'),
+  onbIsi: document.getElementById('onbIsi'),
+  ring1: document.getElementById('ring1'),
+  ring2: document.getElementById('ring2'),
+  flash: document.getElementById('flash'),
+  cta: document.getElementById('cta'),
+};
+const TUNJUK = (el, on) => el.classList.toggle('on', on);
+
+async function keSplash(){
+  TUNJUK(L.chat,false); TUNJUK(L.onb,false); TUNJUK(L.splash,true);
+  L.splashIsi.style.opacity = 1;
+  L.splashLogo.style.transition = 'none';
+  L.splashLogo.style.transform = 'scale(1)';
+  L.splashLogo.style.borderRadius = '20px';
+  L.ring1.style.transition = L.ring2.style.transition = L.flash.style.transition = 'none';
+  L.ring1.style.opacity = L.ring2.style.opacity = L.flash.style.opacity = 0;
+  L.onbIsi.style.opacity = 1; L.onbIsi.style.transform = 'scale(1)';
+  L.chat.style.transform = 'scale(1)'; L.chat.style.opacity = 1;
+  await jeda(700);
+  await portalSplash();
+}
+function jeda(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function portalSplash(){
+  // nama + bar memudar
+  L.splashIsi.style.transition = 'opacity .3s linear';
+  L.splashIsi.style.opacity = 0;
+  // lambang melebar jadi portal
+  L.splashLogo.style.transition = 'transform .46s cubic-bezier(.55,0,.55,1), border-radius .46s linear';
+  L.splashLogo.style.transform = 'scale(9)';
+  L.splashLogo.style.borderRadius = '999px';
+  await jeda(520);
+  // onboarding naik dari sedikit lebih dekat
+  TUNJUK(L.onb,true);
+  L.onbIsi.style.transition = 'opacity .42s ease, transform .42s cubic-bezier(.22,1,.36,1)';
+  L.onbIsi.style.opacity = 0;
+  L.onbIsi.style.transform = 'scale(1.04)';
+  await jeda(40);
+  L.onbIsi.style.opacity = 1;
+  L.onbIsi.style.transform = 'scale(1)';
+  await jeda(520);
+}
+
+async function keChat(){
+  // 1. kilatan
+  L.flash.style.transition = 'opacity .14s ease-out';
+  L.flash.style.opacity = 1;
+  // 2. dua cincin melebar
+  const M = 1.9;
+  L.ring1.style.transition = 'transform .56s cubic-bezier(.22,1,.36,1), opacity .56s linear';
+  L.ring1.style.opacity = .75;
+  L.ring1.style.transform = 'translate(-50%,-50%) scale(0.05)';
+  L.ring2.style.transition = 'transform .56s cubic-bezier(.22,1,.36,1) .12s, opacity .56s linear .12s';
+  L.ring2.style.opacity = .45;
+  L.ring2.style.transform = 'translate(-50%,-50%) scale(0.05)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    L.ring1.style.transform = 'translate(-50%,-50%) scale('+M+')';
+    L.ring2.style.transform = 'translate(-50%,-50%) scale('+(M*0.92)+')';
+  }));
+  // 3. onboarding melesat ke depan + memudar
+  L.onbIsi.style.transition = 'transform .56s cubic-bezier(.55,0,.55,1), opacity .4s linear';
+  L.onbIsi.style.transform = 'scale(1.22)';
+  L.onbIsi.style.opacity = 0;
+  L.flash.style.transition = 'opacity .3s linear .12s';
+  L.flash.style.opacity = 0;
+  await jeda(300);
+  // 4. chat datang dari jauh lalu menapak
+  TUNJUK(L.chat,true);
+  L.chat.style.transition = 'opacity .45s ease, transform .45s cubic-bezier(.22,1,.36,1)';
+  L.chat.style.opacity = 0;
+  L.chat.style.transform = 'scale(1.10)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    L.chat.style.opacity = 1;
+    L.chat.style.transform = 'scale(1)';
+  }));
+  await jeda(500);
+  L.ring1.style.opacity = L.ring2.style.opacity = 0;
+  L.onbIsi.style.transition = 'none';
+}
+
+L.cta.addEventListener('click', keChat);
+document.getElementById('btnUlang').addEventListener('click', keSplash);
+document.getElementById('btnLoncat').addEventListener('click', async ()=>{
+  TUNJUK(L.splash,false); TUNJUK(L.onb,true); TUNJUK(L.chat,true);
+  L.onbIsi.style.opacity = 0; L.chat.style.opacity = 1; L.chat.style.transform = 'scale(1)';
+});
+keSplash();
+</script>
+</body>
+</html>
