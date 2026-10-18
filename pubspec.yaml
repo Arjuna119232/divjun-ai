@@ -32,6 +32,10 @@ dependencies:
 
   # Render markdown jawaban AI
   flutter_markdown_plus: ^1.0.12
+  # Animasi robot (Lottie). Latest 3.6.1 butuh Dart ^3.11, jadi dikunci 3.2.x
+  # yang masih/sdk ^3.2 dan cocok dengan SDK proyek. Kalau berkasnya belum ada,
+  # widget AsetRobot jatuh ke gambar cadangan yang digambar kode.
+  lottie: ^3.2.0
 
   # Icon set (Lucide) - konsisten, bukan Material Icons
   lucide_icons_flutter: ^4.0.0
@@ -2833,6 +2837,11 @@ flutter:
     # dan dipakai agent sebagai panduan menjawab. Dibiarkan sebagai asset apa
     # adanya supaya tidak ada yang terpotong.
     - assets/skills/
+    # Dokumen Pusat Legal -> dibaca lewat rootBundle di legal_service.dart.
+    - assets/legal/
+    # Animasi robot untuk onboarding + login (Lottie .json). Foldernya harus
+    # selalu berisi sesuatu, kalau kosong `flutter build` gagal.
+    - assets/animations/
 
   fonts:
     - family: Inter

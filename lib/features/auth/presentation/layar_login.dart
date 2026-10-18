@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,12 +11,19 @@ import '../../../core/providers.dart';
 // app_theme.dart mengekspor app_colors, app_typography, app_motion — cukup satu
 // import ini untuk ketiga token tersebut.
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/aset_robot.dart';
 
 /// Kunci penyimpanan: halaman login hanya muncul SEKALI.
 ///
 /// Dibaca di `layar_splash.dart`, bukan di dalam LayarLogin, supaya keputusan
 /// "sudah pernah masuk" tidak bergantung pada layar yang sedang dibuka.
 const String kunciLogin = 'login_v1';
+
+/// Kunci penyimpanan: status centang persetujuan Syarat & Ketentuan.
+///
+/// Disimpan supaya user yang sudah pernah menyetujui tidak perlu mencentang
+/// ulang setiap kali layar login dibuka (mis. setelah keluar akun).
+const String kunciPersetujuan = 'persetujuan_v1';
 
 /// Halaman masuk (dummy) — tampil sekali setelah onboarding.
 ///
@@ -42,6 +50,40 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
 
   bool _proses = false;
 
+  /// Status centang "Saya menyetujui Syarat & Ketentuan dan Kebijakan Privasi".
+  /// Tombol lanjut mati selama ini false - gerbang wajib, bukan hiasan.
+  bool _setuju = false;
+
+  /// Tautan di dalam teks persetujuan. Dibuat sekali lalu di-dispose di
+  /// [dispose]: recognizer yang dibuat di dalam `build` bocor setiap kali
+  /// layar dibangun ulang (mis. tiap huruf diketik di kolom email).
+  final TapGestureRecognizer _tautanSyarat = TapGestureRecognizer();
+  final TapGestureRecognizer _tautanPrivasi = TapGestureRecognizer();
+
+  @override
+  void initState() {
+    super.initState();
+    _tautanSyarat.onTap = () => _bukaLegal('syarat');
+    _tautanPrivasi.onTap = () => _bukaLegal('privasi');
+    // Dibaca langsung (tanpa setState) karena masih sebelum build pertama.
+    _setuju =
+        ref.read(simpanCepitProvider).bacaBool(kunciPersetujuan) == true;
+  }
+
+  /// Buka satu dokumen legal lewat rute `/legal/dokumen/:id`.
+  void _bukaLegal(String id) {
+    context.push('/legal/dokumen/$id');
+  }
+
+  void _ubahSetuju(bool nilai) {
+    setState(() => _setuju = nilai);
+    // Ditulis tanpa ditunggu: mencentang tidak boleh terasa lambat. Kalau
+    // penyimpanan gagal, gerbang layar ini tetap berlaku untuk sesi sekarang.
+    ref
+        .read(simpanCepitProvider)
+        .tulis(kunciPersetujuan, nilai ? 'true' : 'false');
+  }
+
   /// Validasi sengaja longgar: satu `@` dan satu titik setelahnya.
   /// Menolak email yang sah (mis. `nama+label@domain.co.id`) jauh lebih
   /// menyebalkan daripada membiarkan satu typo lewat di layar dummy.
@@ -55,17 +97,37 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
     _email.dispose();
     _fokus.dispose();
     _masuk.dispose();
+    _tautanSyarat.dispose();
+    _tautanPrivasi.dispose();
     super.dispose();
   }
 
   Future<void> _selesai() async {
     if (_proses) return;
+    if (!_setuju) {
+      // Jangan diamkan: user menekan tombol lalu tidak terjadi apa-apa.
+      _ingatPersetujuan();
+      return;
+    }
     setState(() => _proses = true);
     // Penanda ditulis SEBELUM pindah halaman: kalau penulisan gagal, user
     // tetap masuk (jangan menahan orang di layar login karena penyimpanan).
     await ref.read(simpanCepitProvider).tulis(kunciLogin, 'true');
     if (!mounted) return;
     context.go('/chat');
+  }
+
+  /// Snackbar singkat saat tombol ditekan tapi persetujuan belum dicentang.
+  void _ingatPersetujuan() {
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: const Text('Centang persetujuan Syarat & Ketentuan dulu.'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -91,9 +153,16 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     const _Merek(),
-                    const SizedBox(height: 26),
-                    const _IlustrasiNapas(ukuran: 120),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: AppSpacing.xl),
+                    // Robot melambai di antara logo dan judul. Berkas Lottie-nya
+                    // `assets/animations/robot_waving.json`; kalau belum ada,
+                    // AsetRobot menampilkan robot cadangan yang sama bergeraknya.
+                    const AsetRobot(
+                      berkas: 'assets/animations/robot_waving.json',
+                      pose: PoseRobotGambar.melambai,
+                      ukuran: 168,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
                     // Headline serif — satu-satunya tempat font ini dipakai.
                     Text(
                       'Masuk untuk melanjutkan',
@@ -174,6 +243,15 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
                           ),
                         ),
                       ),
+                    ),
+                    // Persetujuan diletakkan DI ATAS tombol: tombol yang mengizinkan
+                    // masuk harus berada setelah persetujuan, bukan sebaliknya.
+                    const SizedBox(height: AppSpacing.md),
+                    _Persetujuan(
+                      nilai: _setuju,
+                      onUbah: _ubahSetuju,
+                      tautanSyarat: _tautanSyarat,
+                      tautanPrivasi: _tautanPrivasi,
                     ),
                     // Tombol "Lanjut" muncul hanya kalau email sudah masuk akal.
                     // Tanpa AnimatedSize, kemunculannya menggeser formulir
@@ -293,134 +371,6 @@ class _Merek extends StatelessWidget {
   }
 }
 
-/// Ilustrasi: cincin yang menggambar dirinya sambil bernapas.
-///
-/// Dua gerak dalam SATU controller - cincin luar berputar-penuh lalu
-/// menghilang, cincin dalam berdenyut - supaya keduanya tidak pernah
-/// kehilangan sinkronisasi (dua controller terpisah gampang meleset kalau
-/// halaman dibuka-tutup).
-class _IlustrasiNapas extends StatefulWidget {
-  const _IlustrasiNapas({required this.ukuran});
-
-  final double ukuran;
-
-  @override
-  State<_IlustrasiNapas> createState() => _IlustrasiNapasState();
-}
-
-class _IlustrasiNapasState extends State<_IlustrasiNapas>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 5200),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool gelap = Theme.of(context).brightness == Brightness.dark;
-    return Center(
-      child: AnimatedBuilder(
-        animation: _c,
-        builder: (BuildContext context, Widget? _) {
-          return CustomPaint(
-            size: Size.square(widget.ukuran),
-            painter: _GambarNapas(
-              t: _c.value,
-              aksen: AppColors.brand,
-              pudar: gelap
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : AppColors.brand.withValues(alpha: 0.10),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _GambarNapas extends CustomPainter {
-  const _GambarNapas({
-    required this.t,
-    required this.aksen,
-    required this.pudar,
-  });
-
-  /// 0..1, berulang.
-  final double t;
-  final Color aksen;
-  final Color pudar;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Offset pusat = Offset(size.width / 2, size.height / 2);
-    final double r = size.width / 2;
-    final double napas = 1 + (math.sin(t * 2 * math.pi) * 0.035);
-
-    // Lingkaran tipis tetap: memberi "lantai" supaya gerak cincin terbaca.
-    canvas.drawCircle(
-      pusat,
-      r * 0.86,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = pudar,
-    );
-
-    // Cincin yang menggambar dirinya: mulai dari atas, berputar penuh
-    // sepanjang siklus, lalu memudar saat tuntas - jadi terasa di-ulang.
-    final double lingkaran = Curves.easeInOut.transform(
-      (t < 0.72 ? t / 0.72 : 1),
-    );
-    final Paint penaCincin = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4
-      ..strokeCap = StrokeCap.round
-      ..color = aksen.withValues(alpha: (1 - lingkaran) * 0.9 + 0.1);
-    canvas.drawArc(
-      Rect.fromCircle(center: pusat, radius: r * 0.99 * napas),
-      -math.pi / 2,
-      2 * math.pi * lingkaran,
-      false,
-      penaCincin,
-    );
-
-    // Inti yang bernapas + monogram di tengahnya.
-    canvas.drawCircle(
-      pusat,
-      r * 0.6 * napas,
-      Paint()..color = aksen.withValues(alpha: 0.14),
-    );
-    canvas.drawCircle(pusat, r * 0.42, Paint()..color = aksen);
-
-    final TextPainter tp = TextPainter(
-      text: TextSpan(
-        text: 'D',
-        style: TextStyle(
-          fontFamily: AppTypography.ui,
-          fontSize: r * 0.46,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          height: 1,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    tp.paint(
-      canvas,
-      pusat - Offset(tp.width / 2, tp.height / 2),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_GambarNapas old) => old.t != t || old.aksen != aksen;
-}
-
 /// Tombol "Lanjutkan dengan Google": lambang G digambar sendiri pakai 4 busur
 /// (`Path` manual), jadi tidak perlu `flutter_svg` hanya untuk satu ikon.
 class _TombolGoogle extends StatelessWidget {
@@ -533,6 +483,96 @@ class _GambarGoogle extends CustomPainter {
 
   @override
   bool shouldRepaint(_GambarGoogle old) => false;
+}
+
+/// Baris persetujuan: centang + tautan ke dua dokumen legal.
+///
+/// Recognizer-nya milik [_LayarLogin] (dibuat sekali, di-dispose sekali) dan
+/// diteruskan lewat parameter. Kalau recognizer dibuat di dalam `build`, tiap
+/// ketikan huruf di kolom email menambah listener yang tidak pernah dibuang.
+class _Persetujuan extends StatelessWidget {
+  const _Persetujuan({
+    required this.nilai,
+    required this.onUbah,
+    required this.tautanSyarat,
+    required this.tautanPrivasi,
+  });
+
+  final bool nilai;
+  final ValueChanged<bool> onUbah;
+  final TapGestureRecognizer tautanSyarat;
+  final TapGestureRecognizer tautanPrivasi;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool gelap = Theme.of(context).brightness == Brightness.dark;
+    final Color garis = gelap ? AppColors.lineDark : AppColors.lineLight;
+    final TextStyle gaya = TextStyle(
+      fontFamily: AppTypography.ui,
+      fontSize: 12.5,
+      height: 1.45,
+      color: gelap ? AppColors.textDark : AppColors.textLight,
+    );
+    final TextStyle gayaTautan = gaya.copyWith(
+      color: AppColors.brand,
+      fontWeight: FontWeight.w700,
+      decoration: TextDecoration.underline,
+      decorationColor: AppColors.brand,
+    );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        SizedBox(
+          width: 22,
+          height: 22,
+          child: Checkbox(
+            value: nilai,
+            onChanged: (bool? v) => onUbah(v ?? false),
+            activeColor: AppColors.brand,
+            checkColor: Colors.white,
+            side: BorderSide(color: garis),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Area teks bisa diketuk untuk mencentang, jadi yang bisa ditekan bukan
+        // hanya kotak kecil 22 dp (terlalu sempit untuk jari).
+        Expanded(
+          child: GestureDetector(
+            onTap: () => onUbah(!nilai),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text.rich(
+                TextSpan(
+                  style: gaya,
+                  children: <InlineSpan>[
+                    const TextSpan(text: 'Saya menyetujui '),
+                    TextSpan(
+                      text: 'Syarat & Ketentuan',
+                      style: gayaTautan,
+                      recognizer: tautanSyarat,
+                    ),
+                    const TextSpan(text: ' dan '),
+                    TextSpan(
+                      text: 'Kebijakan Privasi',
+                      style: gayaTautan,
+                      recognizer: tautanPrivasi,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Garis pemisah dengan kata di tengahnya ("ATAU").

@@ -9,8 +9,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_config.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/aset_robot.dart';
 import '../domain/halaman_onboarding.dart';
-import 'widgets/ilustrasi_onboarding.dart';
 import 'widgets/latar_onboarding.dart';
 import 'widgets/ledakan_cahaya.dart';
 
@@ -310,8 +310,9 @@ class _KartuHalaman extends StatelessWidget {
   final List<Color> aksen;
   final AnimationController masuk;
 
-  /// Jeda antar elemen (detik).
-  static const List<double> _jeda = <double>[0.00, 0.10, 0.20, 0.30];
+  /// Jeda antar elemen (detik). Lima slot karena halaman 3 punya satu blok
+  /// tambahan (tiga kartu memori) sebelum judul.
+  static const List<double> _jeda = <double>[0.00, 0.10, 0.20, 0.30, 0.40];
 
   @override
   Widget build(BuildContext context) {
@@ -332,15 +333,40 @@ class _KartuHalaman extends StatelessWidget {
                 _Masuk(
                   masuk: masuk,
                   jeda: _jeda[0],
-                  child: IlustrasiOnboarding(
-                    jenis: halaman.gambar,
-                    aksen: aksen,
+                  child: SizedBox(
+                    height: _tinggiRobot(
+                      batas,
+                      halaman.kartu.isNotEmpty,
+                    ),
+                    child: Center(
+                      child: AsetRobot(
+                        berkas: halaman.aset,
+                        pose: _poseGambar(halaman.pose),
+                        ukuran: 205,
+                      ),
+                    ),
                   ),
                 ),
+                // Kartu kecil hanya di halaman 3, DI ATAS judul.
+                if (halaman.kartu.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: AppSpacing.md),
+                  _Masuk(
+                    masuk: masuk,
+                    jeda: _jeda[1],
+                    child: Column(
+                      children: <Widget>[
+                        for (final BarisInfo b in halaman.kartu) ...<Widget>[
+                          _KartuInfo(baris: b),
+                          const SizedBox(height: AppSpacing.sm),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 _Masuk(
                   masuk: masuk,
-                  jeda: _jeda[1],
+                  jeda: _jeda[2],
                   child: _JudulBergaris(
                     depan: halaman.judul,
                     aksen: halaman.judulAksen,
@@ -350,7 +376,7 @@ class _KartuHalaman extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 _Masuk(
                   masuk: masuk,
-                  jeda: _jeda[2],
+                  jeda: _jeda[3],
                   child: Text(
                     halaman.subjudul,
                     style: const TextStyle(
@@ -364,7 +390,7 @@ class _KartuHalaman extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
                 _Masuk(
                   masuk: masuk,
-                  jeda: _jeda[3],
+                  jeda: _jeda[4],
                   child: Wrap(
                     spacing: AppSpacing.sm,
                     runSpacing: AppSpacing.sm,
@@ -450,6 +476,96 @@ class _JudulBergaris extends StatelessWidget {
       blendMode: BlendMode.srcIn,
       child: Text('$depan\n$aksen', style: gaya),
     );
+  }
+}
+
+/// Terjemahan pose domain -> pose gambar cadangan.
+///
+/// Dipisah supaya domain tidak perlu tahu bentuk gambarnya.
+PoseRobotGambar _poseGambar(PoseRobot pose) {
+  switch (pose) {
+    case PoseRobot.melambai:
+      return PoseRobotGambar.melambai;
+    case PoseRobot.berpikir:
+      return PoseRobotGambar.berpikir;
+    case PoseRobot.bekerja:
+      return PoseRobotGambar.bekerja;
+    case PoseRobot.mengingat:
+      return PoseRobotGambar.mengingat;
+  }
+}
+
+/// Tinggi area robot, diturunkan dari tinggi halaman supaya proporsional di
+/// HP pendek maupun panjang.
+///
+/// Sengaja pakai perbandingan biasa, bukan `clamp()`: `num.clamp()` mengembalikan
+/// `num`, dan itu langsung jadi compile error kalau tromolnya `double`.
+double _tinggiRobot(BoxConstraints batas, bool adaKartu) {
+  final double h = batas.maxHeight * (adaKartu ? 0.30 : 0.42);
+  if (h < 120) return 120;
+  if (h > 215) return 215;
+  return h;
+}
+
+/// Kartu kecil bergaya kotak: ikon + teks, dipakai sebagai daftar di atas
+/// judul pada halaman memori.
+class _KartuInfo extends StatelessWidget {
+  const _KartuInfo({required this.baris});
+
+  final BarisInfo baris;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: AppRadius.br14,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: AppColors.brand.withValues(alpha: 0.22),
+              borderRadius: AppRadius.br8,
+            ),
+            child: Icon(
+              _ikonInfo(baris.ikon),
+              size: 15,
+              color: AppColors.brandSoft,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              baris.teks,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.88),
+                fontFamily: AppTypography.ui,
+                fontSize: 13.5,
+                height: 1.2,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+IconData _ikonInfo(IkonInfo ikon) {
+  switch (ikon) {
+    case IkonInfo.otak:
+      return LucideIcons.brain;
+    case IkonInfo.jam:
+      return LucideIcons.clock;
+    case IkonInfo.kilau:
+      return LucideIcons.sparkles;
   }
 }
 

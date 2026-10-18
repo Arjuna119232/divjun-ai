@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/layar_login.dart';
 import '../../features/chat/presentation/layar_chat.dart';
 import '../../features/home/presentation/layar_splash.dart';
+import '../../features/legal/data/legal_service.dart';
+import '../../features/legal/presentation/halaman_markdown.dart';
+import '../../features/legal/presentation/pusat_legal_screen.dart';
 import '../../features/memory/presentation/layar_memori.dart';
 import '../../features/onboarding/presentation/layar_onboarding.dart';
 import '../../features/settings/presentation/halaman_koneksi.dart';
@@ -83,6 +86,27 @@ final GoRouter appRouter = GoRouter(
       path: '/memori',
       pageBuilder: (BuildContext c, GoRouterState s) =>
           AppTransisi.halaman<void>(s, const LayarMemori()),
+    ),
+    GoRoute(
+      path: '/legal',
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const PusatLegalScreen()),
+    ),
+    GoRoute(
+      // Id dokumen ikut di URL supaya tautan dari halaman Login tetap sah
+      // kalau app dibuka ulang lewat deep link.
+      path: '/legal/dokumen/:id',
+      pageBuilder: (BuildContext c, GoRouterState s) {
+        final DokumenLegal? dok = LegalService.cari(s.pathParameters['id'] ?? '');
+        // Id tidak dikenal -> tampilkan daftar dokumen, jangan layar kosong.
+        if (dok == null) {
+          return AppTransisi.halaman<void>(s, const PusatLegalScreen());
+        }
+        return AppTransisi.halaman<void>(
+          s,
+          HalamanMarkdown(judul: dok.judul, berkas: dok.berkas),
+        );
+      },
     ),
   ],
 );

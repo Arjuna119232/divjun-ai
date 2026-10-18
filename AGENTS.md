@@ -53,6 +53,22 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
   onboarding (`durasiHalamanOnboardingMs`, total 12 detik), auto-lanjut dengan
   garis countdown 2 px. Transisi splash->onboarding->chat = zoom-through dua
   arah + ledakan cahaya (`lib/core/theme/app_transitions.dart`).
+- **Manajemen riwayat chat v3.0.2** (`permalink`-style punya Claude):
+  - `Percakapan.disematkan` (json `'disematkan'`); `kontrol_chat.dart` tambah
+    `sematkan(id,nilai)` & `gantiNama(id,judul)` — **keduanya TIDAK mengubah
+    `diperbarui`** supaya urutan "Terbaru" stabil saat hanya menyematkan/renama.
+  - Sidebar: grup **"Disematkan"** di atas, lalu grup waktu (Hari ini / 7 hari
+    / bulan ini / lebih lama); ikon pin (`LucideIcons.pin`) + `moreVertical`
+    + long-press → menu bottom sheet: Bagikan (`SharePlus.instance.share`),
+    Ganti nama (`AlertDialog`+`TextField` terisi judul kini), Sematkan/Lepas,
+    Tambahkan ke proyek (abu-abu, nonaktif), Hapus (merah).
+  - `layar_chat.dart`: actions AppBar (history + menu opsi) dibungkus
+    `if (state.daftar.isNotEmpty)` → sembunyi saat belum ada percakapan.
+  - `gelembung_pesan.dart`: di bawah bubble jawaban AI **hanya saat status
+    `selesai`** muncul `_AksiPesan` — Row ikon copy/share/play(TTS dummy)/
+    thumbsUp/thumbsDown/refreshCw + disclaimer "DIVJUN AI adalah AI dan dapat
+    melakukan kesalahan." (teks di LUAR bubble = metadata, bukan isi pesan).
+    State `_nilai` 0/1/2 untuk umpan balik jempol.
 - Keystore: **sama** dengan app lama (`KEYSTORE_BASE64` di repo secrets) →
   APK baru bisa update di atas APK lama, jangan ganti keystore.
 - Audit brief vs kenyataan: `docs/REBUILD-AUDIT.md` (agent.js tidak pernah ada;
@@ -188,3 +204,40 @@ Berlaku untuk setiap update dan setiap pencarian saat mengerjakan DIVJUN AI.
   `flutter-app-seukuran-claude`.
 - `_buffer.remove(id)` SEBELUM membaca sisa buffer = seluruh teks yang sudah
   streaming hilang saat stream gagal. Ambil sisanya dulu, baru hapus.
+
+## Pusat Legal + robot (v3.1.0, 19 Okt 2026)
+- **Pusat Legal** (`lib/features/legal/`): `data/legal_service.dart`
+  (3 dokumen + `rootBundle.loadString`), `presentation/halaman_markdown.dart`
+  (`HalamanMarkdown` reuse `TampilanMarkdown` + `_Gagal` retry),
+  `presentation/pusat_legal_screen.dart` (`PusatLegalScreen`).
+  Teks hukum di `assets/legal/{terms,usage,privacy}.md` — **jangan** hardcode di UI.
+  Rute `/legal` + `/legal/dokumen/:id`; ID tak dikenal fallback ke daftar.
+- **Gerbang persetujuan login**: `kunciPersetujuan = 'persetujuan_v1'` dibaca
+  di `initState` (tanpa `setState`) lalu ditulis tiap centang berubah.
+  `TapGestureRecognizer` dibuat/di-dispose di `_LayarLoginState` dan
+  **diteruskan** ke `_Persetujuan` — kalau dibuat di dalam `build`, tiap ketikan
+  huruf menambah listener yang tak pernah dibuang. Tombol ditekan sebelum centang
+  → Snackbar, **bukan** `return` diam (diam = bug "tombol mati").
+- **Splash** (`_keBeranda`): `kunciLogin` dicek **DULUAN**, baru `kunciOnboarding`.
+  Urutan dibalik = user yang sudah pernah login melihat 3 halaman perkenalan
+  lagi tiap app dibuka.
+- **Robot**: `lib/shared/widgets/aset_robot.dart` = `AsetRobot` (Lottie
+  `assets/animations/robot_*.json`) + `RobotGambar` (CustomPainter cadangan).
+  `lottie: ^3.2.0` **dikunci** — 3.6.1 butuh Dart `^3.11`, proyek ini `>=3.4.0`.
+  Berkas animasi belum ada (user belum mengunduh) → `errorBuilder` lottie 3.2.0
+  (`ImageErrorWidgetBuilder`) menurunkan ke gambar kode, jadi layar tidak pernah
+  error merah. Pratinjau: `design/preview_robot.py` → `design/pratinjau-robot.png`.
+- **Jebakan painter yang ketahuan hanya dari render** (lihat
+  `design/pratinjau-robot.png`):
+  1. **Lengan digambar SESUDAH badan.** Kalau sebelum, lengan tertutup badan →
+     yang terlihat hanya 2 tonjolan.
+  2. **Rotasi canvas Flutter**: titik ujung lengan = `(-L*sin(a), L*cos(a))`.
+     Pratinjau Pillow sempat pakai `+sin(a)` → lengan terbalik dan review
+     visual jadi salah Targets. Preview harus memakai matematika yang sama.
+  3. **Kepala tanpa leher = kepala melayang**; sisipkan leher rect bridging.
+  4. Semua dekorasi (gelembung/kilau/centang) harus di dalam kotak ±48 dari
+     pusat, kalau tidak terpotong `SizedBox`.
+  5. `num.clamp()` mengembalikan `num` → **compile error** kalau tromol `double`.
+     Untuk tinggi area pakai `if (h < a) return a; if (h > b) return b; return h;`
+- `widgets/ilustrasi_onboarding.dart` **dihapus** (digantikan robot). Kalau file
+  tak terpakai lagi, `check_source.py` melaporkannya sebagai DEAD-FILE.

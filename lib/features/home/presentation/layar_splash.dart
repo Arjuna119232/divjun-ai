@@ -94,14 +94,19 @@ class _LayarSplashState extends ConsumerState<LayarSplash>
       // LayarOnboarding, supaya `/onboarding` yang dibuka manual dari
       // Pengaturan tidak ikut terpengaruh keputusan ini.
       final simpan = ref.read(simpanCepitProvider);
-      final bool sudah = simpan.bacaBool(kunciOnboarding) ?? false;
-      if (!sudah) {
-        context.go('/onboarding');
+
+      // Sudah pernah masuk -> LANGSUNG ke beranda, perkenalan tidak diulang.
+      // Dicek lebih dulu dari onboarding: user yang sudah pernah login tidak
+      // perlu melihat 3 halaman perkenalan lagi setiap kali app dibuka.
+      final bool pernahMasuk = simpan.bacaBool(kunciLogin) ?? false;
+      if (pernahMasuk) {
+        context.go('/chat');
         return;
       }
-      // Layar masuk juga hanya sekali, dengan alasan yang sama.
-      final bool pernahMasuk = simpan.bacaBool(kunciLogin) ?? false;
-      context.go(pernahMasuk ? '/chat' : '/login');
+
+      // Belum pernah masuk: tampilkan perkenalan sekali saja, lalu login.
+      final bool sudah = simpan.bacaBool(kunciOnboarding) ?? false;
+      context.go(sudah ? '/login' : '/onboarding');
     } catch (e, s) {
       Diagnostik.catat(e, s, konteks: 'splash.go');
       setState(() => _galat = '$e');
