@@ -130,7 +130,7 @@ class BarisSetelan extends StatelessWidget {
       leading: ikon == null ? null : Icon(ikon, size: 20, color: warna),
       title: Text(judul, style: TextStyle(color: warna)),
       subtitle: keterangan == null ? null : Text(keterangan!),
-      trailing: Icon(LucideIcons.chevronRight, size: 18),
+      trailing: const Icon(LucideIcons.chevronRight, size: 18),
       onTap: onTap,
     );
   }
