@@ -6,7 +6,9 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
 `main`; `main` masih berisi app WebView lama + pipeline Gradle-nya).
 
 - Lokasi kerja: `$HOME/divjun-flutter` (bukan `/storage` — FUSE + git lambat)
-- Package: `com.divjun.ai` · versi `2.8.0+46` · minSdk 24 · targetSdk 35
+- Package: `com.divjun.ai` · versi `2.8.1+47` · minSdk 24 · targetSdk 36
+- Sertifikat rilis SHA-256 `c3923241b05990b2575e215090f037e09be5d1da5cc715b1ef11ded4cb18feb7`
+  (CN=DIVJUN AI). APK dengan sertifikat lain TIDAK bisa update di atas v2.8.0.
 - Status "seukuran Claude AI": tahap 1 (sidebar + kolom 820) ✅ v2.4.0+42 ·
   tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ❌
 - Intro: splash 4 detik (`AppConfig.durasiSplashMs`) + 4 detik PER HALAMAN
@@ -56,6 +58,26 @@ Semua sudah diuji dengan fault injection.
 6. Setiap file baru: `python3 tool/check_source.py` harus hijau sebelum commit.
 
 ## Jebakan yang sudah kejadian (jangan ulangi)
+- **`-f demo=true` menghasilkan APK bertanda tangan DEBUG (`CN=Android Debug`)**,
+  karena step `Tulis key.properties` di-skip `if: !inputs.demo` sehingga
+  Gradle jatuh ke debug signing. Build tetap hijau, analyze tetap 0 issue,
+  test tetap lulus - tapi APK-nya **tidak bisa update di atas rilis lama**
+  (INSTALL_FAILED_UPDATE_INCOMPATIBLE) dan meng Uninstall = history chat hilang.
+  Untuk rilis ke user WAJIB `-f demo=false`. SetELAHP selalu cek:
+  `apksigner verify --print-certs <apk> | grep 'certificate DN'`
+  harus `CN=DIVJUN AI`, bukan `CN=Android Debug`.
+- **Versi app TAK boleh ditulis tangan.** `AppConfig.versi` pernah macet di
+  "2.0.0" padahal APK sudah 2.8.x, dan "build" diisi `github.run_number`
+  (nomor workflow GitHub = tidak berguna buat user). Sekarang CI membaca
+  versi dari `pubspec.yaml` (step `id: appver`) lalu inject
+  `--dart-define=APP_VERSION=`. Satu-satunya sumber = `AppEnv.appVersion`.
+- **`dart:core` MENGEKSPOR `Future` dan `Stream` dari `dart:async`**
+  (sdk/lib/core/core.dart: `export "dart:async" show Future, FutureExtensions,
+  Stream;`). Jadi `async`/`await`/`Future`/`Stream` TIDAK butuh import
+  `dart:async`. Hanya `Timer`, `Completer`, `StreamController`,
+  `StreamSubscription`, `unawaited`, dan extension method seperti
+  `asBroadcastStream()` yang benar-benar butuh import itu.
+
 - `flutter create` di template terbaru (3.4x) **tidak** menulis `versionCode`/
   `versionName` angka di `build.gradle.kts` (baca dari pubspec) → patcher harus
   adaptable, bukan `versionCode = \d+` polos.
