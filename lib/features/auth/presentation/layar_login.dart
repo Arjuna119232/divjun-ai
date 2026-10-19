@@ -157,10 +157,10 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
-      SnackBar(
-        content: const Text('Centang persetujuan Syarat & Ketentuan dulu.'),
+      const SnackBar(
+        content: Text('Centang persetujuan Syarat & Ketentuan dulu.'),
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -371,7 +371,7 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
                                               color: Colors.white,
                                             ),
                                           )
-                                        : Text(
+                                        : const Text(
                                             'Lanjut',
                                             style: TextStyle(
                                               fontFamily: AppTypography.ui,
