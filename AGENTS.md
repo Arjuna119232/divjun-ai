@@ -241,3 +241,59 @@ Berlaku untuk setiap update dan setiap pencarian saat mengerjakan DIVJUN AI.
      Untuk tinggi area pakai `if (h < a) return a; if (h > b) return b; return h;`
 - `widgets/ilustrasi_onboarding.dart` **dihapus** (digantikan robot). Kalau file
   tak terpakai lagi, `check_source.py` melaporkannya sebagai DEAD-FILE.
+## Layout overflow + keyboard overlap (19 Okt 2026, commit 3f7b26f)
+Bug yang dilaporkan user di 2 layar, keduanya sudah diperbaiki dan diverifikasi
+`flutter analyze` 0 issue + 61 test hijau (CI run `39190236346`).
+
+**Onboarding — konten terpotong di bawah layar.**
+- Akar: `_tinggiRobot` pakai rasio 0.30/0.42 dengan batas bawah **120 dp**, dan
+  jarak antar blok `lg` (16 dp). Di HP 393x873 dp, area robot halaman 3 jadi
+  166 dp sehingga total isi halaman (robot + 3 kartu + judul + subjudul + chip)
+  **melebihi** tinggi viewport → chip.poin terpotong. Chip itu yang dikeluhkan
+  user, dan auto-lanjut 4 detik membuatnya praktis tak terjangkau.
+- `_tinggiRobot` sekarang 0.26/0.34, batas bawah 92/104, atas 150/200.
+  Jarak: `md` (12) untuk sebelum kartu + sebelum judul, `xs` (4) setelah judul,
+  subjudul 13.5/1.5. Spasi `AppSpacing.sm` **setiap** kartu (termasuk kartu
+  terakhir) diganti jadi spasi **antar** kartu saja (`if (i < len - 1)`).
+  Terukur: halaman 3 = 557 dp dari 639 dp tersedia → **muat tanpa scroll**.
+- ⛔ **Bug laten yang ikut ketemu:** `ConstrainedBox(minHeight: batas.maxHeight - 24)`
+  dengan `EdgeInsets` 16+16. Kalau `maxHeight < 24`, hasilnya **negatif** dan
+  `BoxConstraints` menolak nilai negatif → assertion crash. Sekarang
+  `math.max(0, batas.maxHeight - atasBawah * 2)`, dan angka pengurang **harus
+  sama persis** dengan padding yang dipakai di bawah (dulu 24 vs 32 → halaman
+  selalu lebih tinggi 8 dp dari viewport, jadi selalu ada scroll aneh).
+- Struktur utama jadi `LayoutBuilder` + dua mode, ambang `_ambangRapat = 600`:
+  ≥600 dp → `Column` + `Expanded` (tombol & titik **menempel di bawah**);
+  <600 dp → satu `SingleChildScrollView` (tidak ada yang terpotong).
+- Footer: `SafeArea(bottom: false)` di layar, padding bawah
+  `AppSpacing.lg + MediaQuery.paddingOf(context).bottom` di `_BagianBawah`,
+  jadi jarak tombol ke navigasi 3-tombol vs gesture ikut benar. Ditambah
+  gradasian `0x000B0B10 → 0xFF0B0B10` (warna sama dengan Scaffold) supaya
+  konten yang digeser ke bawah terbaca "masuk ke tombol", bukan terpotong.
+
+**Login — keyboard menutupi tombol "Lanjut" + teks legal dobel.**
+- Teks "Dengan melanjutkan, Anda menyetujui ..." di paling bawah **DIHAPUS**
+  (persetujuan sudah diwakili checkbox + tautan).
+- ⛔ **`viewInsets.bottom` TIDAK boleh ditambahkan sebagai padding di dalam
+  Scaffold yang `resizeToAvoidBottomInset: true`** — Scaffold sudah memotong
+  tinggi body sebesar keyboard, jadi menambahnya lagi = **ruang kosong mati
+  setinggi keyboard** (≈300 dp) di bawah tombol. Yang benar:
+  `resizeToAvoidBottomInset: true` + `Align(alignment: topCenter)` saat
+  keyboard terbuka (bukan `Center`) + `Scrollable.ensureVisible` untuk kolom
+  email dan tombol.
+- `AnimatedSize` tombol "Lanjut" punya `onEnd` → setelah animasi selesai, tombol
+  digeser ke layar kalau keyboard sedang menutupinya. Ini yang menutup celah
+  "tombol muncul tapi tidak terlihat".
+- `TextField.scrollPadding: EdgeInsets.only(bottom: 120)` supaya `EditableText`
+  ikut menyisakan ruang saat bring-into-view.
+- `FocusNode` didaftarkan lewat `initState` (`_fokus.addListener`), **bukan**
+  cascade di deklarasi field — field initializer tidak boleh menyentuh
+  instance method.
+- Tinggi robot diturunkan dari `MediaQuery.sizeOf(context).shortestSide * 0.40`
+  (batas 140..176) dan **104 dp saat keyboard terbuka** (`_tinggiRobot`).
+
+**Pola yang dipakai (juga untuk layar lain):** bagian mahal secara vertikal
+(ilustrasi) direduksi saat keyboard aktif; alignment pindah `center → topCenter`;
+elemen yang bisauttuh berubahUkuran (tombol) memanggil `ensureVisible` di
+`onEnd` animasinya. Jangan pernah andalkan `Center` + `SingleChildScrollView`
+sendirian untuk halaman yangkeyboard-nya bisa muncul.
