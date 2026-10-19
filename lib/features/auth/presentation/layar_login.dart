@@ -42,6 +42,12 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
   final TextEditingController _email = TextEditingController();
   final FocusNode _fokus = FocusNode();
 
+  /// Pengatur posisi scroll. Dipakai untuk menarik kolom email + tombol
+  /// "Lanjut" ke dalam area terlihat saat keyboard muncul.
+  final ScrollController _gulir = ScrollController();
+  final GlobalKey _kunciEmail = GlobalKey();
+  final GlobalKey _kunciTombol = GlobalKey();
+
   /// Animasi masuk halaman (fade + naik sedikit), jalan sekali.
   late final AnimationController _masuk = AnimationController(
     vsync: this,
@@ -63,11 +69,37 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
   @override
   void initState() {
     super.initState();
+    _fokus.addListener(_saatFokusEmail);
     _tautanSyarat.onTap = () => _bukaLegal('syarat');
     _tautanPrivasi.onTap = () => _bukaLegal('privasi');
     // Dibaca langsung (tanpa setState) karena masih sebelum build pertama.
     _setuju =
         ref.read(simpanCepitProvider).bacaBool(kunciPersetujuan) == true;
+  }
+
+  /// Saat kolom email mendapat fokus,keyboard muncul dan tinggi body mengecil.
+  /// Tanpa ini, keyboard bisa menutupi kolom yang baru saja diketuk.
+  void _saatFokusEmail() {
+    if (!_fokus.hasFocus) return;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _tampilkanDalamLayar(_kunciEmail),
+    );
+  }
+
+  /// Geser [kunci] ke area tengah-bawah viewport scroll.
+  ///
+  /// Aman dipanggil berkali-kali: kalau belum ada yang bisa digeser (animasi
+  /// tombol belum selesai, atau belum ada frame scroll) fungsi ini diam saja.
+  void _tampilkanDalamLayar(GlobalKey kunci) {
+    if (!mounted || !_gulir.hasClients) return;
+    final BuildContext? target = kunci.currentContext;
+    if (target == null) return;
+    Scrollable.ensureVisible(
+      target,
+      duration: AppMotion.sedang,
+      curve: AppMotion.masuk,
+      alignment: 0.4,
+    );
   }
 
   /// Buka satu dokumen legal lewat rute `/legal/dokumen/:id`.
@@ -95,7 +127,10 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
   @override
   void dispose() {
     _email.dispose();
-    _fokus.dispose();
+    _fokus
+      ..removeListener(_saatFokusEmail)
+      ..dispose();
+    _gulir.dispose();
     _masuk.dispose();
     _tautanSyarat.dispose();
     _tautanPrivasi.dispose();
@@ -139,176 +174,218 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
     final Color redup =
         gelap ? AppColors.textMutedDark : AppColors.textMutedLight;
 
+    //TINGGI KEYBOARD. Dibaca dari context DI ATAS Scaffold, jadi angkanya
+    // keyboard sungguhan (bukan sisa keyboard yang sudah dipotong Scaffold).
+    final double keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final bool keyboardTerbuka = keyboard > 0;
+    final double tinggiRobot = _tinggiRobot(context, keyboardTerbuka);
+
     return Scaffold(
       backgroundColor: gelap ? AppColors.inkDark : AppColors.surfaceLight,
+      //WAJIB: body menyusut setinggi keyboard. Tanpa ini, area bawah halaman
+      // (tombol "Lanjut") tertutup di balik keyboard dan tidak bisa disentuh.
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Center(
+        child: Align(
+          // Saat keyboard muncul, konten menempel di atas, bukan di tengah:
+          // dengan `Center` isi 700 dp di viewport 480 dp akan terlihat terpotong
+          // dan user baru bisa melihat bagian paling bawahnya dengan scroll.
+          alignment: keyboardTerbuka
+              ? Alignment.topCenter
+              : Alignment.center,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: FadeTransition(
-                opacity: _masuk,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    const _Merek(),
-                    const SizedBox(height: AppSpacing.xl),
-                    // Robot melambai di antara logo dan judul. Berkas Lottie-nya
-                    // `assets/animations/robot_waving.json`; kalau belum ada,
-                    // AsetRobot menampilkan robot cadangan yang sama bergeraknya.
-                    const AsetRobot(
-                      berkas: 'assets/animations/robot_waving.json',
-                      pose: PoseRobotGambar.melambai,
-                      ukuran: 168,
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    // Headline serif — satu-satunya tempat font ini dipakai.
-                    Text(
-                      'Masuk untuk melanjutkan',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: _Playfair.family,
-                        fontSize: 30,
-                        height: 1.18,
-                        fontWeight: FontWeight.w600,
-                        color: gelap ? AppColors.textDark : AppColors.textLight,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '${AppConfig.appName} mengingat konteks percakapanmu '
-                      'dan bisa memakai alat saat dibutuhkan.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13.5, height: 1.5, color: redup),
-                    ),
-                    const SizedBox(height: 30),
-                    _TombolGoogle(
-                      onTap: _proses ? null : _selesai,
-                      permukaan: permukaan,
-                      garis: garis,
-                      gelap: gelap,
-                    ),
-                    const SizedBox(height: 22),
-                    _Pembatas(kata: 'ATAU', redup: redup, garis: garis),
-                    const SizedBox(height: 22),
-                    TextField(
-                      controller: _email,
-                      focusNode: _fokus,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.done,
-                      autocorrect: false,
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) {
-                        if (_emailSah) _selesai();
-                      },
-                      style: TextStyle(
-                        fontFamily: AppTypography.ui,
-                        fontSize: 15,
-                        color: gelap
-                            ? AppColors.textDark
-                            : AppColors.textLight,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Masukkan email Anda',
-                        hintStyle: TextStyle(
-                          fontFamily: AppTypography.ui,
-                          fontSize: 14.5,
-                          color: redup,
-                        ),
-                        prefixIcon: Icon(
-                          LucideIcons.mail,
-                          size: 18,
-                          color: redup,
-                        ),
-                        filled: true,
-                        fillColor: permukaan,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 18,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: garis),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: garis),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(
-                            color: AppColors.brand,
-                            width: 1.6,
+            controller: _gulir,
+            // Menggeser halaman saat user tarik ke atas = tutup keyboard.
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            physics: const ClampingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              keyboardTerbuka ? 12 : 28,
+              24,
+              keyboardTerbuka ? 20 : 28,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: FadeTransition(
+                  opacity: _masuk,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      const _Merek(),
+                      SizedBox(height: keyboardTerbuka ? 16 : 24),
+                      // Robot melambai di antara logo dan judul. Berkas Lottie-nya
+                      // `assets/animations/robot_waving.json`; kalau belum ada,
+                      // AsetRobot menampilkan robot cadangan yang sama bergeraknya.
+                      //
+                      // Tingginya diturunkan dari lebar layar HP dan dikecilkan
+                      // jadi seperempat saat keyboard terbuka: ilustrasi tetap
+                      // proporsional tanpa ikut mendorong kolom email ke bawah
+                      // keyboard.
+                      SizedBox(
+                        height: tinggiRobot,
+                        child: Center(
+                          child: AsetRobot(
+                            berkas: 'assets/animations/robot_waving.json',
+                            pose: PoseRobotGambar.melambai,
+                            ukuran: tinggiRobot - 12,
                           ),
                         ),
                       ),
-                    ),
-                    // Persetujuan diletakkan DI ATAS tombol: tombol yang mengizinkan
-                    // masuk harus berada setelah persetujuan, bukan sebaliknya.
-                    const SizedBox(height: AppSpacing.md),
-                    _Persetujuan(
-                      nilai: _setuju,
-                      onUbah: _ubahSetuju,
-                      tautanSyarat: _tautanSyarat,
-                      tautanPrivasi: _tautanPrivasi,
-                    ),
-                    // Tombol "Lanjut" muncul hanya kalau email sudah masuk akal.
-                    // Tanpa AnimatedSize, kemunculannya menggeser formulir
-                    // sekaligus dan terasa seperti lompatan.
-                    AnimatedSize(
-                      duration: AppMotion.sedang,
-                      curve: AppMotion.masuk,
-                      alignment: Alignment.topCenter,
-                      child: _emailSah
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 14),
-                              child: SizedBox(
-                                height: 52,
-                                child: FilledButton(
-                                  onPressed: _proses ? null : _selesai,
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: AppColors.brand,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                  ),
-                                  child: _proses
-                                      ? const SizedBox(
-                                          width: 18,
-                                          height: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : Text(
-                                          'Lanjut',
-                                          style: TextStyle(
-                                            fontFamily: AppTypography.ui,
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                            )
-                          : const SizedBox(width: double.infinity),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Dengan melanjutkan, Anda menyetujui Syarat Layanan dan '
-                      'Kebijakan Privasi ${AppConfig.appName}.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: AppTypography.ui,
-                        fontSize: 11,
-                        height: 1.6,
-                        color: redup.withValues(alpha: 0.6),
+                      SizedBox(height: keyboardTerbuka ? 16 : 24),
+                      // Headline serif — satu-satunya tempat font ini dipakai.
+                      Text(
+                        'Masuk untuk melanjutkan',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: _Playfair.family,
+                          fontSize: 30,
+                          height: 1.18,
+                          fontWeight: FontWeight.w600,
+                          color: gelap
+                              ? AppColors.textDark
+                              : AppColors.textLight,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      Text(
+                        '${AppConfig.appName} mengingat konteks percakapanmu '
+                        'dan bisa memakai alat saat dibutuhkan.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          height: 1.5,
+                          color: redup,
+                        ),
+                      ),
+                      SizedBox(height: keyboardTerbuka ? 20 : 30),
+                      _TombolGoogle(
+                        onTap: _proses ? null : _selesai,
+                        permukaan: permukaan,
+                        garis: garis,
+                        gelap: gelap,
+                      ),
+                      const SizedBox(height: 22),
+                      _Pembatas(kata: 'ATAU', redup: redup, garis: garis),
+                      const SizedBox(height: 22),
+                      TextField(
+                        key: _kunciEmail,
+                        controller: _email,
+                        focusNode: _fokus,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.done,
+                        autocorrect: false,
+                        scrollPadding: const EdgeInsets.only(bottom: 120),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) {
+                          if (_emailSah) _selesai();
+                        },
+                        style: TextStyle(
+                          fontFamily: AppTypography.ui,
+                          fontSize: 15,
+                          color: gelap
+                              ? AppColors.textDark
+                              : AppColors.textLight,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan email Anda',
+                          hintStyle: TextStyle(
+                            fontFamily: AppTypography.ui,
+                            fontSize: 14.5,
+                            color: redup,
+                          ),
+                          prefixIcon: Icon(
+                            LucideIcons.mail,
+                            size: 18,
+                            color: redup,
+                          ),
+                          filled: true,
+                          fillColor: permukaan,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 18,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: garis),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: garis),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(
+                              color: AppColors.brand,
+                              width: 1.6,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Persetujuan diletakkan DI ATAS tombol: tombol yang
+                      // mengizinkan masuk harus berada setelah persetujuan.
+                      const SizedBox(height: AppSpacing.md),
+                      _Persetujuan(
+                        nilai: _setuju,
+                        onUbah: _ubahSetuju,
+                        tautanSyarat: _tautanSyarat,
+                        tautanPrivasi: _tautanPrivasi,
+                      ),
+                      // Tombol "Lanjut" muncul hanya kalau email sudah masuk akal.
+                      // Tanpa AnimatedSize, kemunculannya menggeser formulir
+                      // sekaligus dan terasa seperti lompatan.
+                      AnimatedSize(
+                        duration: AppMotion.sedang,
+                        curve: AppMotion.masuk,
+                        alignment: Alignment.topCenter,
+                        // Setelah tombol selesai muncul, geser ke layar kalau
+                        // keyboard sedang menutupi bagian bawah halaman.
+                        onEnd: () {
+                          if (_emailSah) {
+                            WidgetsBinding.instance.addPostFrameCallback(
+                              (_) => _tampilkanDalamLayar(_kunciTombol),
+                            );
+                          }
+                        },
+                        child: _emailSah
+                            ? Padding(
+                                key: _kunciTombol,
+                                padding: const EdgeInsets.only(top: 14),
+                                child: SizedBox(
+                                  height: 52,
+                                  child: FilledButton(
+                                    onPressed: _proses ? null : _selesai,
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: AppColors.brand,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
+                                    child: _proses
+                                        ? const SizedBox(
+                                            width: 18,
+                                            height: 18,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Text(
+                                            'Lanjut',
+                                            style: TextStyle(
+                                              fontFamily: AppTypography.ui,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox(width: double.infinity),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -317,6 +394,24 @@ class _LayarLoginState extends ConsumerState<LayarLogin>
       ),
     );
   }
+}
+
+/// Tinggi area robot di halaman login.
+///
+/// Diturunkan dari sisi terpendek layar (bukan angka tetap) supaya proporsional
+/// di HP kecil maupun tablet, dan dikecilkan drastis saat keyboard terbuka:
+/// ilustrasi adalah bagian paling mahal dari halaman ini, dan yang paling
+/// tidak penting saat user sedang mengisi email.
+///
+/// `num.clamp()` mengembalikan `num` dan itu jadi compile error kalau tromolnya
+/// `double`, jadi batasnya ditulis dengan perbandingan biasa.
+double _tinggiRobot(BuildContext context, bool keyboardTerbuka) {
+  if (keyboardTerbuka) return 104;
+  final double sisi = MediaQuery.sizeOf(context).shortestSide;
+  final double h = sisi * 0.40;
+  if (h < 140) return 140;
+  if (h > 176) return 176;
+  return h;
 }
 
 /// Nama font headline. Ditulis sekali di sini supaya penggantian font nanti

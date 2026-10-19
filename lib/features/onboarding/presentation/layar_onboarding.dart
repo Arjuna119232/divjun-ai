@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,16 @@ import 'widgets/ledakan_cahaya.dart';
 
 /// Kunci penanda onboarding sudah pernah ditutup.
 const String kunciOnboarding = 'onboarding_v3';
+
+/// Batas tinggi layar (dp) di bawah ini layout berubah jadi satu kolom
+/// yang bisa di-scroll.
+///
+/// Angkanya = tinggi paling kecil yang masih muat untuk kepala (baris atas +
+/// garis hitung, 64 dp) + kaki (titik + tombol, 98 dp) + halaman paling
+/// pendek yang tetap terbaca (430 dp). Di bawah itu, Memakai Column dengan
+/// `Expanded` akan habisnya ruang untuk `PageView` sehingga chip dan judul
+/// terpotong batas layar.
+const double _ambangRapat = 600;
 
 /// Onboarding 3 halaman, muncul sekali saat aplikasi pertama dipasang.
 ///
@@ -153,33 +164,70 @@ class _OnboardingState extends ConsumerState<LayarOnboarding>
 
   @override
   Widget build(BuildContext context) {
+    final Widget halaman = PageView.builder(
+      controller: _page,
+      itemCount: halamanOnboarding.length,
+      onPageChanged: (int i) {
+        setState(() => _indeks = i);
+        _mulaiHitung();
+      },
+      itemBuilder: (BuildContext context, int i) => _KartuHalaman(
+        halaman: halamanOnboarding[i],
+        aksen: aksenHalaman[i],
+        masuk: _masuk,
+      ),
+    );
+
     final Widget layar = SafeArea(
-      child: Column(
-        children: <Widget>[
-          _BarisAtas(selesai: () => _tandaiSelesai(denganLedakan: false)),
-          _GarisHitung(animasi: _cHitung),
-          Expanded(
-            child: PageView.builder(
-              controller: _page,
-              itemCount: halamanOnboarding.length,
-              onPageChanged: (int i) {
-                setState(() => _indeks = i);
-                _mulaiHitung();
-              },
-              itemBuilder: (BuildContext context, int i) => _KartuHalaman(
-                halaman: halamanOnboarding[i],
-                aksen: aksenHalaman[i],
-                masuk: _masuk,
-              ),
-            ),
-          ),
-          _BagianBawah(
+      // Padding bawah TIDAK dikumpulkan SafeArea: footer yang memakainya
+      // sendiri (lihat [_BagianBawah]) supaya jaraknya bisa dibesarkan saat
+      // navigasi HP berupa tombol 3 tombol, bukan gesture.
+      bottom: false,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints batas) {
+          final Widget kepala = Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _BarisAtas(selesai: () => _tandaiSelesai(denganLedakan: false)),
+              _GarisHitung(animasi: _cHitung),
+            ],
+          );
+          final Widget kaki = _BagianBawah(
             jumlah: halamanOnboarding.length,
             indeks: _indeks,
             terakhir: _terakhir,
             onLanjut: _lanjut,
-          ),
-        ],
+          );
+
+          // Layar cukup tinggi: tombol dan titik menempel di bawah (Expanded),
+          // halaman di tengahnya. Ini jalur normal di HP sekarang.
+          if (batas.maxHeight >= _ambangRapat) {
+            return Column(
+              children: <Widget>[
+                kepala,
+                Expanded(child: halaman),
+                kaki,
+              ],
+            );
+          }
+
+          // Layar pendek (HP kecil, font sistem besar, atau keyboard belum
+          // selesai): seluruh isi jadi satu kolom yang bisa di-scroll, supaya
+          // tidak ada elemen yang terpotong batas layar.
+          return SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              children: <Widget>[
+                kepala,
+                SizedBox(
+                  height: math.max(260, batas.maxHeight * 0.52),
+                  child: halaman,
+                ),
+                kaki,
+              ],
+            ),
+          );
+        },
       ),
     );
 
@@ -318,14 +366,23 @@ class _KartuHalaman extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints batas) {
+        // Padding disamakan persis dengan yang dipakai di bawah, kalau tidak
+        // `minHeight` selalu lebih besar dari tinggi halaman sehingga halaman
+        // selalu perlu scroll beberapa dp lebih tinggi dari yang terlihat.
+        const double sisi = AppSpacing.xl;
+        const double atasBawah = AppSpacing.md;
+        // `math.max(0, ...)` wajib: di layar sangat pendek `maxHeight` bisa di
+        // bawah 0 setelah dikurangi padding, dan `BoxConstraints` menolak
+        // nilai negatif (assertion crash, bukan sekadar tampilan aneh).
+        final double tinggiMin = math.max(0, batas.maxHeight - atasBawah * 2);
         return SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.md,
+            horizontal: sisi,
+            vertical: atasBawah,
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: batas.maxHeight - 24),
+            constraints: BoxConstraints(minHeight: tinggiMin),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -349,21 +406,24 @@ class _KartuHalaman extends StatelessWidget {
                 ),
                 // Kartu kecil hanya di halaman 3, DI ATAS judul.
                 if (halaman.kartu.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   _Masuk(
                     masuk: masuk,
                     jeda: _jeda[1],
                     child: Column(
                       children: <Widget>[
-                        for (final BarisInfo b in halaman.kartu) ...<Widget>[
-                          _KartuInfo(baris: b),
-                          const SizedBox(height: AppSpacing.sm),
+                        for (int i = 0; i < halaman.kartu.length; i++) ...<Widget>[
+                          _KartuInfo(baris: halaman.kartu[i]),
+                          // Jarak hanya antar kartu; setelah kartu terakhir
+                          // tidak perlu ada ruang kosong lagi.
+                          if (i < halaman.kartu.length - 1)
+                            const SizedBox(height: AppSpacing.sm),
                         ],
                       ],
                     ),
                   ),
                 ],
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.md),
                 _Masuk(
                   masuk: masuk,
                   jeda: _jeda[2],
@@ -373,7 +433,7 @@ class _KartuHalaman extends StatelessWidget {
                     warna: aksen,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.xs),
                 _Masuk(
                   masuk: masuk,
                   jeda: _jeda[3],
@@ -382,12 +442,12 @@ class _KartuHalaman extends StatelessWidget {
                     style: const TextStyle(
                       color: Color(0xB3FFFFFF),
                       fontFamily: AppTypography.ui,
-                      fontSize: 14,
-                      height: 1.62,
+                      fontSize: 13.5,
+                      height: 1.5,
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.md),
                 _Masuk(
                   masuk: masuk,
                   jeda: _jeda[4],
@@ -498,12 +558,20 @@ PoseRobotGambar _poseGambar(PoseRobot pose) {
 /// Tinggi area robot, diturunkan dari tinggi halaman supaya proporsional di
 /// HP pendek maupun panjang.
 ///
+/// Rasio dan batasnya sengaja konservatif. Sebelumnya halaman 3 (yang punya
+/// tiga kartu info) memakai 0.30 dengan batas bawah 120 dp: pada HP 393x873 dp
+/// areanya jadi 166 dp dan seluruh isi halaman melebihi tinggi viewport,
+/// sehingga chip poin terpotong di bawah layar. Sekarang porsinya dikecilkan
+/// dan batas bawahnya diturunkan supaya halaman muat tanpa harus di-scroll.
+///
 /// Sengaja pakai perbandingan biasa, bukan `clamp()`: `num.clamp()` mengembalikan
 /// `num`, dan itu langsung jadi compile error kalau tromolnya `double`.
 double _tinggiRobot(BoxConstraints batas, bool adaKartu) {
-  final double h = batas.maxHeight * (adaKartu ? 0.30 : 0.42);
-  if (h < 120) return 120;
-  if (h > 215) return 215;
+  final double h = batas.maxHeight * (adaKartu ? 0.26 : 0.34);
+  final double bawah = adaKartu ? 92 : 104;
+  final double atas = adaKartu ? 150 : 200;
+  if (h < bawah) return bawah;
+  if (h > atas) return atas;
   return h;
 }
 
@@ -662,17 +730,32 @@ class _BagianBawah extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
+    // `SafeArea` di layar memakai `bottom: false` supaya angka ini yang
+    // paprika menentukan jarak tombol dari navigasi HP. Gesture navigation
+    // memberi inset ~16 dp, tombol 3 tombol ~48 dp - tanpa tambahan ini
+    // tombol "Mulai" bisa tertutup sistem.
+    final double bawahSistem = MediaQuery.paddingOf(context).bottom;
+    return Container(
+      // Gradasian tipis supaya konten halaman yang digeser ke bawah terlihat
+      // seolah pernah "masuk" ke tombol, bukan terpotong dadakan.
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[Color(0x000B0B10), Color(0xFF0B0B10)],
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.xl,
-        AppSpacing.sm,
+        AppSpacing.md,
         AppSpacing.xl,
-        AppSpacing.lg,
+        AppSpacing.lg + bawahSistem,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               for (int i = 0; i < jumlah; i++)
                 AnimatedContainer(
@@ -695,7 +778,7 @@ class _BagianBawah extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,
             height: 54,
