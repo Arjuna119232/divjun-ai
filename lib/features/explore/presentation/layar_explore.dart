@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/katalog_ide_ai.dart';
@@ -167,7 +168,11 @@ class _LayarExploreState extends State<LayarExplore> {
                     separatorBuilder: (BuildContext _, int __) =>
                         const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (BuildContext context, int i) =>
-                        _KartuIde(t: daftar[i]),
+                        _KartuIde(
+                          t: daftar[i],
+                          onBukaGitHub: () => _bukaGitHub(daftar[i].link),
+                          onSalin: () => _salinPrompt(daftar[i]),
+                        ),
                   ),
           ),
           Padding(
@@ -194,9 +199,15 @@ class _LayarExploreState extends State<LayarExplore> {
 }
 
 class _KartuIde extends StatelessWidget {
-  const _KartuIde({required this.t});
+  const _KartuIde({
+    required this.t,
+    required this.onBukaGitHub,
+    required this.onSalin,
+  });
 
   final IdeTemplate t;
+  final VoidCallback onBukaGitHub;
+  final VoidCallback onSalin;
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +274,7 @@ class _KartuIde extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(LucideIcons.arrowUpRight, size: 16),
-                  onPressed: () => _bukaGitHub(t.link),
+                  onPressed: onBukaGitHub,
                   label: const Text('Buka di GitHub'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: context.cs.onSurfaceVariant,
@@ -278,7 +289,7 @@ class _KartuIde extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(LucideIcons.copy, size: 16),
-                    onPressed: () => _salinPrompt(t),
+                    onPressed: onSalin,
                     label: const Text('Salin prompt'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.cs.primary,
