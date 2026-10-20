@@ -8,7 +8,6 @@ import '../../../../core/constants/app_config.dart';
 import '../../../../core/constants/app_env.dart';
 import '../../../../core/providers.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../domain/entities/model_ai.dart';
 import '../../../../domain/entities/percakapan.dart';
 import '../../../../domain/entities/setelan.dart';
 import '../../data/kontrol_chat.dart';
@@ -40,7 +39,6 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
   Widget build(BuildContext context) {
     final StateChat state = ref.watch(chatProvider);
     final SetelanApp setelan = ref.watch(setelanProvider);
-    final ModelAi model = ref.watch(modelProvider);
     final String q = _cari.text.trim().toLowerCase();
     final List<Percakapan> semua = <Percakapan>[
       for (final Percakapan p in state.daftar)
