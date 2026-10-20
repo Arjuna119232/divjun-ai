@@ -41,6 +41,12 @@ abstract final class AppColors {
           ? const Color(0xFF1C1C25)
           : Colors.white;
 
+  /// Latar dokumen pratinjau artifak (HTML/SVG) di WebView.
+  ///
+  /// Selalu terang, bukan mengikuti tema: dokumen ditulis pihak ketiga untuk
+  /// kertas putih. Kalau ikut tema gelap, teks hitam jadi tak terbaca.
+  static const Color kertas = Color(0xFFFFFFFF);
+
   /// Warna aksen untuk status tool saat agent sedang jalan.
   static const Color tool = Color(0xFF7C4DFF);
   static const Color toolSoft = Color(0xFFEDE4FF);

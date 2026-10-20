@@ -7,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/waktu.dart';
 import '../../../../domain/entities/percakapan.dart';
 import '../../../../shared/widgets/tampilan_markdown.dart';
+import '../../../artifacts/presentation/isi_jawaban.dart';
 
 /// Satu bubble pesan: user (kanan, warna brand) atau AI (kiri, netral).
 ///
@@ -168,7 +169,7 @@ class GelembungPesan extends StatelessWidget {
           blokPenalaran,
           const SizedBox(height: AppSpacing.sm),
         ],
-        TampilanMarkdown(teks: pesan.isi),
+        IsiJawaban(teks: pesan.isi),
         if (pesan.status == StatusPesan.mengalir) ...<Widget>[
           const SizedBox(height: AppSpacing.xs),
           _TeksSedangMengalir(),

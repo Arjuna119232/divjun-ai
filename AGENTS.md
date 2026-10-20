@@ -6,11 +6,11 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
 `main`; `main` masih berisi app WebView lama + pipeline Gradle-nya).
 
 - Lokasi kerja: `$HOME/divjun-flutter` (bukan `/storage` — FUSE + git lambat)
-- Package: `com.divjun.ai` · versi `3.1.0+52` · minSdk 24 · targetSdk 36
+- Package: `com.divjun.ai` · versi `3.2.0+54` · minSdk 24 · targetSdk 36
 - Sertifikat rilis SHA-256 `c3923241b05990b2575e215090f037e09be5d1da5cc715b1ef11ded4cb18feb7`
   (CN=DIVJUN AI). APK dengan sertifikat lain TIDAK bisa update di atas v2.8.0.
 - Status "seukuran Claude AI": tahap 1 (sidebar + kolom 820) ✅ v2.4.0+42 ·
-  tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ❌
+  tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ✅ v3.2.0+54
 - UI v3.0.1: **overlap splash diperbaiki** — lambang + nama app kini SATU
   `Column` ber-center; sebelumnya dua anak `Center` terpisah di dalam `Stack`
   sehingga saling tumpang. Ditambah kredit "FROM : 0XMAHEN" di atas progress
@@ -297,3 +297,33 @@ Bug yang dilaporkan user di 2 layar, keduanya sudah diperbaiki dan diverifikasi
 elemen yang bisauttuh berubahUkuran (tombol) memanggil `ensureVisible` di
 `onEnd` animasinya. Jangan pernah andalkan `Center` + `SingleChildScrollView`
 sendirian untuk halaman yangkeyboard-nya bisa muncul.
+
+## Artifak / artifacts (v3.2.0+54, tahap 3 "seukuran Claude")
+Blok kode di jawaban AI kini punya kartu sendiri + layar penuh pratinjau.
+- `lib/features/artifacts/domain/artifak.dart` — `PemecahJawaban.pecah()`
+  memisah markdown jadi `BagianTeks` (teks / kode). Pagar ``` dan `~~~`,
+  pagar penutup minimal sepanjang pembuka, info string diambil kata pertama,
+  CRLF dinormalkan, blok **terbuka** saat streaming ditandai `terbuka: true`
+  (kartu tidak boleh dibuka sebelum jawaban selesai).
+  `Artifak.dari()` menentukan `JenisArtifak` (html/svg/markdown/kode),
+  `judul` (dari `<title>` atau `'Kode SQL · 3 baris'`), `bisaPratinjau`,
+  dan `dokumenHtml()` (dokumen utuh dipakai apa adanya; potongan dibungkus
+  `<!doctype html>` + `background:#ffffff`; SVG dibungkus `.kanvas`).
+- `presentation/isi_jawaban.dart` — dipakai bubble chat. Fast-path: satu
+  bagian non-kode → langsung `TampilanMarkdown` (jalur streaming tetap ringan).
+- `presentation/kartu_artifak.dart` + `presentation/halaman_artifak.dart` —
+  kartu di bubble; layar `/artifak` (extra: `Artifak`) dengan tab
+  Pratinjau/Kode, Salin, Bagikan. Markdown dirender `TampilanMarkdown`,
+  HTML/SVG lewat `webview_flutter`.
+- ⚠️ `webview_flutter` **dikunci `^4.13.0`**: 4.13.1 butuh Flutter ≥3.32,
+  4.14.x butuh Dart ^3.10 (proyek `^3.9.0`). Jangan naikkan tanpa cek.
+- ⚠️ `WebViewController` di `_PratinjauWeb` **bukan `late final`** — tombol
+  "Coba lagi" membuat controller baru, `late final` = LateInitializationError
+  justru di jalur pemulihan.
+- ⚠️ `WebResourceError.isForMainFrame` dicek `!= true` (bukan `!`), supaya
+  tetap kompilasi baik field-nya `bool` maupun `bool?`.
+- ⚠️ `AppColors.kertas` (`#FFFFFF`) = latar dokumen pratinjau, **selalu terang**
+  walau app mode gelap; jangan ganti ke `cs.surface`.
+- Rute `/artifak` fallback `Artifak.kosong` (judul 'Artifak', body `_Kosong`)
+  supaya deep-link / proses mati tidak crash.
+- Test: `test/artifak_test.dart` (parser + judul + dokumenHtml).

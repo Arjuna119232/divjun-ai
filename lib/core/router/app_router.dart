@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/artifacts/domain/artifak.dart';
+import '../../features/artifacts/presentation/halaman_artifak.dart';
 import '../../features/auth/presentation/layar_login.dart';
 import '../../features/chat/presentation/layar_chat.dart';
 import '../../features/home/presentation/layar_splash.dart';
@@ -105,6 +107,20 @@ final GoRouter appRouter = GoRouter(
         return AppTransisi.halaman<void>(
           s,
           HalamanMarkdown(judul: dok.judul, berkas: dok.berkas),
+        );
+      },
+    ),
+    GoRoute(
+      // Satu artifak dari jawaban AI. Isinya dikirim lewat `extra` supaya
+      // tidak perlu menyimpan kode besar di URL.
+      path: '/artifak',
+      pageBuilder: (BuildContext c, GoRouterState s) {
+        final Object? data = s.extra;
+        return AppTransisi.halaman<void>(
+          s,
+          HalamanArtifak(
+            artifak: data is Artifak ? data : Artifak.kosong,
+          ),
         );
       },
     ),
