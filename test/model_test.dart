@@ -43,16 +43,15 @@ void main() {
 
   group('auto-pilih model', () {
     List<ModelAi> katalog() => <ModelAi>[
-          ModelAi.cari('openai/gpt-oss-20b')!,
-          ModelAi.cari('openai/gpt-oss-120b')!,
-          ModelAi.cari('llama-3.3-70b-versatile')!,
+          ModelAi.cari('gpt-oss-20b')!,
+          ModelAi.cari('gpt-oss-120b')!,
         ];
 
     test('tidak pernah memilih model enterprise', () {
       final ModelAi m = AgentLoop.pilihOtomatis(
         pesan: 'berapa 1.250.000 + 15% dari 3.400.000',
         katalog: katalog(),
-        fallback: ModelAi.cari('openai/gpt-oss-120b')!,
+        fallback: ModelAi.cari('gpt-oss-120b')!,
       );
       expect(m.perluBayar, isFalse);
     });
@@ -61,18 +60,18 @@ void main() {
       final ModelAi m = AgentLoop.pilihOtomatis(
         pesan: 'jam berapa sekarang',
         katalog: katalog(),
-        fallback: ModelAi.cari('openai/gpt-oss-120b')!,
+        fallback: ModelAi.cari('gpt-oss-120b')!,
       );
-      expect(m.id, 'openai/gpt-oss-20b');
+      expect(m.id, 'gpt-oss-20b');
     });
 
     test('memilih model besar untuk permintaan kode panjang', () {
       final ModelAi m = AgentLoop.pilihOtomatis(
         pesan: 'tulis kode flutter untuk ${'x' * 800}',
         katalog: katalog(),
-        fallback: ModelAi.cari('openai/gpt-oss-120b')!,
+        fallback: ModelAi.cari('gpt-oss-120b')!,
       );
-      expect(m.id, 'openai/gpt-oss-120b');
+      expect(m.id, 'gpt-oss-120b');
     });
   });
 
