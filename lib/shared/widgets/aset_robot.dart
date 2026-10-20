@@ -317,7 +317,7 @@ class _RobotPainter extends CustomPainter {
           ..strokeCap = StrokeCap.round
           ..color = AppColors.mint.withValues(alpha: 0.85);
         final double denyut = 0.7 + (0.3 * math.sin(t * 2 * math.pi));
-        final Offset p = Offset(37, 12);
+        const Offset p = Offset(37, 12);
         canvas.drawLine(p.translate(-7, 0), p.translate(-7, 4), kilau);
         canvas.drawLine(p.translate(-7, 0), p.translate(-3, 0), kilau);
         canvas.drawLine(p.translate(7, 0), p.translate(7, 4), kilau);

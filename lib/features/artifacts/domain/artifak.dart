@@ -268,8 +268,8 @@ abstract final class PemecahJawaban {
       final String? penutup = cocok?.group(1);
       final bool sahPenutup = penutup != null &&
           pagar != null &&
-          penutup[0] == pagar![0] &&
-          penutup.length >= pagar!.length &&
+          penutup[0] == pagar[0] &&
+          penutup.length >= pagar.length &&
           cocok!.group(2)!.trim().isEmpty;
       if (sahPenutup) {
         keluarkanKode(terbuka: false);
