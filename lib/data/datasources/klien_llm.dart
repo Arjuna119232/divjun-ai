@@ -349,18 +349,6 @@ class KlienLlm {
     return digabung;
   }
 
-  /// Model yang TIDAK mendukung tool calling akan disembunyikan dari agent.
-  static bool _kemungkinanBisaAlat(String id) {
-    final String s = id.toLowerCase();
-    if (s.contains('whisper') || s.contains('guard')) return false;
-    if (s.contains('gemma')) return true;
-    if (s.contains('gpt-oss')) return true;
-    if (s.contains('llama-3.3') || s.contains('llama-3.1')) return true;
-    if (s.contains('qwen')) return true;
-    if (s.contains('kimi') || s.contains('deepseek')) return true;
-    return true; // default: model modern mendukung tool calling
-  }
-
   static String _pretty(String id) {
     final String nama = id.split('/').last.replaceAll('-', ' ');
     return nama

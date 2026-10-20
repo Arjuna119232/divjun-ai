@@ -101,12 +101,13 @@ void main() {
       }
     });
 
-    test('model tidak ada di bawaan OpenRouter (hapus provider berkunci)', () {
-      expect(ModelAi.cari('nvidia/nemotron-3-ultra-550b-a55b:free'), isNull);
-      expect(ModelAi.cari('gemini-3.8-flash'), isNull);
+    test('model tidak ada di bawaan (provider berkunci dihapus)', () {
+      expect(ModelAi.cari('gpt-oss-20b'), isNotNull);
+      expect(ModelAi.cari('gpt-oss-120b'), isNotNull);
       for (final ModelAi m in ModelAi.bawaan) {
-        expect(m.penyedia, isNot(PenyediaModel.openrouter));
-        expect(m.penyedia, isNot(PenyediaModel.gemini));
+        expect(m.penyedia == PenyediaModel.ovh ||
+                m.penyedia == PenyediaModel.pollinations,
+            isTrue, reason: m.id);
       }
     });
   });
