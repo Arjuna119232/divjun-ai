@@ -39,7 +39,7 @@ final Provider<RepositoriMemori> repoMemoriProvider =
 final Provider<KlienLlm> klienLlmProvider = Provider<KlienLlm>(
   (ref) {
     ref.watch(setelanProvider);
-    return const KlienLlm();
+    return KlienLlm();
   },
 );
 
