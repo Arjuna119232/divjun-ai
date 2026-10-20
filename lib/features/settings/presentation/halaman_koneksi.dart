@@ -172,7 +172,7 @@ class _BarisUji extends ConsumerWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: const Text('Model AI', style: context.teks.bodyMedium),
+                child: Text('Model AI', style: context.teks.bodyMedium),
               ),
               if (model.dukungAlat)
                 Container(
