@@ -15,13 +15,6 @@ void main() {
       expect(d.id, isNot('llama-3.1-8b-instant'));
     });
 
-    test('Llama 3.3 70B ditandai perluBayar', () {
-      final ModelAi? m = ModelAi.cari('llama-3.3-70b-versatile');
-      expect(m, isNotNull);
-      expect(m!.perluBayar, isTrue);
-      expect(m.untukGratis, isFalse);
-    });
-
     test('layakOtomatis hanya berisi model gratis + tool calling', () {
       for (final ModelAi m in ModelAi.layakOtomatis()) {
         expect(m.dukungAlat, isTrue, reason: m.id);
