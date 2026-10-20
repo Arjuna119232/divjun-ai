@@ -29,7 +29,7 @@ class KartuArtifak extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: latar,
-        borderRadius: BorderRadius.circular(AppRadius.r14),
+        borderRadius: AppRadius.br14,
         border: Border.all(color: garis),
       ),
       clipBehavior: Clip.antiAlias,
@@ -95,7 +95,7 @@ class _Kepala extends StatelessWidget {
               height: 30,
               decoration: BoxDecoration(
                 color: AppColors.brand.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppRadius.r8),
+                borderRadius: AppRadius.br8,
               ),
               child: Icon(
                 artifak.jenis == JenisArtifak.kode
