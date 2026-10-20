@@ -17,6 +17,7 @@ import '../../features/settings/presentation/layar_setelan.dart';
 import '../../features/settings/presentation/layar_tentang.dart';
 import '../../features/skills/presentation/layar_skill.dart';
 import '../theme/app_transitions.dart';
+import '../../features/explore/presentation/layar_explore.dart';
 
 /// Routing app.
 ///
@@ -117,6 +118,11 @@ final GoRouter appRouter = GoRouter(
           ),
         );
       },
+    ),
+    GoRoute(
+      path: '/explore',
+      pageBuilder: (BuildContext c, GoRouterState s) =>
+          AppTransisi.halaman<void>(s, const LayarExplore()),
     ),
   ],
 );

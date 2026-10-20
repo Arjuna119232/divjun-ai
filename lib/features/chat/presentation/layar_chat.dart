@@ -147,6 +147,8 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                   _scaffoldKey.currentState?.openDrawer();
                 case 'memori':
                   context.push('/memori');
+                case 'explore':
+                  context.push('/explore');
                 case 'setelan':
                   context.push('/setelan');
               }
@@ -168,6 +170,15 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(LucideIcons.brain, size: 18),
                   title: Text('Memori AI'),
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'explore',
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(LucideIcons.brain, size: 18),
+                  title: Text('Jelajahi Ide AI'),
                 ),
               ),
               const PopupMenuItem<String>(
