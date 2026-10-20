@@ -6,11 +6,11 @@ Rebuild total aplikasi DIVJUN AI dari **WebView (HTML/JS + Kotlin)** menjadi
 `main`; `main` masih berisi app WebView lama + pipeline Gradle-nya).
 
 - Lokasi kerja: `$HOME/divjun-flutter` (bukan `/storage` — FUSE + git lambat)
-- Package: `com.divjun.ai` · versi `3.3.0+55` · minSdk 24 · targetSdk 36
+- Package: `com.divjun.ai` · versi `3.3.1+56` · minSdk 24 · targetSdk 36
 - Sertifikat rilis SHA-256 `c3923241b05990b2575e215090f037e09be5d1da5cc715b1ef11ded4cb18feb7`
   (CN=DIVJUN AI). APK dengan sertifikat lain TIDAK bisa update di atas v2.8.0.
 - Status "seukuran Claude AI": tahap 1 (sidebar + kolom 820) ✅ v2.4.0+42 ·
-  tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ✅ v3.3.0+55
+  tahap 2 (blok "Berpikir" collapsible) ✅ v2.5.0+43 · tahap 3 artifacts ✅ v3.3.1+56
 - UI v3.0.1: **overlap splash diperbaiki** — lambang + nama app kini SATU
   `Column` ber-center; sebelumnya dua anak `Center` terpisah di dalam `Stack`
   sehingga saling tumpang. Ditambah kredit "FROM : 0XMAHEN" di atas progress
@@ -298,7 +298,7 @@ elemen yang bisauttuh berubahUkuran (tombol) memanggil `ensureVisible` di
 `onEnd` animasinya. Jangan pernah andalkan `Center` + `SingleChildScrollView`
 sendirian untuk halaman yangkeyboard-nya bisa muncul.
 
-## Artifak / artifacts (v3.3.0+55, tahap 3 "seukuran Claude")
+## Artifak / artifacts (v3.3.1+56, tahap 3 "seukuran Claude")
 Status 20 Okt 2026: analyze-only CI `39372043641` HIJAU (test ikut lulus),
 build APK penuh `39372284037` HIJAU. APK:
 `/storage/emulated/0/Download/DIVJUN-AI-v3.2.0.apk` (68.681.545 byte),
