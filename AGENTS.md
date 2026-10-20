@@ -299,6 +299,22 @@ elemen yang bisauttuh berubahUkuran (tombol) memanggil `ensureVisible` di
 sendirian untuk halaman yangkeyboard-nya bisa muncul.
 
 ## Artifak / artifacts (v3.2.0+54, tahap 3 "seukuran Claude")
+Status 20 Okt 2026: analyze-only CI `39372043641` HIJAU (test ikut lulus),
+build APK penuh `39372284037` HIJAU. APK:
+`/storage/emulated/0/Download/DIVJUN-AI-v3.2.0.apk` (68.681.545 byte),
+cert SHA-256 `c3923241…feb7` = SAMA dengan rilis sebelumnya → install di atas
+APK lama, JANGAN uninstall.
+
+⚠️ Dua penyebab CI merah yang TIDAK terlihat dari `check_source.py` (checker
+statis tidak membaca warning analyzer sama sekali):
+1. `BorderRadius.circular(AppRadius.r14)` → `AppRadius.r14` bertipe `Radius`,
+   bukan `double` → pakai token `AppRadius.br14`/`br8`.
+2. `pagar![0]` setelah `pagar != null` = `unnecessary_non_null_assertion`
+   (WARNING = fatal), dan `final Offset p = Offset(37, 12)` =
+   `prefer_const_constructors`. `--no-fatal-infos` HANYA memaafkan info;
+   warning tetap mematikan build. Baca log dengan
+   `grep -nE "warning •|error •| • lib/"`.
+
 Blok kode di jawaban AI kini punya kartu sendiri + layar penuh pratinjau.
 - `lib/features/artifacts/domain/artifak.dart` — `PemecahJawaban.pecah()`
   memisah markdown jadi `BagianTeks` (teks / kode). Pagar ``` dan `~~~`,
