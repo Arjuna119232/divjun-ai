@@ -40,7 +40,7 @@ class LayarLanjutan extends ConsumerWidget {
             anak: <Widget>[
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(model.label),
+                title: const Text('Model AI'),
                 subtitle: const Text('Diganti otomatis bila perlu.'),
                 trailing: const Icon(LucideIcons.chevronRight, size: 18),
                 onTap: () async {

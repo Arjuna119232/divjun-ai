@@ -92,12 +92,7 @@ class GelembungPesan extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],
-              if (!user && pesan.modelId.isNotEmpty) ...<Widget>[
-                Text(
-                  _modelRingkas(pesan.modelId),
-                  style: context.teks.labelSmall,
-                ),
-                const SizedBox(width: AppSpacing.xs),
+              if (!user) ...<Widget>[
                 Text(Waktu.jam(pesan.waktu), style: context.teks.labelSmall),
               ],
             ],
@@ -122,29 +117,13 @@ class GelembungPesan extends StatelessWidget {
   Widget _isi(BuildContext context, Color teks) {
     final bool adaPenalaran = pesan.punyaPenalaran;
 
-    // Blok "Berpikir" duduk DI DALAM bubble, di atas jawaban - seperti Claude.
-    // Tanpa ini, penalaran yang sudah dipisah di layer data tidak pernah tampil
-    // dan user mengira model menjawab tanpa berpikir sama sekali.
-    final Widget? blokPenalaran = adaPenalaran
-        ? _BlokPenalaran(pesan: pesan, sedangAlir: sedangAlir)
-        : null;
-
     if (pesan.isi.isEmpty) {
-      if (blokPenalaran != null) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            blokPenalaran,
-            if (pesan.status == StatusPesan.mengalir) ...<Widget>[
-              const SizedBox(height: AppSpacing.sm),
-              _TeksSedangMengalir(),
-            ],
-          ],
-        );
-      }
+      // Belum ada token final sama sekali: masih awal proses berpikir.
       if (pesan.status == StatusPesan.mengalir) {
-        return _TeksSedangMengalir();
+        return _BlokBerpikir(
+          sedangAlir: true,
+          penalaranMs: pesan.penalaranMs,
+        );
       }
       return Text(
         pesan.pesanGalat.isEmpty ? '(kosong)' : pesan.pesanGalat,
@@ -161,28 +140,34 @@ class GelembungPesan extends StatelessWidget {
       );
     }
 
+    // AI sudah ada isi final.
+    if (pesan.status == StatusPesan.mengalir) {
+      // Masih memproses: tampilkan HANYA "Berpikir..." + titik-tiga.
+      // Sembunyikan teks mentah proses berpikir dan teks jawaban yang masih
+      // mengalir agar user tidak melihat isi mentah dari API.
+      return _BlokBerpikir(
+        sedangAlir: true,
+        penalaranMs: pesan.penalaranMs,
+      );
+    }
+
+    // Selesai: tampilkan jawaban final, lalu accordion untuk proses berpikir.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (blokPenalaran != null) ...<Widget>[
-          blokPenalaran,
-          const SizedBox(height: AppSpacing.sm),
-        ],
         IsiJawaban(teks: pesan.isi),
-        if (pesan.status == StatusPesan.mengalir) ...<Widget>[
-          const SizedBox(height: AppSpacing.xs),
-          _TeksSedangMengalir(),
+        if (adaPenalaran) ...<Widget>[
+          const SizedBox(height: AppSpacing.sm),
+          _BlokBerpikir(
+            sedangAlir: false,
+            penalaranMs: pesan.penalaranMs,
+            pesan: pesan,
+          ),
         ],
       ],
     );
   }
-
-  static String _modelRingkas(String id) {
-    final String p = id.split('/').last;
-    return p.replaceAll('-', ' ');
-  }
-
 
   Future<void> _tampilkanMenu(BuildContext context) async {
     final List<_ItemMenu> item = <_ItemMenu>[
@@ -223,45 +208,37 @@ class GelembungPesan extends StatelessWidget {
   }
 }
 
-/// Blok "Berpikir": isi penalaran model, bisa dibuka-tutup.
+/// Blok "Berpikir": proses berpikir model.
 ///
-/// Default terbuka saat masih mengalir (supaya user lihat prosesnya), lalu
-/// menutup sendiri saat jawaban selesai - kecuali user yang membukanya
-/// secara manual, pilihan itu dihormati.
-class _BlokPenalaran extends StatefulWidget {
-  const _BlokPenalaran({required this.pesan, required this.sedangAlir});
+/// - Saat `sedangAlir == true`: hanya tampilkan teks "Berpikir..." dengan
+///   animasi titik-tiga, **jangan pernah** render teks mentah proses berpikir
+///   dari API agar pengguna tidak melihat isi mentahnya.
+/// - Saat `sedangAlir == false` dan ada [penalaran]: tampilkan judul
+///   "Berpikir selama X detik" sebagai ExpansionTile (accordion). Diklik baru
+///   teks mentah proses berpikir ditampilkan.
+class _BlokBerpikir extends StatefulWidget {
+  const _BlokBerpikir({
+    required this.sedangAlir,
+    required this.penalaranMs,
+    this.pesan,
+  });
 
-  final Pesan pesan;
   final bool sedangAlir;
+  final int penalaranMs;
+  final Pesan? pesan;
 
   @override
-  State<_BlokPenalaran> createState() => _BlokPenalaranState();
+  State<_BlokBerpikir> createState() => _BlokBerpikirState();
 }
 
-class _BlokPenalaranState extends State<_BlokPenalaran> {
-  bool _buka = true;
-  bool _manual = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _buka = widget.sedangAlir;
-  }
-
-  @override
-  void didUpdateWidget(_BlokPenalaran lama) {
-    super.didUpdateWidget(lama);
-    // Selesai mengalir -> tutup sendiri, tapi jangan menimpa pilihan user.
-    if (lama.sedangAlir && !widget.sedangAlir && !_manual) {
-      setState(() => _buka = false);
-    }
-  }
+class _BlokBerpikirState extends State<_BlokBerpikir> {
+  /// Accordion belum pernah dibuka oleh user.
+  bool _buka = false;
 
   String get _judul {
-    if (widget.sedangAlir) return 'Berpikir';
-    final int ms = widget.pesan.penalaranMs;
-    if (ms <= 0) return 'Berpikir';
-    return 'Berpikir ${Waktu.durasi(ms)}';
+    final int ms = widget.penalaranMs;
+    if (ms <= 0) return 'Berpikir selama 0 detik';
+    return 'Berpikir selama ${Waktu.durasi(ms)}';
   }
 
   @override
@@ -283,12 +260,11 @@ class _BlokPenalaranState extends State<_BlokPenalaran> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           InkWell(
-            onTap: () {
-              setState(() {
-                _buka = !_buka;
-                _manual = true;
-              });
-            },
+            onTap: widget.sedangAlir
+                ? null
+                : () {
+                    setState(() => _buka = !_buka);
+                  },
             borderRadius: AppRadius.br8,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -298,41 +274,57 @@ class _BlokPenalaranState extends State<_BlokPenalaran> {
                   Icon(LucideIcons.brain, size: 14, color: aksen),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    _judul,
+                    widget.sedangAlir ? 'Berpikir...' : _judul,
                     style: context.teks.labelMedium?.copyWith(color: aksen),
                   ),
-                  AnimatedRotation(
-                    turns: _buka ? 0.5 : 0,
-                    duration: AppMotion.cepat,
-                    curve: AppMotion.masuk,
-                    child: Icon(
-                      LucideIcons.chevronDown,
-                      size: 14,
-                      color: aksen.withValues(alpha: 0.8),
+                  const Spacer(),
+                  if (!widget.sedangAlir)
+                    AnimatedRotation(
+                      turns: _buka ? 0.5 : 0,
+                      duration: AppMotion.cepat,
+                      curve: AppMotion.masuk,
+                      child: Icon(
+                        LucideIcons.chevronDown,
+                        size: 14,
+                        color: aksen.withValues(alpha: 0.8),
+                      ),
                     ),
-                  ),
+                  if (widget.sedangAlir) ...<Widget>[
+                    const SizedBox(width: AppSpacing.sm),
+                    _Titik(
+                      warna: aksen,
+                      muncul: true,
+                    ),
+                    const SizedBox(width: 4),
+                    _Titik(
+                      warna: aksen,
+                      muncul: true,
+                    ),
+                    const SizedBox(width: 4),
+                    _Titik(
+                      warna: aksen,
+                      muncul: true,
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
-          AnimatedSize(
-            duration: AppMotion.sedang,
-            curve: AppMotion.emphasized,
-            alignment: Alignment.topCenter,
-            child: _buka
-                ? Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    // Redup: isi berpikir bukan jawaban.
-                    child: Opacity(
-                      opacity: widget.sedangAlir ? 0.75 : 0.6,
-                      child: TampilanMarkdown(
-                        teks: widget.pesan.penalaran,
-                        kecil: true,
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
+          if (!widget.sedangAlir &&
+              widget.pesan != null &&
+              widget.pesan!.penalaran.trim().isNotEmpty &&
+              _buka)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              // Redup: isi berpikir bukan jawaban.
+              child: Opacity(
+                opacity: 0.6,
+                child: TampilanMarkdown(
+                  teks: widget.pesan!.penalaran,
+                  kecil: true,
+                ),
+              ),
+            ),
         ],
       ),
     );

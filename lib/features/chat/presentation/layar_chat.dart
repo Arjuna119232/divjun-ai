@@ -105,7 +105,7 @@ class _LayarChatState extends ConsumerState<LayarChat> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        model.label,
+                        'DIVJUN AI',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.teks.titleSmall

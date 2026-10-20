@@ -132,7 +132,6 @@ class _SidebarObrolanState extends ConsumerState<SidebarObrolan> {
                           AppConfig.appName,
                           style: context.teks.titleSmall,
                         ),
-                        Text(model.label, style: context.teks.labelSmall),
                       ],
                     ),
                   ),

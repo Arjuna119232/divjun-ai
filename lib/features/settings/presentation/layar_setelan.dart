@@ -452,10 +452,9 @@ class _LembarModel extends ConsumerWidget {
                         selected: dipilih,
                         selectedTileColor:
                             context.cs.primary.withValues(alpha: 0.10),
-                        title: Text(m.label),
+                        title: const Text('Model AI'),
                         subtitle: Text(
-                          '${m.penyedia.name} · konteks '
-                          '${(m.konteks / 1000).round()}k'
+                          'konteks ${(m.konteks / 1000).round()}k'
                           '${m.dukungAlat ? ' · agent' : ''}',
                         ),
                         trailing: dipilih
