@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Satu ide template AI dari https://github.com/Shubhamsaboo/awesome-llm-apps.
 ///
