@@ -17,15 +17,15 @@ import 'package:flutter_test/flutter_test.dart';
 /// bug ini ketahuan di CI bukan di HP user.
 void main() {
   const ModelAi model = ModelAi(
-    id: 'openai/gpt-oss-20b',
-    label: 'GPT-OSS 20B',
-    penyedia: PenyediaModel.groq,
+    id: 'gpt-oss-20b',
+    label: 'GPT-OSS 20B (OVH)',
+    penyedia: PenyediaModel.ovh,
     dukungAlat: true,
   );
 
   KlienLlm klienDengan(String body, {int status = 200}) {
     final Dio dio = Dio()..httpClientAdapter = _StubAdapter(body, status);
-    return KlienLlm(dio: dio, kunciGroq: 'gsk_test');
+    return KlienLlm(dio: dio);
   }
 
   group('stream chat', () {
@@ -80,22 +80,6 @@ void main() {
       expect(alat.first.argumenMap()['ekspresi'], '1+1');
     });
 
-    test('kunci kosong ditolak tanpa menyentuh jaringan', () async {
-      final KlienLlm k = KlienLlm(
-        dio: Dio()..httpClientAdapter = _StubAdapter('data: [DONE]\n\n', 200),
-        kunciGroq: '',
-      );
-      final List<PotonganBalasan> hasil = await k
-          .stream(
-            model: model,
-            pesan: <PesanApi>[const PesanApi(peran: 'user', isi: 'halo')],
-            suhu: 0.5,
-          )
-          .toList();
-      expect(hasil.first.galat, contains('API key'));
-      expect(hasil.first.kodeGalat, KodeGalat.kunciDitolak);
-    });
-
     test('galat 404 "model tidak ada" diklasifikasi dengan benar', () async {
       final KlienLlm k = klienDengan(
         '{"error":{"message":"The model does not exist"}}',
@@ -125,7 +109,7 @@ void main() {
           )
           .toList();
       expect(hasil.first.kodeGalat, KodeGalat.kunciDitolak);
-      expect(hasil.first.galat, contains('berbayar'));
+      expect(hasil.first.galat, contains('ditolak'));
     });
 
     test('sekali() merangkai teks penuh', () async {

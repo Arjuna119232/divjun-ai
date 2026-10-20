@@ -1,20 +1,14 @@
 /// Katalog model AI.
 ///
-/// PENTING (hasil audit 17 Okt 2026 terhadap docs resmi Groq): beberapa model
-/// yang dulu gratis sekarang **khusus paket Enterprise** - misalnya
-/// `llama-3.3-70b-versatile` dan `llama-3.1-8b-instant` (keduanya "ContactSales").
-/// Kalau katalog bawaan menunjuk model seperti itu, SEMUA permintaan dari kunci
-/// gratis akan ditolak dan userума "semua model gagal". Jadi model Enterprise
-/// ditandai [perluBayar] dan TIDAK dipakai sebagai default / pilihan otomatis.
+/// Semua model di sini gratis dan TANPA kunci API (diverifikasi 18 Okt 2026):
+/// OVHcloud AI Endpoints + Pollinations. Tidak ada rahasia yang bisa
+/// diekstrak dari APK.
 library;
 
 enum PenyediaModel {
-  /// Gratis, tanpa kunci API sama sekali (diverifikasi 18 Okt 2026).
+  /// Gratis, tanpa kunci API sama sekali.
   ovh,
   pollinations,
-  groq,
-  gemini,
-  openrouter,
 }
 
 extension PenyediaModelX on PenyediaModel {
@@ -23,15 +17,12 @@ extension PenyediaModelX on PenyediaModel {
   bool get tanpaKunci =>
       this == PenyediaModel.ovh || this == PenyediaModel.pollinations;
 
-  /// Prioritas mencoba: tanpa kunci didahulukan.
+  /// Prioritas mencoba: tanpa kunci didahulukan (selalu 0 sekarang).
   int get prioritas => tanpaKunci ? 0 : 10;
 
   String get namaTampil => switch (this) {
         PenyediaModel.ovh => 'OVH (tanpa kunci)',
         PenyediaModel.pollinations => 'Pollinations (tanpa kunci)',
-        PenyediaModel.groq => 'Groq',
-        PenyediaModel.gemini => 'Gemini',
-        PenyediaModel.openrouter => 'OpenRouter',
       };
 }
 
@@ -62,9 +53,6 @@ class ModelAi {
 
   String get labelLengkap => '$label · ${penyedia.namaTampil}';
 
-  /// Butuh kunci API yang sudah diisi sebelum model ini bisa dipakai.
-  bool get perluKunci => !penyedia.tanpaKunci;
-
   /// Aman dipakai kunci gratis.
   bool get untukGratis => !perluBayar;
 
@@ -75,45 +63,6 @@ class ModelAi {
   int get hashCode => id.hashCode;
 
   static const List<ModelAi> bawaan = <ModelAi>[
-    // --- Groq: yang dipakai kunci gratis (docs Groq, Okt 2026) ---
-    ModelAi(
-      id: 'openai/gpt-oss-20b',
-      label: 'GPT-OSS 20B',
-      penyedia: PenyediaModel.groq,
-      dukungAlat: true,
-      konteks: 131072,
-    ),
-    ModelAi(
-      id: 'openai/gpt-oss-120b',
-      label: 'GPT-OSS 120B',
-      penyedia: PenyediaModel.groq,
-      dukungAlat: true,
-      konteks: 131072,
-    ),
-    ModelAi(
-      id: 'qwen/qwen3.8-27b',
-      label: 'Qwen3.8 27B',
-      penyedia: PenyediaModel.groq,
-      dukungAlat: true,
-      konteks: 131072,
-    ),
-    // --- Groq: Enterprise, disembunyikan dari pilihan otomatis ---
-    ModelAi(
-      id: 'llama-3.3-70b-versatile',
-      label: 'Llama 3.3 70B (Enterprise)',
-      penyedia: PenyediaModel.groq,
-      dukungAlat: true,
-      konteks: 131072,
-      perluBayar: true,
-    ),
-    ModelAi(
-      id: 'llama-3.1-8b-instant',
-      label: 'Llama 3.1 8B (Enterprise)',
-      penyedia: PenyediaModel.groq,
-      dukungAlat: true,
-      konteks: 131072,
-      perluBayar: true,
-    ),
     // --- OVHcloud AI Endpoints: GRATIS, TANPA KUNCI (18 Okt 2026, live) ---
     ModelAi(
       id: 'gpt-oss-120b',
@@ -172,79 +121,6 @@ class ModelAi {
       dukungAlat: true,
       konteks: 131072,
     ),
-    // --- OpenRouter: 16 model ':free', 15 punya tool calling (live) ---
-    ModelAi(
-      id: 'nvidia/nemotron-3-ultra-550b-a55b:free',
-      label: 'Nemotron 3 Ultra 550B',
-      penyedia: PenyediaModel.openrouter,
-      dukungAlat: true,
-      konteks: 1000000,
-    ),
-    ModelAi(
-      id: 'thinkingmachines/inkling:free',
-      label: 'Inkling',
-      penyedia: PenyediaModel.openrouter,
-      dukungAlat: true,
-      konteks: 1000000,
-    ),
-    ModelAi(
-      id: 'nvidia/nemotron-3.5-lightning:free',
-      label: 'Nemotron 3.5 Lightning',
-      penyedia: PenyediaModel.openrouter,
-      dukungAlat: true,
-      konteks: 1000000,
-    ),
-    ModelAi(
-      id: 'google/gemma-4-31b-it:free',
-      label: 'Gemma 4 31B',
-      penyedia: PenyediaModel.openrouter,
-      dukungAlat: true,
-      lihatGambar: true,
-      konteks: 262144,
-    ),
-    ModelAi(
-      id: 'cohere/north-mini-code:free',
-      label: 'North Mini Code',
-      penyedia: PenyediaModel.openrouter,
-      dukungAlat: true,
-      konteks: 256000,
-    ),
-    ModelAi(
-      id: 'nvidia/nemotron-3-super-120b-a12b:free',
-      label: 'Nemotron 3 Super 120B',
-      penyedia: PenyediaModel.openrouter,
-      dukungAlat: true,
-      konteks: 262144,
-    ),
-    // --- Gemini (butuh kunci gratis dari AI Studio) ---
-    ModelAi(
-      id: 'gemini-3.8-flash',
-      label: 'Gemini 3.8 Flash',
-      penyedia: PenyediaModel.gemini,
-      lihatGambar: true,
-      konteks: 1000000,
-    ),
-    ModelAi(
-      id: 'gemini-3.5-flash-lite',
-      label: 'Gemini 3.5 Flash Lite',
-      penyedia: PenyediaModel.gemini,
-      lihatGambar: true,
-      konteks: 1000000,
-    ),
-    ModelAi(
-      id: 'gemini-2.5-flash',
-      label: 'Gemini 2.5 Flash',
-      penyedia: PenyediaModel.gemini,
-      lihatGambar: true,
-      konteks: 1000000,
-    ),
-    ModelAi(
-      id: 'gemini-2.0-flash',
-      label: 'Gemini 2.0 Flash',
-      penyedia: PenyediaModel.gemini,
-      lihatGambar: true,
-      konteks: 1000000,
-    ),
   ];
 
   /// Model yang mendukung tool calling (syarat agent mode aktif).
@@ -275,14 +151,8 @@ class ModelAi {
   static ModelAi defaultGratis([List<ModelAi>? semua]) {
     final List<ModelAi> layak = layakOtomatis(semua);
     if (layak.isEmpty) return bawaan.first;
-    // Prioritas: provider tanpa kunci (langsung jalan), lalu yang paling
-    // ringan (respons cepat).
-    for (final ModelAi m in layak) {
-      if (!m.perluKunci) return m;
-    }
-    for (final ModelAi m in layak) {
-      if (m.id == 'openai/gpt-oss-20b') return m;
-    }
+    // Semua model di katalog ini tanpa kunci, jadi yang paling ringan (first)
+    // langsung dipakai — respons paling cepat.
     return layak.first;
   }
 

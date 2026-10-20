@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/constants/app_env.dart';
 import '../data/datasources/klien_llm.dart';
 import '../data/datasources/penyimpan_lokal.dart';
 import '../data/repositories/repositori_memori.dart';
@@ -39,26 +38,12 @@ final Provider<RepositoriMemori> repoMemoriProvider =
 
 final Provider<KlienLlm> klienLlmProvider = Provider<KlienLlm>(
   (ref) {
-    final SetelanApp s = ref.watch(setelanProvider);
-    return KlienLlm(
-      kunciGroq: s.kunciGroq,
-      kunciGemini: s.kunciGemini,
-      kunciOpenRouter: s.kunciOpenRouter,
-    );
+    ref.watch(setelanProvider);
+    return const KlienLlm();
   },
 );
 
-/// Kunci yang benar-benar dipakai (lokal menimpa yang dibundel).
-final Provider<String> kunciGroqAktifProvider = Provider<String>((ref) {
-  final String lokal = ref.watch(setelanProvider).kunciGroq.trim();
-  return lokal.isNotEmpty ? lokal : AppEnv.groqApiKey;
-});
-
-final Provider<String> kunciGeminiAktifProvider = Provider<String>((ref) {
-  final String lokal = ref.watch(setelanProvider).kunciGemini.trim();
-  return lokal.isNotEmpty ? lokal : AppEnv.geminiApiKey;
-});
-
+/// Streaming + memori (tidak ada kunci APi lagi — semua provider gratis).
 final Provider<StreamingService> streamingServiceProvider =
     Provider<StreamingService>((ref) => StreamingService(
           klien: ref.watch(klienLlmProvider),
@@ -104,13 +89,6 @@ class SetelanController extends Notifier<SetelanApp> {
 
   Future<void> setWarnaDinamis(bool v) =>
       ubah(state.salin(pakaiWarnaDinamis: v));
-
-  Future<void> setKunciGroq(String v) => ubah(state.salin(kunciGroq: v.trim()));
-
-  Future<void> setKunciGemini(String v) => ubah(state.salin(kunciGemini: v.trim()));
-
-  Future<void> setKunciOpenRouter(String v) =>
-      ubah(state.salin(kunciOpenRouter: v.trim()));
 
   Future<void> setPromptTambahan(String v) =>
       ubah(state.salin(promptSistemTambahan: v));

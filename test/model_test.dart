@@ -80,20 +80,14 @@ void main() {
     test('OVH dan Pollinations tidak butuh kunci', () {
       expect(PenyediaModel.ovh.tanpaKunci, isTrue);
       expect(PenyediaModel.pollinations.tanpaKunci, isTrue);
-      expect(PenyediaModel.groq.tanpaKunci, isFalse);
-      expect(PenyediaModel.openrouter.tanpaKunci, isFalse);
       for (final ModelAi m in ModelAi.bawaan) {
-        if (m.penyedia == PenyediaModel.ovh ||
-            m.penyedia == PenyediaModel.pollinations) {
-          expect(m.perluKunci, isFalse, reason: m.id);
-          expect(m.dukungAlat, isTrue, reason: m.id);
-        }
+        expect(m.penyedia.tanpaKunci, isTrue, reason: m.id);
+        expect(m.dukungAlat, isTrue, reason: m.id);
       }
     });
 
     test('model default adalah provider tanpa kunci', () {
       final ModelAi d = ModelAi.defaultGratis();
-      expect(d.perluKunci, isFalse);
       expect(d.dukungAlat, isTrue);
     });
 
@@ -101,23 +95,18 @@ void main() {
       final ModelAi awal = ModelAi.defaultGratis();
       final List<ModelAi> lain = ModelAi.cadangan(awal);
       expect(lain, isNotEmpty);
-      final int iPertamaBerbayar = lain.indexWhere((ModelAi m) => m.perluKunci);
-      if (iPertamaBerbayar >= 0) {
-        for (final ModelAi m in lain.sublist(iPertamaBerbayar)) {
-          expect(m.perluKunci, isTrue, reason: m.id);
-        }
+      for (final ModelAi m in lain) {
+        expect(m.id, isNot(awal.id));
+        expect(m.penyedia.tanpaKunci, isTrue, reason: m.id);
       }
     });
 
-    test('model OpenRouter gratis ditandai :free dan punya tools', () {
-      final List<ModelAi> or = ModelAi.bawaan
-          .where((ModelAi m) => m.penyedia == PenyediaModel.openrouter)
-          .toList();
-      expect(or, isNotEmpty);
-      for (final ModelAi m in or) {
-        expect(m.id.endsWith(':free'), isTrue, reason: m.id);
-        expect(m.dukungAlat, isTrue, reason: m.id);
-        expect(m.perluBayar, isFalse, reason: m.id);
+    test('model tidak ada di bawaan OpenRouter (hapus provider berkunci)', () {
+      expect(ModelAi.cari('nvidia/nemotron-3-ultra-550b-a55b:free'), isNull);
+      expect(ModelAi.cari('gemini-3.8-flash'), isNull);
+      for (final ModelAi m in ModelAi.bawaan) {
+        expect(m.penyedia, isNot(PenyediaModel.openrouter));
+        expect(m.penyedia, isNot(PenyediaModel.gemini));
       }
     });
   });

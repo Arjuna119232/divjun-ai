@@ -15,7 +15,7 @@ enum ModeAgent { chatting, auto, selalu }
 /// tanpa perlu migrasi data pengguna.
 class SetelanApp {
   const SetelanApp({
-    this.modelId = 'openai/gpt-oss-120b',
+    this.modelId = 'openai/gpt-oss-20b',
     this.tema = TemaMode.sistem,
     this.pakaiWarnaDinamis = true,
     this.suhu = 0.7,
@@ -25,9 +25,6 @@ class SetelanApp {
     this.izinkanKalkulator = true,
     this.namaPengguna = '',
     this.promptSistemTambahan = '',
-    this.kunciGroq = '',
-    this.kunciGemini = '',
-    this.kunciOpenRouter = '',
   });
 
   final String modelId;
@@ -50,14 +47,6 @@ class SetelanApp {
   /// Selalu `true` - lihat catatan kelas.
   bool get pakaiSkillPanduan => true;
 
-  /// Kunci API yang diisi user di aplikasi (menimpa kunci yang dibundel).
-  /// Dikosongkan = pakai kunci bawaan saat build.
-  final String kunciGroq;
-  final String kunciGemini;
-
-  /// Kunci OpenRouter (opsional - model gratis ':free' tetap butuh kunci).
-  final String kunciOpenRouter;
-
   bool get agentAktif => true;
 
   SetelanApp salin({
@@ -71,9 +60,6 @@ class SetelanApp {
     bool? izinkanKalkulator,
     String? namaPengguna,
     String? promptSistemTambahan,
-    String? kunciGroq,
-    String? kunciGemini,
-    String? kunciOpenRouter,
   }) =>
       SetelanApp(
         modelId: modelId ?? this.modelId,
@@ -87,9 +73,6 @@ class SetelanApp {
         namaPengguna: namaPengguna ?? this.namaPengguna,
         promptSistemTambahan:
             promptSistemTambahan ?? this.promptSistemTambahan,
-        kunciGroq: kunciGroq ?? this.kunciGroq,
-        kunciGemini: kunciGemini ?? this.kunciGemini,
-        kunciOpenRouter: kunciOpenRouter ?? this.kunciOpenRouter,
       );
 
   Map<String, dynamic> keJson() => {
@@ -103,13 +86,10 @@ class SetelanApp {
         'izinkanKalkulator': izinkanKalkulator,
         'namaPengguna': namaPengguna,
         'promptSistemTambahan': promptSistemTambahan,
-        'kunciGroq': kunciGroq,
-        'kunciGemini': kunciGemini,
-        'kunciOpenRouter': kunciOpenRouter,
       };
 
   static SetelanApp dariJson(Map<String, dynamic> j) => SetelanApp(
-        modelId: j['modelId'] as String? ?? 'openai/gpt-oss-120b',
+        modelId: j['modelId'] as String? ?? 'openai/gpt-oss-20b',
         tema: TemaMode.values.firstWhere(
           (TemaMode t) => t.name == j['tema'],
           orElse: () => TemaMode.sistem,
@@ -122,9 +102,6 @@ class SetelanApp {
         izinkanKalkulator: j['izinkanKalkulator'] as bool? ?? true,
         namaPengguna: j['namaPengguna'] as String? ?? '',
         promptSistemTambahan: j['promptSistemTambahan'] as String? ?? '',
-        kunciGroq: j['kunciGroq'] as String? ?? '',
-        kunciGemini: j['kunciGemini'] as String? ?? '',
-        kunciOpenRouter: j['kunciOpenRouter'] as String? ?? '',
       );
 
   static String keJsonTeks(SetelanApp s) => jsonEncode(s.keJson());

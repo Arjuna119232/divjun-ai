@@ -9,10 +9,6 @@ on:
         description: "Hanya analyze + test (tanpa APK)"
         type: boolean
         default: true
-      demo:
-        description: "Build tanpa API key (mode demo)"
-        type: boolean
-        default: true
       release:
         description: "Buat GitHub Release + AAB"
         type: boolean
@@ -47,7 +43,6 @@ jobs:
           python3 tool/setup_android.py --verify-only
 
       - name: Tulis key.properties dari secrets
-        if: ${{ !inputs.demo }}
         run: |
           # PENTING: keystore harus di android/app/ karena `file(...)` di
           # app/build.gradle.kts relatif ke folder modul app (bukan root android/).
@@ -102,18 +97,7 @@ jobs:
 
       - name: Build APK
         if: ${{ !inputs.analyze_only }}
-        run: |
-          if [ "${{ inputs.demo }}" = "true" ]; then
-            flutter build apk --release \
-              --dart-define=APP_VERSION=${{ steps.appver.outputs.versi }} \
-              --dart-define=GROQ_API_KEY= \
-              --dart-define=GEMINI_API_KEY=
-          else
-            flutter build apk --release \
-              --dart-define=APP_VERSION=${{ steps.appver.outputs.versi }} \
-              --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} \
-              --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          fi
+        run: flutter build apk --release --dart-define=APP_VERSION=${{ steps.appver.outputs.versi }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ !inputs.analyze_only }}

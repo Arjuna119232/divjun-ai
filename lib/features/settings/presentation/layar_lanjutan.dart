@@ -69,12 +69,6 @@ class LayarLanjutan extends ConsumerWidget {
                 keterangan: 'Cek apakah AI bisa menghubungi layanan.',
                 onTap: () => context.push('/koneksi'),
               ),
-              _Baris(
-                ikon: LucideIcons.keyRound,
-                judul: 'Kunci akses',
-                keterangan: 'Masukkan kunci supaya jawaban tidak terputus.',
-                onTap: () => context.push('/kunci'),
-              ),
             ],
           ),
         ],

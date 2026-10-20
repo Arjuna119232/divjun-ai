@@ -4,26 +4,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../core/constants/app_env.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/klien_llm.dart';
 import '../../../domain/entities/model_ai.dart';
-import '../../../domain/entities/setelan.dart';
 
 /// Halaman Koneksi: diagnosis kenapa AI tidak merespons.
 ///
-/// Isinya: status kunci per provider, isi/ubah kunci, tombol "Tes model"
-/// per model (request nyata ke provider), tombol segarkan katalog model.
+/// Isinya: status model tersedia, tombol "Tes model" per model (request nyata
+/// ke provider), tombol segarkan katalog model. Semua provider gratis tanpa
+/// kunci — tidak ada kunci API yang perlu diisi.
 class HalamanKoneksi extends ConsumerWidget {
   const HalamanKoneksi({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final SetelanApp setelan = ref.watch(setelanProvider);
     final AsyncValue<List<ModelAi>> katalog = ref.watch(katalogModelProvider);
-    final String kunciGroq = ref.watch(kunciGroqAktifProvider);
-    final String kunciGemini = ref.watch(kunciGeminiAktifProvider);
 
     final List<ModelAi> daftar = katalog.valueOrNull ?? const <ModelAi>[];
     final List<ModelAi> tanpaBayar =
@@ -58,31 +54,6 @@ class HalamanKoneksi extends ConsumerWidget {
         ),
         children: <Widget>[
           _Blok(
-            judul: 'Status kunci API',
-            ikon: LucideIcons.key,
-            anak: <Widget>[
-              _BarisKunci(
-                nama: 'Groq',
-                terisi: kunciGroq.trim().isNotEmpty,
-                dariBuild: setelan.kunciGroq.trim().isEmpty &&
-                    AppEnv.groqApiKey.trim().isNotEmpty,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _BarisKunci(
-                nama: 'Gemini',
-                terisi: kunciGemini.trim().isNotEmpty,
-                dariBuild: setelan.kunciGemini.trim().isEmpty &&
-                    AppEnv.geminiApiKey.trim().isNotEmpty,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton.tonalIcon(
-                onPressed: () => context.push('/kunci'),
-                icon: const Icon(LucideIcons.pencil, size: 16),
-                label: const Text('Masukkan / ganti kunci API'),
-              ),
-            ],
-          ),
-          _Blok(
             judul: 'Model',
             ikon: LucideIcons.brain,
             anak: <Widget>[
@@ -99,12 +70,12 @@ class HalamanKoneksi extends ConsumerWidget {
               else
                 _Teks(
                   '${daftar.length} model dari provider · '
-                  '${tanpaBayar.length} bisa dipakai kunci gratis',
+                  '${tanpaBayar.length} gratis tanpa kunci',
                 ),
               const SizedBox(height: AppSpacing.sm),
               if (tanpaBayar.isEmpty)
                 _Teks(
-                  'Belum ada model gratis terdeteksi. Perbarui kunci API lalu '
+                  'Belum ada model gratis terdeteksi. Periksa internet lalu '
                   'tekan tombol segarkan.',
                   warna: context.cs.error,
                 )
@@ -118,15 +89,14 @@ class HalamanKoneksi extends ConsumerWidget {
             ikon: LucideIcons.info,
             anak: <Widget>[
               _Teks(
-                'Semua model gagal biasanya karena 3 hal: (1) kunci API kosong '
-                'atau kadaluarsa, (2) model yang dipilih hanya tersedia di '
-                'paket berbayar, (3) kuota provider habis. Tekan "Tes" di '
+                'Semua model gagal biasanya karena 2 hal: (1) internet tidak '
+                'aktif, (2) kuota provider habis sementara. Tekan "Tes" di '
                 'atas untuk melihat penyebabnya persis.',
               ),
               SizedBox(height: AppSpacing.sm),
               _Teks(
-                'Kunci gratis: Groq (console.groq.com) dan Gemini '
-                '(aistudio.google.com) - keduanya tanpa kartu kredit.',
+                'Semua model gratis dan tanpa kunci API — OVHcloud '
+                'Endpoints + Pollinations. Tidak ada kunci yang perlu diisi.',
               ),
             ],
           ),
@@ -176,43 +146,6 @@ class _Teks extends StatelessWidget {
     return Text(
       isi,
       style: context.teks.bodySmall?.copyWith(color: warna),
-    );
-  }
-}
-
-class _BarisKunci extends StatelessWidget {
-  const _BarisKunci({
-    required this.nama,
-    required this.terisi,
-    required this.dariBuild,
-  });
-
-  final String nama;
-  final bool terisi;
-  final bool dariBuild;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color warna =
-        terisi ? context.cs.secondary : context.cs.error;
-    return Row(
-      children: <Widget>[
-        Icon(
-          terisi ? LucideIcons.circleCheck : LucideIcons.circleAlert,
-          size: 16,
-          color: warna,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(nama, style: context.teks.bodyMedium),
-        ),
-        Text(
-          terisi
-              ? (dariBuild ? 'terpasang saat build' : 'diisi di aplikasi')
-              : 'belum diisi',
-          style: context.teks.labelSmall?.copyWith(color: warna),
-        ),
-      ],
     );
   }
 }
